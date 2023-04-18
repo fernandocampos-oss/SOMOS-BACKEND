@@ -1,16 +1,14 @@
-package com.marcas.repository;
+package com.marcas.repository.tweb2;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.marcas.model.Ambito;
-import com.marcas.model.projection.PersonalProjection;
-
+import com.marcas.model.tweb2.Ambito;
+import com.marcas.model.tweb2.projection.PersonalProjection;
 
 public interface IMarcasPersonalRepository extends JpaRepository<Ambito, Integer> {
-
 	
 	@Query(nativeQuery = true, value= "select ma.CODIGO as codplanilla,\r\n"
 			+ "	(pe.apellido_paterno+ ' '  + pe.apellido_materno+ ',' + pe.nombres) as nombrepersonal,\r\n"

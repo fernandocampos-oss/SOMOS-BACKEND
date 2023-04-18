@@ -1,4 +1,4 @@
-package com.marcas.model;
+package com.marcas.model.tweb2;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

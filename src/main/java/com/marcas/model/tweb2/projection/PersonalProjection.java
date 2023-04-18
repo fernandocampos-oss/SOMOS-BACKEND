@@ -1,4 +1,4 @@
-package com.marcas.model.projection;
+package com.marcas.model.tweb2.projection;
 
 public interface PersonalProjection {
 
