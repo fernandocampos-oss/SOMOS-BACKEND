@@ -1,0 +1,13 @@
+<div role="presentation" class="email" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div class="email__row">
+        <h1 class="email__title">
+            Bienvenido(a) a EsSalud
+        </h1>
+        <p class="email__text">
+            Para activar su cuenta ingrese el siguiente código:
+        </p>
+    </div>
+    <div class="email__row">
+        <h2 class="email__code text-center" th:text="${code}"></h2>
+    </div>
+</div>

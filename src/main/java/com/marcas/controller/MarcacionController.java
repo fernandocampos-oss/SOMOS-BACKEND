@@ -2,22 +2,24 @@ package com.marcas.controller;
 
 import java.util.List;
 
+import com.marcas.base.BaseController;
 import com.marcas.model.marcaciones.Onomastico;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.marcas.model.tweb2.projection.PersonalProjection;
-import com.marcas.service.IMarcasPersonalService;
+import com.marcas.service.MarcasPersonalService;
 
 
 @RestController
-@RequestMapping("/api")
-public class MarcasPersonalController {
-	
-	private final IMarcasPersonalService marcasPersonalService;
+@RequestMapping(MarcacionController.MARCACION)
+@PreAuthorize("authenticated")
+@RequiredArgsConstructor
+public class MarcacionController extends BaseController {
 
-	public MarcasPersonalController(IMarcasPersonalService marcasPersonalService) {
-		this.marcasPersonalService = marcasPersonalService;
-	}
+	static final String MARCACION = "marcaciones";
+	private final MarcasPersonalService marcasPersonalService;
 
 	@GetMapping("/lista")
 	public List<PersonalProjection> findAllMarcas(@RequestParam String desde, @RequestParam String hasta, @RequestParam String codigo) {

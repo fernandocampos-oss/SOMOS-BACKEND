@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.marcas.repository.marcaciones.sqlmap.AuthMyRepository">
+
+    <select id="findByUsername" resultType="UserSession">
+        SELECT us.id_usuario id,
+               us.nombres AS nombres,
+               us.id_sede     idSede,
+               us.id_zona_control    idZonaControl,
+               us.id_rol     idRol
+        FROM usuario us
+        WHERE us.numero_documento = #{numeroDocumento}
+          AND us.es_activo = TRUE
+          AND us.id_estado_usuario = '02'
+    </select>
+
+</mapper>

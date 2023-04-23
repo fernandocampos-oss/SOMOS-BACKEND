@@ -1,0 +1,25 @@
+<soap:Envelope
+        xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+        xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+    <soap:Header/>
+    <soap:Body>
+        <urn:ZRFC_PERSONAL_GET_DATA>
+            <IW_DNI>
+                <item>
+                    <SIGN>I</SIGN>
+                    <OPTION>EQ</OPTION>
+                    <LOW>${NUMERO_DOCUMENTO}</LOW>
+                </item>
+            </IW_DNI>
+            <IW_FEC_NAC>
+                <item>
+                    <SIGN>I</SIGN>
+                    <OPTION>EQ</OPTION>
+                    <LOW>${FECHA_NACIMIENTO}</LOW>
+                    <HIGH/>
+                </item>
+            </IW_FEC_NAC>
+            <OT_DATA/>
+        </urn:ZRFC_PERSONAL_GET_DATA>
+    </soap:Body>
+</soap:Envelope>

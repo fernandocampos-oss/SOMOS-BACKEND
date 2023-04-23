@@ -16,9 +16,9 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.marcas.repository.tweb2",
         entityManagerFactoryRef = "entityManagerFactory2",
-        transactionManagerRef = "transactionManager2"
+        transactionManagerRef = "transactionManager2",
+        basePackages = "com.marcas.repository.tweb2"
 )
 public class Tweb2DBConfig {
 
@@ -31,7 +31,11 @@ public class Tweb2DBConfig {
     @Bean(name = "entityManagerFactory2")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory2(EntityManagerFactoryBuilder builder,
             @Qualifier("dataSource2") DataSource dataSource) {
-        return builder.dataSource(dataSource).packages("com.marcas.model.tweb2").build();
+        return builder
+                .dataSource(dataSource)
+                .packages("com.marcas.model.tweb2")
+                .persistenceUnit("persistenceUnit2")
+                .build();
     }
 
     @Bean(name = "transactionManager2")
