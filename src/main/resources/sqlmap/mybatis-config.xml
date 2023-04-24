@@ -14,7 +14,7 @@
     </settings>
 
     <typeAliases>
-        <typeAlias type="com.marcas.dto.auth.UserSessionDto" alias="UserSession"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.auth.UserSessionDto" alias="UserSession"/>
     </typeAliases>
 
     <typeHandlers>

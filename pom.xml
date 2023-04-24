@@ -9,11 +9,11 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>com.marcas</groupId>
-	<artifactId>com.marcas</artifactId>
+	<groupId>essalud.gob.pe</groupId>
+	<artifactId>servicio-marcaciones</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>marcas-personal</name>
-	<description>com.marcas</description>
+	<name>servicio-marcaciones</name>
+	<description>API Rest de Mi EsSalud</description>
 	
 	<properties>
 		<java.version>11</java.version>

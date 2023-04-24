@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.marcas.repository.marcaciones.sqlmap.AuthMyRepository">
+<mapper namespace="pe.gob.essalud.apps.repository.miessalud.sqlmap.AuthMyRepository">
 
     <select id="findByUsername" resultType="UserSession">
         SELECT us.id_usuario id,
