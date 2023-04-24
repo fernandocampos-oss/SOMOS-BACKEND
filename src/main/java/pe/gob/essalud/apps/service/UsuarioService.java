@@ -1,0 +1,23 @@
+package pe.gob.essalud.apps.service;
+
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
+import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
+import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
+
+import java.util.List;
+
+public interface UsuarioService {
+
+    List<UsuarioResponseDto> search();
+
+    UsuarioResponseDto get(long id);
+
+    void update(long id, UsuarioRegisterUpdateRequestDto model);
+
+    void delete(long id);
+
+    long save(UsuarioRegisterUpdateRequestDto model);
+
+    List<UsuarioNombresResponse> getNombres(boolean mostrarTodos);
+
+}
