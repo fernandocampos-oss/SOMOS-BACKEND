@@ -9,8 +9,8 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>essalud.gob.pe</groupId>
-	<artifactId>servicio-marcaciones</artifactId>
+	<groupId>com.marcas</groupId>
+	<artifactId>com.marcas</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>servicio-marcaciones</name>
 	<description>API Rest de Mi EsSalud</description>
