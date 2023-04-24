@@ -137,6 +137,14 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         long idUsuario = usuarioModel.getIdUsuario();
         String token = generarToken(idUsuario, model.getCorreo());
 
+        String message = mailContentBuilder.registrationCode(token);
+        String correo = usuarioModel.getCorreo();
+        emailSender.send(
+                correo,
+                "Código de Activación",
+                message
+        );
+
         return AuthUsuarioRegisterResponse.builder()
                 .idUsuario(idUsuario)
                 .token(token)
