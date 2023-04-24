@@ -8,8 +8,8 @@ import org.thymeleaf.context.Context;
 @Component
 public class EmailContentBuilder {
     private static final String FRAGMENT = "fragment";
-    private static final String TEMPLATE = "templates/email/template";
-    private static final String FRAGMENTS_PATH = "templates/email/fragments/";
+    private static final String TEMPLATE = "email/template";
+    private static final String FRAGMENTS_PATH = "email/fragments/";
     private final TemplateEngine templateEngine;
 
     @Autowired
