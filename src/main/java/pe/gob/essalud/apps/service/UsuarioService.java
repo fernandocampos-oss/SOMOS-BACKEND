@@ -1,5 +1,6 @@
 package pe.gob.essalud.apps.service;
 
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
@@ -20,4 +21,5 @@ public interface UsuarioService {
 
     List<UsuarioNombresResponse> getNombres(boolean mostrarTodos);
 
+    void cambiarClave(long id, UsuarioCambiarClaveRequestDto request);
 }

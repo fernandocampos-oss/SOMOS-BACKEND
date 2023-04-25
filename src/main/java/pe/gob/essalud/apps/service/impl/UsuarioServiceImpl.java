@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.base.BaseService;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.constants.RoleType;
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
@@ -118,6 +119,19 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
                     .nombresCompletos(nombres + " " + apellidos)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void cambiarClave(long id, UsuarioCambiarClaveRequestDto request) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
+
+        if (!passwordEncoder.matches(request.getActualClave(), usuario.getPassword())) {
+            throw new ValidationException("La contraseña actual no coincide con el valor ingresado");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(request.getNuevaClave()));
+        usuarioRepository.save(usuario);
     }
 
     private List<Usuario> getMyUsers() {

@@ -1,9 +1,10 @@
 package pe.gob.essalud.apps.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.base.BaseController;
-import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdmin;
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping(UsuarioController.USERS)
 @RequiredArgsConstructor
-@PreAuthorizeAdmin
+@PreAuthorize("authenticated")
 public class UsuarioController extends BaseController {
 
     static final String USERS = "usuarios";
@@ -40,13 +41,20 @@ public class UsuarioController extends BaseController {
     public long save(@RequestBody UsuarioRegisterUpdateRequestDto model) {
         return usuarioService.save(model);
     }
+
     @PutMapping("{id}")
     public void update(@PathVariable long id, @RequestBody UsuarioRegisterUpdateRequestDto model) {
         usuarioService.update(id, model);
     }
+
     @DeleteMapping("{id}")
     public void delete(@PathVariable long id) {
         usuarioService.delete(id);
+    }
+
+    @PutMapping("{id}/cambiar-clave")
+    public void cambiarClave(@PathVariable long id, @RequestBody UsuarioCambiarClaveRequestDto request) {
+        usuarioService.cambiarClave(id, request);
     }
 
 }
