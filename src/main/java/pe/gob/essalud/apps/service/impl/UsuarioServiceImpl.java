@@ -123,6 +123,10 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
 
     @Override
     public void cambiarClave(long id, UsuarioCambiarClaveRequestDto request) {
+        if(authService.getIdUserSession() != id) {
+            throw new ValidationException("No puede actualizar la clave de un usuario diferente al de la sesión");
+        }
+
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
 

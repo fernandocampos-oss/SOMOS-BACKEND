@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.base.BaseController;
+import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdmin;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
@@ -37,16 +38,19 @@ public class UsuarioController extends BaseController {
         return usuarioService.get(id);
     }
 
+    @PreAuthorizeAdmin
     @PostMapping
     public long save(@RequestBody UsuarioRegisterUpdateRequestDto model) {
         return usuarioService.save(model);
     }
 
+    @PreAuthorizeAdmin
     @PutMapping("{id}")
     public void update(@PathVariable long id, @RequestBody UsuarioRegisterUpdateRequestDto model) {
         usuarioService.update(id, model);
     }
 
+    @PreAuthorizeAdmin
     @DeleteMapping("{id}")
     public void delete(@PathVariable long id) {
         usuarioService.delete(id);
