@@ -30,7 +30,7 @@ public class AppConfig implements WebMvcConfigurer {
     public CommonsRequestLoggingFilter logFilter() {
         CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
         filter.setIncludeQueryString(true);
-        filter.setIncludePayload(true);
+        filter.setIncludePayload(false);
         filter.setIncludeClientInfo(true);
         filter.setMaxPayloadLength(2000);
         filter.setAfterMessagePrefix("Request data ");
