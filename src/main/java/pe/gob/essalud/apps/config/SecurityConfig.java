@@ -1,6 +1,5 @@
 package pe.gob.essalud.apps.config;
 
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import pe.gob.essalud.apps.filters.JwtAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,11 +42,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(new Http401AuthenticationEntryPoint())
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // stateless to API
                 .and().addFilter(jwtAuthorizationFilter());
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/swagger-ui/**", "/v3/api-docs/**");
     }
 
     @Bean
