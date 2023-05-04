@@ -23,6 +23,7 @@ public class UsuarioController extends BaseController {
 
     private final UsuarioService usuarioService;
 
+    /*
     @GetMapping
     public List<UsuarioResponseDto> search() {
         return usuarioService.search();
@@ -32,12 +33,14 @@ public class UsuarioController extends BaseController {
     public List<UsuarioNombresResponse> nombres(@RequestParam boolean mostrarTodos) {
         return usuarioService.getNombres(mostrarTodos);
     }
+    */
 
     @GetMapping("{id}")
     public UsuarioResponseDto get(@PathVariable long id) {
         return usuarioService.get(id);
     }
 
+    /*
     @PreAuthorizeAdmin
     @PostMapping
     public long save(@RequestBody UsuarioRegisterUpdateRequestDto model) {
@@ -55,6 +58,7 @@ public class UsuarioController extends BaseController {
     public void delete(@PathVariable long id) {
         usuarioService.delete(id);
     }
+    */
 
     @PutMapping("{id}/cambiar-clave")
     public void cambiarClave(@PathVariable long id, @RequestBody UsuarioCambiarClaveRequestDto request) {
