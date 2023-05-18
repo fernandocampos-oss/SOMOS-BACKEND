@@ -9,6 +9,7 @@ import pe.gob.essalud.apps.dto.auth.request.TokenActivacionRequestDto;
 import pe.gob.essalud.apps.dto.auth.response.AuthUsuarioRegisterResponse;
 import pe.gob.essalud.apps.dto.auth.response.GenerarTokenRecuperarClaveResponseDto;
 import pe.gob.essalud.apps.dto.auth.response.LoginResponseDto;
+import pe.gob.essalud.apps.dto.auth.response.UserResponseDto;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,8 @@ public class AuthController extends BaseController {
     @PostMapping(LOGIN)
     public LoginResponseDto login(@AuthenticationPrincipal User activeUser) {
         String token = getToken(activeUser);
-        return new LoginResponseDto(token);
+        UserResponseDto user = new UserResponseDto(activeUser.getUsername(), activeUser.getAuthorities());
+        return new LoginResponseDto(user, token);
     }
 
     @PostMapping
