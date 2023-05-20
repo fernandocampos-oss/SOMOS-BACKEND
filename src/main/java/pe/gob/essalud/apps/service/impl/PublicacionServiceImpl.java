@@ -6,8 +6,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.gob.essalud.apps.common.constants.RoleType;
 import pe.gob.essalud.apps.dto.publicacion.request.PublicacionRequestDto;
 import pe.gob.essalud.apps.dto.publicacion.response.PublicacionResponseDto;
+import pe.gob.essalud.apps.exceptions.ForbiddenException;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.Publicacion;
 import pe.gob.essalud.apps.repository.miessalud.PublicacionRepository;
@@ -38,11 +40,9 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     @Override
     public List<PublicacionResponseDto> listarPublicaciones() {
-        return listarPublicacionesDto(publicacionRepository.findPublicacionesBySedeAndCentral(authService.getIdSedeSession(), ID_SEDE_CENTRAL));
-    }
-
-    @Override
-    public List<PublicacionResponseDto> listarPublicacionesAdmin() {
+        if (authService.hasRole(RoleType.TRABAJADOR)) {
+            return listarPublicacionesDto(publicacionRepository.findPublicacionesBySedeAndCentral(authService.getIdSedeSession(), ID_SEDE_CENTRAL));
+        }
         return listarPublicacionesDto(publicacionRepository.findPublicacionByIdSede(authService.getIdSedeSession()));
     }
 
@@ -61,33 +61,19 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     @Transactional
     @Override
-    public void modificarPublicacionDatos(long idPublicacion, PublicacionRequestDto request) {
+    public void modificarPublicacion(long idPublicacion, PublicacionRequestDto request) {
         Publicacion publicacion = publicacionRepository.findById(idPublicacion)
-                .orElseThrow(() -> new ValidationException("La publicación no se encuentra registrada"));
+                .orElseThrow(() -> new ValidationException("La publicación no existe"));
 
         if (!publicacion.getIdSede().equals(authService.getIdSedeSession())) {
-            throw new ValidationException("La sede del usuario no coincide con la sede de la publicación");
+            throw new ForbiddenException();
         }
 
         publicacion.setUsuarioModificacion(authService.getIdUserSession());
         publicacion.setTitulo(request.getTitulo());
         publicacion.setDescripcion(request.getDescripcion());
         publicacion.setUrlRedireccion(request.getUrlRedireccion());
-        publicacionRepository.save(publicacion);
-    }
-
-    @Transactional
-    @Override
-    public void modificarPublicacionImagen(long idPublicacion, String imagenBase64) {
-        Publicacion publicacion = publicacionRepository.findById(idPublicacion)
-                .orElseThrow(() -> new ValidationException("La publicación no se encuentra registrada"));
-
-        if (!publicacion.getIdSede().equals(authService.getIdSedeSession())) {
-            throw new ValidationException("La sede del usuario no coincide con la sede de la publicación");
-        }
-
-        publicacion.setUsuarioModificacion(authService.getIdUserSession());
-        String rutaImagen = guardarImagenPublicacion(publicacion.getIdPublicacion(), imagenBase64);
+        String rutaImagen = guardarImagenPublicacion(publicacion.getIdPublicacion(), request.getImagenBase64());
         publicacion.setRutaImagen(rutaImagen);
         publicacionRepository.save(publicacion);
     }
@@ -96,10 +82,10 @@ public class PublicacionServiceImpl implements PublicacionService {
     @Override
     public void eliminarPublicacion(long idPublicacion) {
         Publicacion publicacion = publicacionRepository.findById(idPublicacion)
-                .orElseThrow(() -> new ValidationException("La publicación no se encuentra registrada"));
+                .orElseThrow(() -> new ValidationException("La publicación no existe"));
 
         if (!publicacion.getIdSede().equals(authService.getIdSedeSession())) {
-            throw new ValidationException("La sede del usuario no coincide con la sede de la publicación");
+            throw new ForbiddenException();
         }
 
         publicacion.setUsuarioModificacion(authService.getIdUserSession());

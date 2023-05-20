@@ -8,10 +8,8 @@ import java.util.List;
 public interface PublicacionService {
 
     List<PublicacionResponseDto> listarPublicaciones();
-    List<PublicacionResponseDto> listarPublicacionesAdmin();
     long crearPublicacion(PublicacionRequestDto request);
-    void modificarPublicacionDatos(long idPublicacion, PublicacionRequestDto request);
-    void modificarPublicacionImagen(long idPublicacion, String imagenBase64);
+    void modificarPublicacion(long idPublicacion, PublicacionRequestDto request);
     void eliminarPublicacion(long idPublicacion);
 
 }

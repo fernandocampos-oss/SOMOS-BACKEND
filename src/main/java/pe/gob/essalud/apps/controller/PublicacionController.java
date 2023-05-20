@@ -25,31 +25,19 @@ public class PublicacionController {
     }
 
     @PreAuthorizeAdmin
-    @GetMapping("/admin")
-    public List<PublicacionResponseDto> listarPublicacionesAdmin() {
-        return publicacionService.listarPublicacionesAdmin();
-    }
-
-    @PreAuthorizeAdmin
     @PostMapping
     public long crearPublicacion(@RequestBody PublicacionRequestDto request) {
         return publicacionService.crearPublicacion(request);
     }
 
     @PreAuthorizeAdmin
-    @PutMapping("/modificar-datos/{idPublicacion}")
+    @PutMapping("/{idPublicacion}")
     public void modificarPublicacionDatos(@PathVariable long idPublicacion, @RequestBody PublicacionRequestDto request) {
-        publicacionService.modificarPublicacionDatos(idPublicacion, request);
+        publicacionService.modificarPublicacion(idPublicacion, request);
     }
 
     @PreAuthorizeAdmin
-    @PutMapping("/modificar-imagen/{idPublicacion}")
-    public void modificarPublicacionImagen(@PathVariable long idPublicacion, @RequestBody String imagenBase64) {
-        publicacionService.modificarPublicacionImagen(idPublicacion, imagenBase64);
-    }
-
-    @PreAuthorizeAdmin
-    @PutMapping("/eliminar/{idPublicacion}")
+    @DeleteMapping("/{idPublicacion}")
     public void eliminarPublicacion(@PathVariable long idPublicacion) {
         publicacionService.eliminarPublicacion(idPublicacion);
     }
