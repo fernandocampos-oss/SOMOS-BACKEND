@@ -39,7 +39,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         if (authService.hasRole(RoleType.TRABAJADOR)) {
             return listarPublicacionesDto(publicacionRepository.findPublicacionesBySedeAndCentral(authService.getIdSedeSession(), ID_SEDE_CENTRAL));
         }
-        return listarPublicacionesDto(publicacionRepository.findPublicacionByIdSede(authService.getIdSedeSession()));
+        return listarPublicacionesDto(publicacionRepository.findPublicacionByIdSedeOrderByIdPublicacionDesc(authService.getIdSedeSession()));
     }
 
     @Transactional

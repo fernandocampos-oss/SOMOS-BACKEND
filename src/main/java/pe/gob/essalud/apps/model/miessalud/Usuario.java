@@ -1,14 +1,13 @@
 package pe.gob.essalud.apps.model.miessalud;
 
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Data
 @Entity
@@ -46,14 +45,22 @@ public class Usuario {
     @Column(name = "password")
     private String password;
     @Column(name = "fecha_creacion", updatable = false)
-    @CreationTimestamp
     private LocalDateTime fechaCreacion;
     @Column(name = "fecha_modificacion")
-    @UpdateTimestamp
     private LocalDateTime fechaModificacion;
     @Column(name = "usuario_modificacion")
     private Integer usuarioModificacion;
     @Column(name = "id_estado_usuario")
     private String idEstadoUsuario;
+
+    @PrePersist
+    private void prePersist() {
+        this.fechaCreacion = LocalDateTime.now(ZoneId.of("America/Lima"));
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        this.fechaModificacion = LocalDateTime.now(ZoneId.of("America/Lima"));
+    }
 
 }

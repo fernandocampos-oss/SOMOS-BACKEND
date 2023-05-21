@@ -2,10 +2,10 @@ package pe.gob.essalud.apps.model.miessalud;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Getter
 @Setter
@@ -29,7 +29,11 @@ public class UsuarioEncuesta {
     private Integer idAreaPersonal;
     @Column(name = "id_tiempo_servicio")
     private Integer idTiempoServicio;
-    @CreationTimestamp
     private LocalDateTime fecha;
+
+    @PrePersist
+    private void prePersist() {
+        this.fecha = LocalDateTime.now(ZoneId.of("America/Lima"));
+    }
 
 }

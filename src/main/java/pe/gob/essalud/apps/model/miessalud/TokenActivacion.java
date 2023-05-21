@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Data
 @Entity
@@ -24,7 +24,6 @@ public class TokenActivacion {
     @Column(name = "token", nullable = false)
     private String token;
     @Column(name = "fecha_creacion", updatable = false)
-    @CreationTimestamp
     private LocalDateTime fechaCreacion;
     @Column(name = "fecha_expiracion")
     private LocalDateTime fechaExpiracion;
@@ -34,5 +33,10 @@ public class TokenActivacion {
     private Boolean esConfirmado;
     @Column(name = "id_usuario")
     private long idUsuario;
+
+    @PrePersist
+    private void prePersist() {
+        this.fechaCreacion = LocalDateTime.now(ZoneId.of("America/Lima"));
+    }
 
 }

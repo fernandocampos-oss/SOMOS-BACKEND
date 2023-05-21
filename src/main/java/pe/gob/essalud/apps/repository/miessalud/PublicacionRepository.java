@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface PublicacionRepository extends JpaRepository<Publicacion, Long> {
 
-    @Query("SELECT p FROM Publicacion p WHERE p.idSede = :idSede or p.idSede = :idCentral")
+    @Query("SELECT p FROM Publicacion p WHERE p.idSede = :idSede or p.idSede = :idCentral ORDER BY p.idPublicacion DESC")
     List<Publicacion> findPublicacionesBySedeAndCentral(int idSede, int idCentral);
-    List<Publicacion> findPublicacionByIdSede(int idSede);
+    List<Publicacion> findPublicacionByIdSedeOrderByIdPublicacionDesc(int idSede);
 
 }
