@@ -29,11 +29,12 @@ public class UsuarioEncuesta {
     private Integer idAreaPersonal;
     @Column(name = "id_tiempo_servicio")
     private Integer idTiempoServicio;
-    private LocalDateTime fecha;
+    @Column(name = "fecha_creacion", updatable = false)
+    private LocalDateTime fechaCreacion;
 
     @PrePersist
     private void prePersist() {
-        this.fecha = LocalDateTime.now(ZoneId.of("America/Lima"));
+        this.fechaCreacion = LocalDateTime.now(ZoneId.of("America/Lima"));
     }
 
 }

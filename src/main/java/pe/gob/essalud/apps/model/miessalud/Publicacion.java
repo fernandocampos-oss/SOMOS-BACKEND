@@ -32,7 +32,7 @@ public class Publicacion {
     private boolean esActivo;
     @Column(name = "usuario_creacion", nullable = false)
     private Integer usuarioCreacion;
-    @Column(name = "fecha_creacion", nullable = false)
+    @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
     @Column(name = "usuario_modificacion")
     private Integer usuarioModificacion;
