@@ -1,12 +1,12 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.common.constants.RoleType;
+import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.publicacion.request.PublicacionRequestDto;
 import pe.gob.essalud.apps.dto.publicacion.response.PublicacionResponseDto;
 import pe.gob.essalud.apps.exceptions.ForbiddenException;
@@ -16,10 +16,6 @@ import pe.gob.essalud.apps.repository.miessalud.PublicacionRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PublicacionService;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +50,8 @@ public class PublicacionServiceImpl implements PublicacionService {
         publicacion.setIdSede(authService.getIdSedeSession());
         publicacion.setEsActivo(true);
         publicacion = publicacionRepository.save(publicacion);
-        String rutaImagen = guardarImagenPublicacion(publicacion.getIdPublicacion(), request.getImagenBase64());
+        String rutaImagen = uploadPath + RUTA_IMAGENES_PUBLICACIONES + publicacion.getIdPublicacion() + FORMATO_IMAGEN_PUBLICACION;
+        rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
         publicacion.setRutaImagen(rutaImagen);
         return publicacion.getIdPublicacion();
     }
@@ -73,7 +70,8 @@ public class PublicacionServiceImpl implements PublicacionService {
         publicacion.setTitulo(request.getTitulo());
         publicacion.setDescripcion(request.getDescripcion());
         publicacion.setUrlRedireccion(request.getUrlRedireccion());
-        String rutaImagen = guardarImagenPublicacion(publicacion.getIdPublicacion(), request.getImagenBase64());
+        String rutaImagen = uploadPath + RUTA_IMAGENES_PUBLICACIONES + publicacion.getIdPublicacion() + FORMATO_IMAGEN_PUBLICACION;
+        rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
         publicacion.setRutaImagen(rutaImagen);
         publicacionRepository.save(publicacion);
     }
@@ -97,37 +95,11 @@ public class PublicacionServiceImpl implements PublicacionService {
         List<PublicacionResponseDto> publicacionesDto = publicacions.stream()
                 .map(p -> {
                     PublicacionResponseDto response = modelMapper.map(p, PublicacionResponseDto.class);
-                    response.setImagenBase64(obtenerImagenPublicacion(p.getRutaImagen()));
+                    response.setImagenBase64(UploadUtil.getFileBase64(p.getRutaImagen()));
                     return response;
                 })
                 .collect(Collectors.toList());
         return publicacionesDto;
-    }
-
-    private String guardarImagenPublicacion(long idPublicacion, String imagenBase64) {
-        String rutaImagen;
-        try {
-            byte[] decodedBytes = Base64.getDecoder().decode(imagenBase64);
-            rutaImagen = uploadPath + RUTA_IMAGENES_PUBLICACIONES + idPublicacion + FORMATO_IMAGEN_PUBLICACION;
-            FileUtils.writeByteArrayToFile(new File(rutaImagen), decodedBytes);
-        } catch (IOException e) {
-            rutaImagen = "";
-            e.printStackTrace();
-        }
-        return rutaImagen;
-    }
-
-    private String obtenerImagenPublicacion(String rutaImagen) {
-        String imagenBase64;
-        try {
-            Path imageFilePath = Path.of(rutaImagen);
-            byte[] imageBytes = Files.readAllBytes(imageFilePath);
-            imagenBase64 = Base64.getEncoder().encodeToString(imageBytes);;
-        } catch (IOException e) {
-            imagenBase64 = "";
-            e.printStackTrace();
-        }
-        return imagenBase64;
     }
 
 }
