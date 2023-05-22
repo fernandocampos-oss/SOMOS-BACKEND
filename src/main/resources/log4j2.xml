@@ -5,7 +5,7 @@
         <Property name="LOG_PATTERN">
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
         </Property>
-        <property name="LOGS_PATH" value="/home/adminsis/log" />
+        <property name="LOGS_PATH" value="/home/adminsis/log/miessalud" />
     </Properties>
 	
     <Appenders>
