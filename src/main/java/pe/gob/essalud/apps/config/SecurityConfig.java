@@ -38,7 +38,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .csrf().disable() //Cross-Site Request Forgery disable to API
-            .cors().disable()
             .httpBasic() // login with Auth Basic for getting a login
             .authenticationEntryPoint(new Http401AuthenticationEntryPoint())
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // stateless to API
