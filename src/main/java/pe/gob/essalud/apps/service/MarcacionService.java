@@ -1,8 +1,9 @@
 package pe.gob.essalud.apps.service;
 
+import pe.gob.essalud.apps.dto.marcacioncons.PersonalProjection;
+
 import java.util.List;
 
-import pe.gob.essalud.apps.model.tempus.projection.PersonalProjection;
 
 
 public interface MarcacionService {
