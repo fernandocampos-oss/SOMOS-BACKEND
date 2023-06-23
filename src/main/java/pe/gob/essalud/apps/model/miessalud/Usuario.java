@@ -34,6 +34,12 @@ public class Usuario {
     private String numeroCelular;
     @Column(name = "correo")
     private String correo;
+    @Column(name = "regimen")
+    private String regimen;
+    @Column(name = "cargo")
+    private String cargo;
+    @Column(name = "fecha_ingreso")
+    private String fechaIngreso;
     @Column(name = "es_activo")
     private boolean esActivo;
     @Column(name = "id_sede")

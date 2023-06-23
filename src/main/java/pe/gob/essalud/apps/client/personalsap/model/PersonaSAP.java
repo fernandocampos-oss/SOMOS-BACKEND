@@ -27,7 +27,7 @@ public class PersonaSAP {
     @XmlElement(name = "IDNUM", required = true)
     protected String numeroDni;
     @XmlElement(name = "BEGDA", required = true)
-    protected String fechaNac;
+    protected String fechaIngreso;
     @XmlElement(name = "CTTYP", required = true)
     protected String cttyp;
     @XmlElement(name = "CTTXT", required = true)
