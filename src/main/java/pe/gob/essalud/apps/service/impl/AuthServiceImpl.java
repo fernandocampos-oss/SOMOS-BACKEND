@@ -126,6 +126,9 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         String[] nombresArray = personaSAP.getNombres().split(",");
         usuarioModel.setNombres(nombresArray[1]);
         usuarioModel.setApellidos(nombresArray[0]);
+        usuarioModel.setRegimen(personaSAP.getRegimen());
+        usuarioModel.setCargo(personaSAP.getCargo());
+        usuarioModel.setFechaIngreso(personaSAP.getFechaIngreso());
         usuarioModel.setEsActivo(true);
         usuarioModel.setIdRol(RoleType.TRABAJADOR);
         usuarioModel.setIdEstadoUsuario(EstadoUsuario.PENDIENTE_ACTIVACION);
