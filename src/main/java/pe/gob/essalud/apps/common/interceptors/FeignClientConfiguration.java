@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import pe.gob.essalud.apps.common.interfaces.BasicAuthForMarcacionConsService;
+import pe.gob.essalud.apps.common.interfaces.BasicAuthForPersonalSapUtilService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -15,6 +16,9 @@ public class FeignClientConfiguration {
 
     @Value("${feign-clients.marcacion-cons-service.key}")
     private String marcacionConsServiceKey;
+
+    @Value("${feign-clients.personal-sap-util-service.key}")
+    private String personalSapUtilServiceKey;
 
 
     private void _addHeader(RequestTemplate template, Class<? extends java.lang.annotation.Annotation> interfaceClass, String key) {
@@ -28,6 +32,7 @@ public class FeignClientConfiguration {
     public RequestInterceptor basicAuthRequestInterceptor() {
         return template -> {
             _addHeader(template, BasicAuthForMarcacionConsService.class, marcacionConsServiceKey);
+            _addHeader(template, BasicAuthForPersonalSapUtilService.class, personalSapUtilServiceKey);
         };
     }
 }

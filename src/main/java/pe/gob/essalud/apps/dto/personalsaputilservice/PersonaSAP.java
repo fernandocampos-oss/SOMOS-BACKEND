@@ -1,4 +1,4 @@
-package pe.gob.essalud.apps.client.personalsap.model;
+package pe.gob.essalud.apps.dto.personalsaputilservice;
 
 import lombok.Data;
 

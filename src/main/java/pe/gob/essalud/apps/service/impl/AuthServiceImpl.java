@@ -1,8 +1,8 @@
 package pe.gob.essalud.apps.service.impl;
 
 import pe.gob.essalud.apps.base.BaseService;
-import pe.gob.essalud.apps.client.personalsap.PersonalSapClient;
-import pe.gob.essalud.apps.client.personalsap.model.PersonaSAP;
+import pe.gob.essalud.apps.client.PersonalSapUtilServiceClient;
+import pe.gob.essalud.apps.dto.personalsaputilservice.PersonaSAP;
 import pe.gob.essalud.apps.common.constants.Constantes;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.constants.RoleType;
@@ -50,7 +50,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     private final ModelMapper modelMapper;
     private final EmailSender emailSender;
     private final EmailContentBuilder mailContentBuilder;
-    private final PersonalSapClient personalSapClient;
+    private final PersonalSapUtilServiceClient _personalSapUtilServiceClient;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -107,9 +107,9 @@ public class AuthServiceImpl extends BaseService implements AuthService {
             throw new ValidationException(
                     "Ya existe un usuario con el número de documento o código de planilla ingresado");
 
-        PersonaSAP personaSAP = personalSapClient.getPorNumeroDocumentoAndFechaNacimiento(
+        PersonaSAP personaSAP = _personalSapUtilServiceClient.getByNumDocAndFecNac(
                 model.getNumeroDocumento(),
-                model.getFechaNacimiento());
+                model.getFechaNacimiento().toString());
 
         if (personaSAP == null)
             throw new ValidationException("Datos incorrectos");
