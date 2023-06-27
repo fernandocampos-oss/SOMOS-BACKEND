@@ -10,8 +10,6 @@ import pe.gob.essalud.apps.dto.personalsaputilservice.PersonaSAP;
 import pe.gob.essalud.apps.common.constants.Constantes;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.constants.RoleType;
-import pe.gob.essalud.apps.common.email.EmailContentBuilder;
-import pe.gob.essalud.apps.common.email.EmailSender;
 import pe.gob.essalud.apps.common.util.StringUtil;
 import pe.gob.essalud.apps.dto.auth.UserSessionDto;
 import pe.gob.essalud.apps.dto.auth.request.AuthUsuarioRegisterRequestDto;
