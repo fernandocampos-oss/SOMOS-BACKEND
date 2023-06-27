@@ -1,7 +1,11 @@
 package pe.gob.essalud.apps.service.impl;
 
+import org.springframework.scheduling.annotation.Async;
 import pe.gob.essalud.apps.base.BaseService;
+import pe.gob.essalud.apps.client.EmailServiceClient;
 import pe.gob.essalud.apps.client.PersonalSapUtilServiceClient;
+import pe.gob.essalud.apps.dto.emailservice.ActivarCuentaRequestDto;
+import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
 import pe.gob.essalud.apps.dto.personalsaputilservice.PersonaSAP;
 import pe.gob.essalud.apps.common.constants.Constantes;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
@@ -48,9 +52,8 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     private final TokenActivacionValidator tokenActivacionValidator;
     private final AuthMyRepository authMyRepository;
     private final ModelMapper modelMapper;
-    private final EmailSender emailSender;
-    private final EmailContentBuilder mailContentBuilder;
     private final PersonalSapUtilServiceClient _personalSapUtilServiceClient;
+    private final EmailServiceClient _emailServiceClient;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -89,6 +92,22 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Override
     public UserSessionDto findByUsername(String username) {
         return authMyRepository.findByUsername(username);
+    }
+
+    @Async
+    void _sendMailActivarCuenta(String correo, String token) {
+        ActivarCuentaRequestDto requestActivarCuenta = new ActivarCuentaRequestDto();
+        requestActivarCuenta.setEmail(correo);
+        requestActivarCuenta.setToken(token);
+        _emailServiceClient.activarCuenta(requestActivarCuenta);
+    }
+
+    @Async
+    void _sendMailRecuperarClave(String correo, String url) {
+        RecuperarClaveWebRequestDto requestRecuperarClave = new RecuperarClaveWebRequestDto();
+        requestRecuperarClave.setEmail(correo);
+        requestRecuperarClave.setUrl(url);
+        _emailServiceClient.recuperarClave(requestRecuperarClave);
     }
 
     @Override
@@ -139,14 +158,8 @@ public class AuthServiceImpl extends BaseService implements AuthService {
 
         long idUsuario = usuarioModel.getIdUsuario();
         String token = generarToken(idUsuario, model.getCorreo());
-
-        String message = mailContentBuilder.registrationCode(token);
         String correo = usuarioModel.getCorreo();
-        emailSender.send(
-                correo,
-                "Código de Activación",
-                message
-        );
+        _sendMailActivarCuenta(correo, token);
 
         return AuthUsuarioRegisterResponse.builder()
                 .idUsuario(idUsuario)
@@ -179,13 +192,10 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         url = UriComponentsBuilder.fromUriString(url).build().encode().toUriString();
         url += "?token=" + token;
         url += "&username=" + username;
-        String message = mailContentBuilder.resetPassword(url);
+
         String correo = usuarioModel.getCorreo();
-        emailSender.send(
-                correo,
-                "Restablecer Contraseña",
-                message
-        );
+        _sendMailRecuperarClave(correo, url);
+
         return new GenerarTokenRecuperarClaveResponseDto(correo);
     }
 
