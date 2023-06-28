@@ -93,7 +93,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     }
 
     @Async
-    void _sendMailActivarCuenta(String correo, String token) {
+    protected void _sendMailActivarCuenta(String correo, String token) {
         ActivarCuentaRequestDto requestActivarCuenta = new ActivarCuentaRequestDto();
         requestActivarCuenta.setEmail(correo);
         requestActivarCuenta.setToken(token);
@@ -101,7 +101,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     }
 
     @Async
-    void _sendMailRecuperarClave(String correo, String url) {
+    protected void _sendMailRecuperarClave(String correo, String url) {
         RecuperarClaveWebRequestDto requestRecuperarClave = new RecuperarClaveWebRequestDto();
         requestRecuperarClave.setEmail(correo);
         requestRecuperarClave.setUrl(url);
@@ -112,13 +112,12 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Transactional
     public AuthUsuarioRegisterResponse save(AuthUsuarioRegisterRequestDto model) {
         Usuario usuarioModel = usuarioRepository
-                .findByNumeroDocumento(
-                        model.getNumeroDocumento())
+                .findByNumeroDocumentoAndIdEstadoUsuario(
+                        model.getNumeroDocumento(),
+                        EstadoUsuario.ACTIVADO)
                 .orElse(null);
 
-        boolean alreadyRegistered = usuarioModel != null && usuarioModel
-                .getIdEstadoUsuario()
-                .equals(EstadoUsuario.ACTIVADO);
+        boolean alreadyRegistered = usuarioModel != null;
 
         if (alreadyRegistered)
             throw new ValidationException(
@@ -135,10 +134,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         if (!codPlanillaValid)
             throw new ValidationException("Datos incorrectos");
 
-        if (usuarioModel != null)
-            modelMapper.map(model, usuarioModel);
-        else
-            usuarioModel = modelMapper.map(model, Usuario.class);
+        usuarioModel = modelMapper.map(model, Usuario.class);
 
         String[] nombresArray = personaSAP.getNombres().split(",");
         usuarioModel.setNombres(nombresArray[1]);
@@ -169,7 +165,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Transactional
     public GenerarTokenRecuperarClaveResponseDto generarTokenRecuperarClave(GenerarTokenRecuperarClaveRequestDto request) {
         String username = request.getNumeroDocumento();
-        Usuario usuarioModel = usuarioRepository.findByNumeroDocumento(username)
+        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuario(username, EstadoUsuario.ACTIVADO)
                 .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
 
         String token = UUID.randomUUID().toString();
@@ -237,7 +233,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Transactional
     public void cambiarClave(CambiarClaveRequestDto request) {
 
-        Usuario usuarioModel = usuarioRepository.findByNumeroDocumento(request.getUsername())
+        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuario(request.getUsername(), EstadoUsuario.ACTIVADO)
                 .orElseThrow(() -> new ValidationException("Usuario no está registrado."));
 
         TokenActivacion tokenModel = tokenActivacionRepository

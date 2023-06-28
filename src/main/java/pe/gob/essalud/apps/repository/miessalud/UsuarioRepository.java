@@ -11,6 +11,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
 	Optional<Usuario> findByNumeroDocumento(String numeroDocumento);
 
+    Optional<Usuario> findByNumeroDocumentoAndIdEstadoUsuario(String numeroDocumento, String estado);
+
     boolean existsByNumeroDocumentoOrCodigoPlanilla(String numeroDocumento, String codigoPlanilla);
     
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN TRUE ELSE FALSE END FROM Usuario u " +

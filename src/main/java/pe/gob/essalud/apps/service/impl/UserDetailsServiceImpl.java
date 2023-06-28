@@ -29,11 +29,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(final String username) {
-        Usuario usuarioModel = usuarioRepository.findByNumeroDocumento(username)
+        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuario(username, EstadoUsuario.ACTIVADO)
                 .orElseThrow(()-> new UsernameNotFoundException(ValidationMsg.USUARIO_NO_ENCONTRADO));
-
-        if (!usuarioModel.getIdEstadoUsuario().equals(EstadoUsuario.ACTIVADO))
-            throw new UsernameNotFoundException(ValidationMsg.USUARIO_NO_ENCONTRADO);
 
         return this.userBuilder(username, usuarioModel.getPassword(), usuarioModel.getIdRol());
     }
