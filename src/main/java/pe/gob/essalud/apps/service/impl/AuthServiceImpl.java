@@ -112,9 +112,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Transactional
     public AuthUsuarioRegisterResponse save(AuthUsuarioRegisterRequestDto model) {
         Usuario usuarioModel = usuarioRepository
-                .findByNumeroDocumentoAndIdEstadoUsuario(
-                        model.getNumeroDocumento(),
-                        EstadoUsuario.ACTIVADO)
+                .findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(model.getNumeroDocumento(),EstadoUsuario.ACTIVADO,true)
                 .orElse(null);
 
         boolean alreadyRegistered = usuarioModel != null;
@@ -165,7 +163,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Transactional
     public GenerarTokenRecuperarClaveResponseDto generarTokenRecuperarClave(GenerarTokenRecuperarClaveRequestDto request) {
         String username = request.getNumeroDocumento();
-        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuario(username, EstadoUsuario.ACTIVADO)
+        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(username, EstadoUsuario.ACTIVADO, true)
                 .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
 
         String token = UUID.randomUUID().toString();
@@ -233,7 +231,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Transactional
     public void cambiarClave(CambiarClaveRequestDto request) {
 
-        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuario(request.getUsername(), EstadoUsuario.ACTIVADO)
+        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(request.getUsername(), EstadoUsuario.ACTIVADO, true)
                 .orElseThrow(() -> new ValidationException("Usuario no está registrado."));
 
         TokenActivacion tokenModel = tokenActivacionRepository

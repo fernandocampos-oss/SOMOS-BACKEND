@@ -11,7 +11,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
 	Optional<Usuario> findByNumeroDocumento(String numeroDocumento);
 
-    Optional<Usuario> findByNumeroDocumentoAndIdEstadoUsuario(String numeroDocumento, String estado);
+    Optional<Usuario> findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(String numeroDocumento, String idEstadoUsuario, boolean esActivo);
 
     boolean existsByNumeroDocumentoOrCodigoPlanilla(String numeroDocumento, String codigoPlanilla);
     

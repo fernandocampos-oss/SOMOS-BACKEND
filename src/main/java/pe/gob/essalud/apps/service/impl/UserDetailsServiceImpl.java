@@ -29,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(final String username) {
-        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuario(username, EstadoUsuario.ACTIVADO)
+        Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(username, EstadoUsuario.ACTIVADO, true)
                 .orElseThrow(()-> new UsernameNotFoundException(ValidationMsg.USUARIO_NO_ENCONTRADO));
 
         return this.userBuilder(username, usuarioModel.getPassword(), usuarioModel.getIdRol());
