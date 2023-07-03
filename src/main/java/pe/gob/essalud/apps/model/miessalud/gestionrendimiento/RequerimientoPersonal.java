@@ -30,7 +30,7 @@ public class RequerimientoPersonal {
     private LocalDateTime fechaCreacion;
 
     @OneToMany(mappedBy = "requerimientoPersonal", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Tarea> listTarea; //BIDIRECCIONAL
+    private List<Tarea> listTarea;
 
     @Override
     public int hashCode() {

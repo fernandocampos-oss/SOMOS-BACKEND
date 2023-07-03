@@ -12,4 +12,6 @@ public interface TareaService extends IcrudService<Tarea> {
 
     Integer registrarTareaNoDuplicado(TareaValidacionTransaccionalDTO obj);
 
+    List<Tarea> listarTareaPorPersonal(Number idPersonal);
+
 }

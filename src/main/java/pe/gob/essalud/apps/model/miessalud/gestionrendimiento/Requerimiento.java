@@ -21,7 +21,7 @@ public class Requerimiento {
     @Column(name = "id_requerimiento")
     private Integer idRequerimiento;
 
-    @Column(name="nombre", nullable = false, length = 50)
+    @Column(name="nombre", nullable = false, length = 150)
     private String nombre;
 
     @Column(name="descripcion", nullable = true, length = 350)

@@ -8,8 +8,10 @@ import pe.gob.essalud.apps.service.IcrudService;
 
 public interface PersonalService extends IcrudService<Personal> {
 
-    List<Personal> listarPersonalPorDependenciaAsignado(Number idDependencia, Character estadoAsignado);
+    List<Personal> listarPersonalPorDependenciaAsignado(Number idDependencia, Number idEstadoPersonal);
 
     List<Personal> buscarPersonalPorNombre(PersonalFiltroNombreDTO filtro);
+
+    int eliminarPersonalMotivo(Number idEstadoPersonal, String motivo, Number idPersonal);
 
 }

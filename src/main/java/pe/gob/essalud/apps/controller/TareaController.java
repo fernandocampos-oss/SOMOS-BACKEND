@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.controller;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -49,6 +50,13 @@ public class TareaController {
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto).toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @GetMapping("/listar/personal/{idPersonal}")
+    public ResponseEntity<List<Tarea>> listarTareaPorPersonal(@PathVariable("idPersonal") Number idPersonal) {
+        log.info("id_personal: [{}]", idPersonal);
+        List<Tarea> lista = tareaService.listarTareaPorPersonal(idPersonal);
+        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
     }
 
 }

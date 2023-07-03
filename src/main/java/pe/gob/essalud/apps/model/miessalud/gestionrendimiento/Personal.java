@@ -27,9 +27,6 @@ public class Personal {
     @Column(name="apellido_materno", nullable = false, length = 150)
     private String apellidoMaterno;
 
-    @Column(name = "estado", nullable = true)
-    private Character estado;
-
     //	@JsonIgnore
     @ManyToOne
     @JoinColumn(name="id_cargo", nullable = true, foreignKey = @ForeignKey(name="fk_personal_cargo"))
@@ -38,6 +35,10 @@ public class Personal {
     @ManyToOne
     @JoinColumn(name="id_dependencia", nullable = true, foreignKey = @ForeignKey(name="fk_personal_dependencia"))
     private Dependencia dependencia;
+
+    @ManyToOne
+    @JoinColumn(name="id_estado_personal", nullable = true, foreignKey = @ForeignKey(name="fk_personal_estadopersonal"))
+    private EstadoPersonal estadoPersonal;
 
     @Column(name = "id_usuario_creacion")
     private Integer idUsuarioCreacion;

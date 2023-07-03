@@ -42,15 +42,17 @@ public class TareaServiceImpl implements TareaService {
         log.info("idRequerimientoPersonal: {}", dto.getRequerimientoPersonal().getIdRequerimientoPersonal());
         if (!dto.getListTareaDTO().isEmpty()) {
             for (TareaValidacionDTO tDto : dto.getListTareaDTO()) {
-                for (Tarea t : tDto.getListTarea()) {
-                    log.info("idPersonal {}", tDto.getPersonal().getIdPersonal());
-                    tareaRepository.registrarTareaNoDuplicado(t.getNombreTarea(),
-                            t.getPlazo(), dto.getRequerimientoPersonal().getIdRequerimientoPersonal(),
-                            LocalDateTime.now(ZoneId.of("America/Lima")), t.getEstadoAvance(), t.getPorcentajeAvance());
-                }
+                tDto.getListTarea().forEach(t -> tareaRepository.registrarTareaNoDuplicado(t.getNombreTarea(),
+                        t.getPlazo(), dto.getRequerimientoPersonal().getIdRequerimientoPersonal(),
+                        LocalDateTime.now(ZoneId.of("America/Lima")), t.getEstadoTarea().getIdEstadoTarea(), t.getPorcentajeAvance()));
             }
         }
         return dto.getRequerimientoPersonal().getIdRequerimientoPersonal();
+    }
+
+    @Override
+    public List<Tarea> listarTareaPorPersonal(Number idPersonal) {
+        return tareaRepository.listarTareaPorPersonal(idPersonal);
     }
 
 }

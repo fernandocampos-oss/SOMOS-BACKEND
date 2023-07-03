@@ -27,13 +27,17 @@ public class PersonalServiceImpl implements PersonalService {
     }
 
     @Override
-    public List<Personal> listarPersonalPorDependenciaAsignado(Number idDependencia, Character estadoAsignado) {
-        return personalRepository.listarPersonalPorDependenciaAsignado(idDependencia, estadoAsignado);
+    public List<Personal> listarPersonalPorDependenciaAsignado(Number idDependencia, Number idEstadoPersonal) {
+        return personalRepository.listarPersonalPorDependenciaAsignado(idDependencia, idEstadoPersonal);
     }
 
     @Override
     public List<Personal> buscarPersonalPorNombre(PersonalFiltroNombreDTO filtro) {
         return personalRepository.buscarPersonalPorNombre(filtro.getNombres());
+    }
+    @Override
+    public int eliminarPersonalMotivo(Number idEstadoPersonal, String motivo, Number idPersonal) {
+        return personalRepository.eliminarPersonalMotivo(idEstadoPersonal, motivo, idPersonal);
     }
 
 }

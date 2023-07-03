@@ -12,14 +12,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 @Data
 @Entity
 @Table(name = "dependencia")
 public class Dependencia {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_dependencia")
     private Integer idDependencia;
 
     @Column(name="abreviatura", nullable = false)

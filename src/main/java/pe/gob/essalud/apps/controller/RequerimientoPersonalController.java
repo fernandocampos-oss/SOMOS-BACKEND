@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping(RequerimientoController.REQUERIMIENTOS)
+@RequestMapping(RequerimientoPersonalController.REQUERIMIENTOS)
 @RequiredArgsConstructor
 @Slf4j
 public class RequerimientoPersonalController {
@@ -39,7 +39,6 @@ public class RequerimientoPersonalController {
     public ResponseEntity<List<RequerimientoPersonal>> listarRequerimientosPorPersonal(@PathVariable("idPersonal") Number idPersonal) {
         log.info("idPersonal: [{}]", idPersonal);
         List<RequerimientoPersonal> lista = requerimientoPersonalService.listarRequerimientosPorPersonal(idPersonal);
-        Collections.reverse(lista);
         return new ResponseEntity<List<RequerimientoPersonal>>(lista, HttpStatus.OK);
     }
 

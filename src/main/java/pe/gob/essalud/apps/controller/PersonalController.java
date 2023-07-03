@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalEliminarDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalFiltroNombreDTO;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Personal;
 import pe.gob.essalud.apps.service.PersonalService;
@@ -34,24 +35,20 @@ public class PersonalController {
     static final String PERSONAL = "personal";
     private final PersonalService personalService;
 
-    @GetMapping("/listar/dependencia/{idDependencia}/estadoAsignado/{estadoAsignado}")
-    public ResponseEntity<List<Personal>> listarPersonalPorDependenciaAsignado(@PathVariable("idDependencia") Number idDependencia, @PathVariable("estadoAsignado") Character estadoAsignado) {
-        log.info("personal: [{}-{}]", idDependencia, estadoAsignado);
-        List<Personal> lista = personalService.listarPersonalPorDependenciaAsignado(idDependencia, estadoAsignado);
-        Collections.reverse(lista);
+    @GetMapping("/listar/dependencia/{idDependencia}/estadoAsignado/{idEstadoPersonal}")
+    public ResponseEntity<List<Personal>> listarPersonalPorDependenciaAsignado(@PathVariable("idDependencia") Number idDependencia, @PathVariable("idEstadoPersonal") Number idEstadoPersonal) {
+        List<Personal> lista = personalService.listarPersonalPorDependenciaAsignado(idDependencia, idEstadoPersonal);
         return new ResponseEntity<List<Personal>>(lista, HttpStatus.OK);
     }
 
     @PostMapping("/registrar")
     public ResponseEntity<Object> registrar(@Valid @RequestBody Personal persona) {
-        log.info("personal: {}", persona);
         if (persona != null) {
             persona.setFechaCreacion(LocalDateTime.now(ZoneId.of("America/Lima")));
         }
         Personal paciente = personalService.registrar(persona);
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(paciente.getIdPersonal()).toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(paciente.getIdPersonal()).toUri();
         return ResponseEntity.created(location).build();
     }
 
@@ -65,5 +62,8 @@ public class PersonalController {
         return new ResponseEntity<List<Personal>>(personas, HttpStatus.OK);
     }
 
-
+    @PostMapping("/eliminar")
+    public int eliminarPersonalMotivo(@RequestBody PersonalEliminarDTO dto ) {
+        return personalService.eliminarPersonalMotivo(dto.getIdEstadoPersonal(), dto.getMotivo(), dto.getIdPersonal());
+    }
 }

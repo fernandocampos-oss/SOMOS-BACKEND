@@ -33,9 +33,6 @@ public class Tarea {
     @Column(name = "estado", nullable = true)
     private boolean estado;
 
-    @Column(name="estado_avance", nullable = true)
-    private String estadoAvance;
-
     @Column(name="porcentaje_avance", nullable = true, length = 3)
     private Integer porcentajeAvance;
 
@@ -43,6 +40,10 @@ public class Tarea {
     @ManyToOne
     @JoinColumn(name="id_requerimiento_personal", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_requerimientopersonal"))
     private RequerimientoPersonal requerimientoPersonal;
+
+    @ManyToOne
+    @JoinColumn(name="id_estado_tarea", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_estadotarea"))
+    private EstadoTarea estadoTarea;
 
     @Column(name = "id_usuario_creacion")
     private Integer idUsuarioCreacion;

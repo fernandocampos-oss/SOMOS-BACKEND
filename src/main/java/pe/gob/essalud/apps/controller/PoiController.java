@@ -25,15 +25,15 @@ public class PoiController {
     static final String POIS = "pois";
     private final PoiService poiService;
 
-    @GetMapping
+    @GetMapping("/listar")
     public ResponseEntity<List<Poi>> listar() {
         List<Poi> lista = poiService.listar();
         return new ResponseEntity<List<Poi>>(lista, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<Object> registrar(@Valid @RequestBody Poi pac) { 																	// OBJETO
-        Poi examen = poiService.registrar(pac);
+    public ResponseEntity<Object> registrar(@Valid @RequestBody Poi poi) { 																	// OBJETO
+        Poi examen = poiService.registrar(poi);
         URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(examen.getIdPoi()).toUri();
         return ResponseEntity.created(location).build();
     }
