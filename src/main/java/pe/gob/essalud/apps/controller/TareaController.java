@@ -31,12 +31,6 @@ public class TareaController {
     static final String TAREA = "tareas";
     private final TareaService tareaService;
 
-    @GetMapping
-    public ResponseEntity<List<Tarea>> listar() {
-        List<Tarea> lista = tareaService.listar();
-        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
-    }
-
     @GetMapping("/listar/requerimientoPersonal/{idRequerimientoPersonal}")
     public ResponseEntity<List<Tarea>> listarTareaPorRequermientoPersonal(@PathVariable("idRequerimientoPersonal") Number idRequerimientoPersonal) {
         log.info("id_requerimiento_personal: [{}]", idRequerimientoPersonal);

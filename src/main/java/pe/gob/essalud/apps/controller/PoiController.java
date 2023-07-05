@@ -31,11 +31,4 @@ public class PoiController {
         return new ResponseEntity<List<Poi>>(lista, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<Object> registrar(@Valid @RequestBody Poi poi) { 																	// OBJETO
-        Poi examen = poiService.registrar(poi);
-        URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(examen.getIdPoi()).toUri();
-        return ResponseEntity.created(location).build();
-    }
-
 }
