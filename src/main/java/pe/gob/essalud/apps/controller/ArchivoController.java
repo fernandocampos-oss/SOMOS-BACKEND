@@ -12,6 +12,8 @@ import pe.gob.essalud.apps.service.ArchivoService;
 import pe.gob.essalud.apps.service.EvidenciaService;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @RestController
 @RequestMapping(ArchivoController.ARCHIVO)
@@ -23,6 +25,9 @@ public class ArchivoController {
 
     @PostMapping("registrar")
     public ResponseEntity<Object> registrar(@Valid @RequestBody Archivo obj) {
+        if (obj != null) {
+            obj.setFechaCreacion(LocalDateTime.now(ZoneId.of("America/Lima")));
+        }
         Archivo archivo = archivoService.registrar(obj);
 
         return new ResponseEntity<>(archivo, HttpStatus.CREATED);

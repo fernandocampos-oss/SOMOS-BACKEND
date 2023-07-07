@@ -23,4 +23,14 @@ public class EvidenciaArchivoServiceImpl implements EvidenciaArchivoService {
     public List<EvidenciaArchivo> listar() {
         return null;
     }
+
+    @Override
+    public EvidenciaArchivo listarArchivoPorEstadoActivo(Number idEvidenciaArchivo) {
+        return evidenciaArchivoRepository.listarArchivoPorEstadoActivo(idEvidenciaArchivo);
+    }
+
+    @Override
+    public int eliminarArchivo(Boolean estado, Number idEvidenciaArchivo) {
+        return evidenciaArchivoRepository.eliminarArchivo(estado, idEvidenciaArchivo);
+    }
 }

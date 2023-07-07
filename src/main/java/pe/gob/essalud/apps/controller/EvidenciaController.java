@@ -11,6 +11,8 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 import pe.gob.essalud.apps.service.EvidenciaService;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @RestController
 @RequestMapping(EvidenciaController.EVIDENCIA)
@@ -22,6 +24,9 @@ public class EvidenciaController {
 
     @PostMapping("registrar")
     public ResponseEntity<Object> registrar(@Valid @RequestBody Evidencia obj) {
+        if (obj != null) {
+            obj.setFechaCreacion(LocalDateTime.now(ZoneId.of("America/Lima")));
+        }
         Evidencia evidencia = evidenciaService.registrar(obj);
 
         return new ResponseEntity<Object>(evidencia, HttpStatus.CREATED);
