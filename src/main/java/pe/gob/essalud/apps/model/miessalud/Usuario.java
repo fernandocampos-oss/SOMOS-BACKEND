@@ -40,6 +40,10 @@ public class Usuario {
     private String cargo;
     @Column(name = "fecha_ingreso")
     private String fechaIngreso;
+    @Column(name = "cod_red")
+    private String codigoRed;
+    @Column(name = "cod_unidad")
+    private String codigoUnidad;
     @Column(name = "es_activo")
     private boolean esActivo;
     @Column(name = "id_sede")
