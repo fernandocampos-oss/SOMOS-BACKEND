@@ -5,8 +5,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.base.BaseService;
+import pe.gob.essalud.apps.client.PersonalSapUtilServiceClient;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.constants.RoleType;
+import pe.gob.essalud.apps.dto.personalsaputilservice.PersonaSAP;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
@@ -33,6 +35,7 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     private final UsuarioMyRepository usuarioMyRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final PersonalSapUtilServiceClient _personalSapUtilServiceClient;
 
     @Override
     public List<UsuarioResponseDto> search() {
@@ -136,6 +139,25 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
 
         usuario.setPassword(passwordEncoder.encode(request.getNuevaClave()));
         usuarioRepository.save(usuario);
+    }
+
+    @Override
+    public void updateDatosSAP(long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(NotFoundException::new);
+
+        PersonaSAP personaSAP = _personalSapUtilServiceClient.getByNumDocAndFecNac(
+                usuario.getNumeroDocumento(),
+                usuario.getFechaNacimiento().toString());
+
+        if (personaSAP != null) {
+            usuario.setRegimen(personaSAP.getRegimen());
+            usuario.setCargo(personaSAP.getCargo());
+            usuario.setFechaIngreso(personaSAP.getFechaIngreso());
+            usuario.setCodigoRed(personaSAP.getWerks());
+            usuario.setCodigoUnidad(personaSAP.getOrgeh());
+            usuarioRepository.save(usuario);
+        }
     }
 
     private List<Usuario> getMyUsers() {

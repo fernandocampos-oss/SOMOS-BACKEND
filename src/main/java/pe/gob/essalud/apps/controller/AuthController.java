@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import pe.gob.essalud.apps.service.UsuarioService;
 
 @RestController
 @RequestMapping(AuthController.AUTH)
@@ -27,6 +28,7 @@ public class AuthController extends BaseController {
     private static final String LOGIN = "login";
     private final JwtService jwtService;
     private final AuthService authService;
+    private final UsuarioService usuarioService;
 
     @PreAuthorize("authenticated")
     @PostMapping(LOGIN)
@@ -59,6 +61,7 @@ public class AuthController extends BaseController {
 
     private String getToken(User activeUser) {
         UserSessionDto userSession = authService.findByUsername(activeUser.getUsername());
+        usuarioService.updateDatosSAP(userSession.getId());
         return jwtService.createToken(
                 userSession.getId(),
                 userSession.getNombres(),
