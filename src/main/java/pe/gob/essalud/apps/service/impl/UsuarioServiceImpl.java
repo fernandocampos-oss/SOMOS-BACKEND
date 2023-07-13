@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -151,6 +152,10 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
                 usuario.getFechaNacimiento().toString());
 
         if (personaSAP != null) {
+            String[] nombresArray = personaSAP.getNombres().split(",");
+            usuario.setNombres(nombresArray[1]);
+            usuario.setApellidos(nombresArray[0]);
+            usuario.setSexo(personaSAP.getSexot());
             usuario.setRegimen(personaSAP.getRegimen());
             usuario.setCargo(personaSAP.getCargo());
             usuario.setFechaIngreso(personaSAP.getFechaIngreso());

@@ -28,6 +28,8 @@ public class Usuario {
     private String nombres;
     @Column(name = "apellidos")
     private String apellidos;
+    @Column(name = "sexo")
+    private String sexo;
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
     @Column(name = "numero_celular")
