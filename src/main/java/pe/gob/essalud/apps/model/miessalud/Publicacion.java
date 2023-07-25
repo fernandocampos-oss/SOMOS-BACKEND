@@ -26,8 +26,10 @@ public class Publicacion {
     private String rutaImagen;
     @Column(name = "url_redireccion")
     private String urlRedireccion;
-    @Column(name = "id_sede")
-    private Integer idSede;
+    @Column(name = "tipo_alcance")
+    private Integer tipoAlcance;
+    @Column(name = "alcance_red")
+    private String alcanceRed;
     @Column(name = "es_activo")
     private boolean esActivo;
     @Column(name = "usuario_creacion", nullable = false)

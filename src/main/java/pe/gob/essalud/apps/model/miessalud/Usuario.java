@@ -48,10 +48,6 @@ public class Usuario {
     private String codigoUnidad;
     @Column(name = "es_activo")
     private boolean esActivo;
-    @Column(name = "id_sede")
-    private Integer idSede;
-    @Column(name = "id_zona_control")
-    private Integer idZonaControl;
     @Column(name = "id_rol")
     private int idRol;
     @Column(name = "password")

@@ -6,10 +6,10 @@
 
     <select id="findByUsername" resultType="UserSession">
         SELECT us.id_usuario id,
-               us.nombres AS nombres,
-               us.id_sede     idSede,
-               us.id_zona_control    idZonaControl,
-               us.id_rol     idRol
+               us.nombres    nombres,
+               us.id_rol     idRol,
+               us.cod_red    codRed,
+               us.cod_unidad codUnidad
         FROM usuario us
         WHERE us.numero_documento = #{numeroDocumento}
           AND us.es_activo = TRUE

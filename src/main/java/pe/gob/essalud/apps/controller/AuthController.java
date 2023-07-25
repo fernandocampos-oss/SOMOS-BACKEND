@@ -65,9 +65,9 @@ public class AuthController extends BaseController {
         return jwtService.createToken(
                 userSession.getId(),
                 userSession.getNombres(),
-                userSession.getIdSede(),
-                userSession.getIdZonaControl(),
-                userSession.getIdRol());
+                userSession.getIdRol(),
+                userSession.getCodRed(),
+                userSession.getCodUnidad());
     }
 
 }

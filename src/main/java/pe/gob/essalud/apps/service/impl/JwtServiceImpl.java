@@ -16,9 +16,9 @@ public class JwtServiceImpl implements JwtService {
 
     private static final String NOMBRES = "nombres";
     private static final String ID = "id";
-    private static final String ID_SEDE = "idSede";
-    private static final String ID_ZONA_CONTROL = "idZonaControl";
     private static final String ROL = "idRol";
+    private static final String COD_RED = "codRed";
+    private static final String COD_UNIDAD = "codUnidad";
     private static final int EXPIRES_IN_MILLISECOND = 2 * 3600000; // 2h
     @Value(value = "${auth0.issuer}")
     private String issuer;
@@ -26,17 +26,17 @@ public class JwtServiceImpl implements JwtService {
     private String secretKey;
 
     @Override
-    public String createToken(long id, String nombres, int idSede, Integer idZonaControl, int idRol) {
+    public String createToken(long id, String nombres, int idRol, String codRed, String codUnidad) {
         return JWT.create()
                 .withIssuer(issuer)
                 .withIssuedAt(new Date())
                 .withNotBefore(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRES_IN_MILLISECOND))
                 .withClaim(ID, id)
-                .withClaim(ID_SEDE, idSede)
-                .withClaim(ID_ZONA_CONTROL, idZonaControl)
                 .withClaim(NOMBRES, nombres)
                 .withClaim(ROL, idRol)
+                .withClaim(COD_RED, codRed)
+                .withClaim(COD_UNIDAD, codUnidad)
                 .sign(Algorithm.HMAC256(secretKey));
     }
 
@@ -53,20 +53,9 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public int idSede(String authorization) {
-        return this.verify(authorization).getClaim(ID_SEDE).asInt();
-    }
-
-    @Override
-    public Integer idZonaControl(String authorization) {
-        return this.verify(authorization).getClaim(ID_ZONA_CONTROL).asInt();
-    }
-
-    @Override
     public int id(String authorization) {
         return this.verify(authorization).getClaim(ID).asInt();
     }
-
 
     private DecodedJWT verify(String authorization) {
 
@@ -81,6 +70,16 @@ public class JwtServiceImpl implements JwtService {
     public int idRol(String authorization) {
         DecodedJWT jwt = this.verify(authorization);
         return jwt.getClaim(ROL).asInt();
+    }
+
+    @Override
+    public String codRed(String authorization) {
+        return this.verify(authorization).getClaim(COD_RED).asString();
+    }
+
+    @Override
+    public String codUnidad(String authorization) {
+        return this.verify(authorization).getClaim(COD_UNIDAD).asString();
     }
 
 }

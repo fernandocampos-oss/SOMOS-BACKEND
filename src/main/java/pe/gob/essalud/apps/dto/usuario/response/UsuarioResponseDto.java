@@ -15,13 +15,8 @@ public class UsuarioResponseDto {
     private LocalDate fechaNacimiento;
     private String numeroCelular;
     private String correo;
-    private int idSede;
-    private Integer idZonaControl;
     private Integer idRol;
     private String idEstado;
     private String estado;
-    /*private String idUbigeo;
-    private String direccion;
-    private String numeroTelefono;*/
 
 }

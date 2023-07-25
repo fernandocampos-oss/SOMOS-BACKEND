@@ -1,7 +1,6 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +23,7 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.UsuarioService;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,7 +53,6 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
 
     @Override
     public void update(long id, UsuarioRegisterUpdateRequestDto model) {
-        validateRoleRegisterUpdateUser(model);
         boolean alreadyExists = usuarioRepository.existsByNumeroDocumentoOrCodigoPlanillaAndIdUsuarioNot(
                 model.getNumeroDocumento(),
                 model.getCodigoPlanilla(),
@@ -73,19 +72,18 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
         Usuario usuarioModel = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("El usuario no existe"));
         if (authService.hasRole(RoleType.ADMIN_SEDE))
-            validateSede(usuarioModel.getIdSede());
+            validateRed(usuarioModel.getCodigoRed());
         usuarioRepository.deleteById(id);
     }
 
-    private void validateSede(int idSede) {
-        boolean userMatchesMySede = authService.getIdSedeSession() == idSede;
-        if (!userMatchesMySede)
+    private void validateRed(String codRed) {
+        boolean userMatchesMyRed = Objects.equals(authService.getCodRedSession(), codRed);
+        if (!userMatchesMyRed)
             throw new ForbiddenException();
     }
 
     @Override
     public long save(UsuarioRegisterUpdateRequestDto model) {
-        validateRoleRegisterUpdateUser(model);
         boolean alreadyExists = usuarioRepository.existsByNumeroDocumentoOrCodigoPlanilla(
                 model.getNumeroDocumento(),
                 model.getCodigoPlanilla());
@@ -99,14 +97,6 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
         usuarioModel.setIdEstadoUsuario(EstadoUsuario.ACTIVADO);
         usuarioRepository.save(usuarioModel);
         return usuarioModel.getIdUsuario();
-    }
-
-    private void validateRoleRegisterUpdateUser(UsuarioRegisterUpdateRequestDto model) {
-        if (authService.hasRole(RoleType.ADMIN_SEDE)) {
-            if (model.getIdRol() == RoleType.ADMIN_CENTRAL)
-                throw new ForbiddenException();
-            model.setIdSede(authService.getIdSedeSession());
-        }
     }
 
     @Override
@@ -168,6 +158,6 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     private List<Usuario> getMyUsers() {
         return authService.hasRole(RoleType.ADMIN_CENTRAL)
                 ? usuarioRepository.findAllByIdEstadoUsuarioOrderByNombres(EstadoUsuario.ACTIVADO)
-                : usuarioRepository.findAllByIdSede(authService.getIdSedeSession());
+                : usuarioRepository.findAllByCodigoRed(authService.getCodRedSession());
     }
 }

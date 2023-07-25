@@ -21,8 +21,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     List<Usuario> findAllByIdEstadoUsuarioOrderByNombres(String idEstado);
     
-    @Query("SELECT u FROM Usuario u WHERE u.idSede = ?1 AND u.idEstadoUsuario = '02' ORDER BY u.nombres")
-    List<Usuario> findAllByIdSede(int idSede);
+    @Query("SELECT u FROM Usuario u WHERE u.codigoRed = ?1 AND u.idEstadoUsuario = '02' ORDER BY u.nombres")
+    List<Usuario> findAllByCodigoRed(String codigoRed);
     
     @Query("SELECT u FROM Usuario u WHERE u.numeroDocumento = ?1")
     Usuario findDocumento(String numeroDocumento);

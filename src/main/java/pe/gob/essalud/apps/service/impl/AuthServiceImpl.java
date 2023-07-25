@@ -78,13 +78,13 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     }
 
     @Override
-    public int getIdSedeSession() {
-        return getUserSession().getIdSede();
+    public String getCodRedSession() {
+        return getUserSession().getCodRed();
     }
 
     @Override
-    public Integer getIdZonaControlSession() {
-        return getUserSession().getIdZonaControl();
+    public String getCodUnidadSession() {
+        return getUserSession().getCodUnidad();
     }
 
     @Override
@@ -147,8 +147,6 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         usuarioModel.setIdRol(RoleType.TRABAJADOR);
         usuarioModel.setIdEstadoUsuario(EstadoUsuario.PENDIENTE_ACTIVACION);
         usuarioModel.setPassword(passwordEncoder.encode(model.getPassword()));
-        usuarioModel.setIdSede(0);
-        usuarioModel.setIdZonaControl(0);
         usuarioRepository.save(usuarioModel);
 
         long idUsuario = usuarioModel.getIdUsuario();
