@@ -13,8 +13,6 @@
                us.fecha_nacimiento  fechaNacimiento,
                us.numero_celular    numeroCelular,
                us.correo,
-               us.id_sede           idSede,
-               us.id_zona_control   idZonaControl,
                us.id_rol            idRol,
                us.id_estado_usuario idEstado,
                --us.id_ubigeo         idUbigeo,
