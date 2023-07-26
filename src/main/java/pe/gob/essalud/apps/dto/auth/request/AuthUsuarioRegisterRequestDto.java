@@ -13,9 +13,5 @@ public class AuthUsuarioRegisterRequestDto {
     private String numeroCelular;
     private String correo;
     private String password;
-    private int idSede;
-    private String idUbigeo;
-    private String direccion;
-    private String numeroTelefono;
 
 }
