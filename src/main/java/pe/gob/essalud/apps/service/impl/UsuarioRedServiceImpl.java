@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.common.constants.RoleType;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
@@ -32,10 +33,11 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     private final RedPersonalRepository redPersonalRepository;
 
     private final AuthService authService;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<UsuarioNombresResponse> listarAministradoresRed() {
-        return usuarioRepository.findByIdRol(RoleType.ADMIN_SEDE).stream()
+        return usuarioRepository.findByIdRolIn(Arrays.asList(RoleType.TRABAJADOR, RoleType.ADMIN_SEDE)).stream()
                 .map(u -> {
                     String nombres = Optional.ofNullable(u.getNombres()).orElse("");
                     String apellidos = Optional.ofNullable(u.getApellidos()).orElse("");
@@ -54,39 +56,20 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     @Override
     public List<UsuarioRedResponse> listarUsuariosRedes() {
         var usuarioRedList = usuarioRedRepository.findAllOrderByFechaCreacionDesc();
-        var usuarios = usuarioRedList.stream().map(UsuarioRed::getUsuario).collect(Collectors.toList());
 
-        Set<Usuario> uniqueUsers = new HashSet<>(usuarios);
-        usuarios.clear();
-        usuarios.addAll(uniqueUsers);
-
-        return usuarios.stream()
-                .map(u -> {
+        return usuarioRedList.stream()
+                .map(ur -> {
                     var response = new UsuarioRedResponse();
-                    String nombres = Optional.ofNullable(u.getNombres()).orElse("");
-                    String apellidos = Optional.ofNullable(u.getApellidos()).orElse("");
+                    String nombres = Optional.ofNullable(ur.getUsuario().getNombres()).orElse("");
+                    String apellidos = Optional.ofNullable(ur.getUsuario().getApellidos()).orElse("");
                     var usuarioNombre = UsuarioNombresResponse.builder()
-                            .idUsuario(u.getIdUsuario())
+                            .idUsuario(ur.getUsuario().getIdUsuario())
                             .nombresCompletos(nombres + " " + apellidos)
                             .build();
                     response.setUsuario(usuarioNombre);
-                    response.setRedes(new ArrayList<>());
-                    response.setHabilitado(false);
-                    usuarioRedList.forEach(ur -> {
-                        if (ur.getUsuario().getIdUsuario() == u.getIdUsuario()) {
-                            var redResponse = new RedResponse();
-                            redResponse.setCodRed(ur.getRed().getCodRed());
-                            redResponse.setDescripcion(ur.getRed().getDescripcion());
-                            redResponse.setHabilitado(ur.isHabilitado());
-                            redResponse.setFechaAsignacion(ur.getFechaCreacion());
-                            response.getRedes().add(redResponse);
-                            if (ur.isHabilitado()) {
-                                response.setHabilitado(true);
-                            }
-                        }
-                    });
-                    var fechas = response.getRedes().stream().map(RedResponse::getFechaAsignacion).collect(Collectors.toList());
-                    response.setFechaAsignacion(Collections.max(fechas));
+                    response.setHabilitado(ur.isHabilitado());
+                    response.setFechaAsignacion(ur.getFechaAsignacion());
+                    response.setRed(modelMapper.map(ur.getRed(), RedResponse.class));
                     return response;
                 })
                 .collect(Collectors.toList());
@@ -96,6 +79,11 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     public void asignarRedesUsuario(UsuarioRedRequest request) {
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
+
+        if (usuario.getIdRol() == RoleType.TRABAJADOR) {
+            usuario.setIdRol(RoleType.ADMIN_SEDE);
+            usuario = usuarioRepository.save(usuario);
+        }
 
         asignarRedes(request, usuario);
     }
@@ -137,6 +125,7 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
                     .usuario(usuario)
                     .red(red)
                     .habilitado(true)
+                    .fechaAsignacion(LocalDateTime.now(ZoneId.of("America/Lima")))
                     .usuarioCreacion(authService.getIdUserSession())
                     .esActivo(true)
                     .build();
@@ -154,5 +143,21 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
                     usuarioRed.setHabilitado(habilitado);
                     usuarioRedRepository.save(usuarioRed);
                 });
+    }
+
+    @Override
+    public void habilitarUsuarioRed(long idUsuario, String codRed, boolean habilitado) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
+
+        RedPersonal red = redPersonalRepository.findById(codRed)
+                .orElseThrow(() -> new ValidationException("La red no se encuentra registrada"));
+
+        UsuarioRed usuarioRed = usuarioRedRepository.findByUsuarioIdUsuarioAndRedCodRed(usuario.getIdUsuario(), red.getCodRed());
+        if (!usuarioRed.isHabilitado()) {
+            usuarioRed.setFechaAsignacion(LocalDateTime.now(ZoneId.of("America/Lima")));
+        }
+        usuarioRed.setHabilitado(habilitado);
+        usuarioRedRepository.save(usuarioRed);
     }
 }

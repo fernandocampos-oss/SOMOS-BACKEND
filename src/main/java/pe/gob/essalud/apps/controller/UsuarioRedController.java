@@ -57,4 +57,11 @@ public class UsuarioRedController {
         usuarioRedService.habilitarUsuario(idUsuario, habilitado == 1);
     }
 
+    @PreAuthorizeAdminCentral
+    @PutMapping("/usuario/{idUsuario}/red/{codRed}/habilitado/{habilitado}")
+    public void habilitarUsuarioRed(@PathVariable long idUsuario, @PathVariable String codRed,
+            @PathVariable int habilitado) {
+        usuarioRedService.habilitarUsuarioRed(idUsuario, codRed,habilitado == 1);
+    }
+
 }

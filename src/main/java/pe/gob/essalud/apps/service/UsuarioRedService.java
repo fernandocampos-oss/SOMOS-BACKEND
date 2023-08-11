@@ -15,5 +15,6 @@ public interface UsuarioRedService {
     void asignarRedesUsuario(UsuarioRedRequest request);
     void actualizarRedesUsuario(UsuarioRedRequest request);
     void habilitarUsuario(long idUsuario, boolean habilitado);
+    void habilitarUsuarioRed(long idUsuario, String codRed, boolean habilitado);
 
 }

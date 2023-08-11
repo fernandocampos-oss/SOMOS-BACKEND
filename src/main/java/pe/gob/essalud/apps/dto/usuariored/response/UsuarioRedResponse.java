@@ -4,7 +4,6 @@ import lombok.Data;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 public class UsuarioRedResponse {
@@ -12,6 +11,6 @@ public class UsuarioRedResponse {
     private UsuarioNombresResponse usuario;
     private LocalDateTime fechaAsignacion;
     private boolean habilitado;
-    private List<RedResponse> redes;
+    private RedResponse red;
 
 }

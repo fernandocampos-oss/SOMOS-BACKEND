@@ -34,6 +34,8 @@ public class UsuarioRed {
 
     private boolean habilitado;
 
+    @Column(name = "fecha_asignacion")
+    private LocalDateTime fechaAsignacion;
     @Column(name = "es_activo")
     private boolean esActivo;
     @Column(name = "usuario_creacion", nullable = false)

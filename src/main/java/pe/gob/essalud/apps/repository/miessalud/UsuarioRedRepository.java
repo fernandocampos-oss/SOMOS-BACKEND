@@ -11,6 +11,8 @@ public interface UsuarioRedRepository extends JpaRepository<UsuarioRed, UsuarioR
 
     List<UsuarioRed> findByUsuarioIdUsuario(long idUsuario);
 
+    UsuarioRed findByUsuarioIdUsuarioAndRedCodRed(long idUsuario, String codRed);
+
     @Query("SELECT ur FROM UsuarioRed ur ORDER BY ur.fechaCreacion DESC")
     List<UsuarioRed> findAllOrderByFechaCreacionDesc();
 

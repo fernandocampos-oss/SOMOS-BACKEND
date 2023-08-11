@@ -27,6 +27,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.numeroDocumento = ?1")
     Usuario findDocumento(String numeroDocumento);
 
-    List<Usuario> findByIdRol(int idRol);
+    List<Usuario> findByIdRolIn(List roles);
 
 }
