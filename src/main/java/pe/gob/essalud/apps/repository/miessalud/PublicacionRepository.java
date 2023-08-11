@@ -14,6 +14,6 @@ public interface PublicacionRepository extends JpaRepository<Publicacion, Long> 
     List<Publicacion> findPublicacionesByAlcanceRed(String codRed);
     List<Publicacion> findPublicacionByTipoAlcanceOrderByIdPublicacionDesc(int tipoAlcance);
 
-    @Query(value = "SELECT distinct cod_red FROM usuario_red WHERE id_usuario = :idUsuario", nativeQuery = true)
+    @Query(value = "SELECT distinct cod_red FROM usuario_red WHERE id_usuario = :idUsuario and es_activo = true and habilitado = true", nativeQuery = true)
     List<String> findRedesAsignadasUsuario(int idUsuario);
 }
