@@ -60,6 +60,8 @@ public class Usuario {
     private Integer usuarioModificacion;
     @Column(name = "id_estado_usuario")
     private String idEstadoUsuario;
+    @Column(name = "id_rol_adicional")
+    private Integer idRolAdicional;
 
     @PrePersist
     private void prePersist() {

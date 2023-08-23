@@ -12,5 +12,6 @@ public class UserSessionDto {
     private int idRol;
     private String codRed;
     private String codUnidad;
+    private int idRolAdicional;
 
 }

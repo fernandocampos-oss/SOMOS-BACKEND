@@ -58,7 +58,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 jwtService.nombres(authHeader),
                 jwtService.idRol(authHeader),
                 jwtService.codRed(authHeader),
-                jwtService.codUnidad(authHeader));
+                jwtService.codUnidad(authHeader),
+                jwtService.idRolAdicional(authHeader));
         return new UsernamePasswordAuthenticationToken(user, null, authorities);
     }
 

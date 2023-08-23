@@ -17,6 +17,7 @@ public class JwtServiceImpl implements JwtService {
     private static final String NOMBRES = "nombres";
     private static final String ID = "id";
     private static final String ROL = "idRol";
+    private static final String ROL_ADICIONAL = "idRolAdicional";
     private static final String COD_RED = "codRed";
     private static final String COD_UNIDAD = "codUnidad";
     private static final int EXPIRES_IN_MILLISECOND = 2 * 3600000; // 2h
@@ -26,7 +27,7 @@ public class JwtServiceImpl implements JwtService {
     private String secretKey;
 
     @Override
-    public String createToken(long id, String nombres, int idRol, String codRed, String codUnidad) {
+    public String createToken(long id, String nombres, int idRol, String codRed, String codUnidad, int idRolAdicional) {
         return JWT.create()
                 .withIssuer(issuer)
                 .withIssuedAt(new Date())
@@ -35,6 +36,7 @@ public class JwtServiceImpl implements JwtService {
                 .withClaim(ID, id)
                 .withClaim(NOMBRES, nombres)
                 .withClaim(ROL, idRol)
+                .withClaim(ROL_ADICIONAL, idRolAdicional)
                 .withClaim(COD_RED, codRed)
                 .withClaim(COD_UNIDAD, codUnidad)
                 .sign(Algorithm.HMAC256(secretKey));
@@ -70,6 +72,12 @@ public class JwtServiceImpl implements JwtService {
     public int idRol(String authorization) {
         DecodedJWT jwt = this.verify(authorization);
         return jwt.getClaim(ROL).asInt();
+    }
+
+    @Override
+    public int idRolAdicional(String authorization) {
+        DecodedJWT jwt = this.verify(authorization);
+        return jwt.getClaim(ROL_ADICIONAL).asInt();
     }
 
     @Override

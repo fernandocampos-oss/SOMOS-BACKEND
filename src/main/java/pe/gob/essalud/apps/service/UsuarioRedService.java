@@ -16,5 +16,6 @@ public interface UsuarioRedService {
     void actualizarRedesUsuario(UsuarioRedRequest request);
     void habilitarUsuario(long idUsuario, boolean habilitado);
     void habilitarUsuarioRed(long idUsuario, String codRed, boolean habilitado);
+    void eliminarUsuarioRed(long idUsuario, String codRed);
 
 }

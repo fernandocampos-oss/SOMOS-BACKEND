@@ -78,6 +78,11 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     }
 
     @Override
+    public boolean hasAdditionalRole(int idRole) {
+        return getUserSession().getIdRolAdicional() == idRole;
+    }
+
+    @Override
     public String getCodRedSession() {
         return getUserSession().getCodRed();
     }

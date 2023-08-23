@@ -32,6 +32,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Usuario usuarioModel = usuarioRepository.findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(username, EstadoUsuario.ACTIVADO, true)
                 .orElseThrow(()-> new UsernameNotFoundException(ValidationMsg.USUARIO_NO_ENCONTRADO));
 
+        if (usuarioModel.getIdRolAdicional() != null) {
+            return this.userBuilder(username, usuarioModel.getPassword(), usuarioModel.getIdRol(), usuarioModel.getIdRolAdicional());
+        }
         return this.userBuilder(username, usuarioModel.getPassword(), usuarioModel.getIdRol());
     }
 

@@ -47,6 +47,22 @@ public class PublicacionServiceImpl implements PublicacionService {
             redesAsignadas.forEach(codRed -> {
                 publicaciones.addAll(publicacionRepository.findPublicacionesByAlcanceRed(codRed));
             });
+            publicaciones.addAll(publicacionRepository.findPublicacionByTipoAlcanceOrderByIdPublicacionDesc(TIPO_ALCANCE_SEDE_CENTRAL));
+            return listarPublicacionesDto(publicaciones);
+        } else if (authService.hasRole(RoleType.ADMIN_SEDE)) {
+            return listarPublicacionesDto(publicacionRepository.findAll());
+        }
+        return listarPublicacionesDto(publicacionRepository.findPublicacionByTipoAlcanceOrderByIdPublicacionDesc(TIPO_ALCANCE_SEDE_CENTRAL));
+    }
+
+    @Override
+    public List<PublicacionResponseDto> listarPublicacionesAdministrador() {
+        if (authService.hasRole(RoleType.ADMIN_SEDE)) {
+            List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
+            List<Publicacion> publicaciones = new ArrayList<>();
+            redesAsignadas.forEach(codRed -> {
+                publicaciones.addAll(publicacionRepository.findPublicacionesByAlcanceRed(codRed));
+            });
             return listarPublicacionesDto(publicaciones);
         }
         return listarPublicacionesDto(publicacionRepository.findPublicacionByTipoAlcanceOrderByIdPublicacionDesc(TIPO_ALCANCE_SEDE_CENTRAL));
@@ -58,13 +74,17 @@ public class PublicacionServiceImpl implements PublicacionService {
         Publicacion publicacion = modelMapper.map(request, Publicacion.class);
         publicacion.setUsuarioCreacion(authService.getIdUserSession());
 
+        List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
         if (authService.hasRole(RoleType.ADMIN_SEDE)) {
             publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_RED);
-            List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
-            if (redesAsignadas.isEmpty()) {
-                throw new ValidationException("No tiene redes asignadas");
+            publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
+        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL) && authService.hasAdditionalRole(RoleType.ADMIN_SEDE)) {
+            if (request.getAlcance() == TIPO_ALCANCE_SEDE_RED) {
+                publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_RED);
+                publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
+            } else {
+                publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_CENTRAL);
             }
-            publicacion.setAlcanceRed(StringUtils.join(redesAsignadas, ","));
         } else {
             publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_CENTRAL);
         }
@@ -83,20 +103,20 @@ public class PublicacionServiceImpl implements PublicacionService {
         Publicacion publicacion = publicacionRepository.findById(idPublicacion)
                 .orElseThrow(() -> new ValidationException("La publicación no existe"));
 
+        List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
+
         if (authService.hasRole(RoleType.ADMIN_SEDE)) {
-            List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
-            AtomicBoolean estaAsignado = new AtomicBoolean(false);
-            redesAsignadas.forEach(codRed -> {
-                if (publicacion.getAlcanceRed().contains(codRed)) {
-                    estaAsignado.set(true);
-                }
-            });
-            if (!estaAsignado.get() || publicacion.getTipoAlcance() != TIPO_ALCANCE_SEDE_RED) {
-                throw new ForbiddenException();
+            publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
+        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL) && authService.hasAdditionalRole(RoleType.ADMIN_SEDE)) {
+            if (request.getAlcance() == TIPO_ALCANCE_SEDE_RED) {
+                publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_RED);
+                publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
+            } else {
+                publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_CENTRAL);
             }
-        } else if (!(authService.hasRole(RoleType.ADMIN_CENTRAL) && publicacion.getTipoAlcance() == TIPO_ALCANCE_SEDE_CENTRAL)) {
-            throw new ForbiddenException();
         }
+
+        validarRedesAsignadas(publicacion, redesAsignadas);
 
         publicacion.setUsuarioModificacion(authService.getIdUserSession());
         publicacion.setTitulo(request.getTitulo());
@@ -114,8 +134,18 @@ public class PublicacionServiceImpl implements PublicacionService {
         Publicacion publicacion = publicacionRepository.findById(idPublicacion)
                 .orElseThrow(() -> new ValidationException("La publicación no existe"));
 
-        if (authService.hasRole(RoleType.ADMIN_SEDE)) {
-            List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
+        List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
+        validarRedesAsignadas(publicacion, redesAsignadas);
+
+        publicacion.setUsuarioModificacion(authService.getIdUserSession());
+        publicacion.setEsActivo(false);
+        publicacionRepository.save(publicacion);
+    }
+
+    private void validarRedesAsignadas(Publicacion publicacion, List<String> redesAsignadas) {
+        if (authService.hasRole(RoleType.ADMIN_SEDE) ||
+                (authService.hasRole(RoleType.ADMIN_CENTRAL) && authService.hasAdditionalRole(RoleType.ADMIN_SEDE)
+                        && publicacion.getTipoAlcance().equals(TIPO_ALCANCE_SEDE_RED))) {
             AtomicBoolean estaAsignado = new AtomicBoolean(false);
             redesAsignadas.forEach(codRed -> {
                 if (publicacion.getAlcanceRed().contains(codRed)) {
@@ -125,13 +155,7 @@ public class PublicacionServiceImpl implements PublicacionService {
             if (!estaAsignado.get() || publicacion.getTipoAlcance() != TIPO_ALCANCE_SEDE_RED) {
                 throw new ForbiddenException();
             }
-        } else if (!(authService.hasRole(RoleType.ADMIN_CENTRAL) && publicacion.getTipoAlcance() == TIPO_ALCANCE_SEDE_CENTRAL)) {
-            throw new ForbiddenException();
         }
-
-        publicacion.setUsuarioModificacion(authService.getIdUserSession());
-        publicacion.setEsActivo(false);
-        publicacionRepository.save(publicacion);
     }
 
     private List<PublicacionResponseDto> listarPublicacionesDto(List<Publicacion> publicacions) {
@@ -139,10 +163,25 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .map(p -> {
                     PublicacionResponseDto response = modelMapper.map(p, PublicacionResponseDto.class);
                     response.setImagenBase64(UploadUtil.getFileBase64(p.getRutaImagen()));
+                    response.setRedes(Arrays.asList(p.getAlcanceRed().split(",")));
                     return response;
                 })
+                .sorted(Comparator.comparingInt(PublicacionResponseDto::getIdPublicacion))
                 .collect(Collectors.toList());
+
         return publicacionesDto;
+    }
+
+    private String obtenereRedesAsignadas(List<String> redesAsignadas, List<String> redes) {
+        if (redesAsignadas.isEmpty()) {
+            throw new ValidationException("No tiene redes asignadas");
+        }
+        for (String red: redes) {
+            if (!redesAsignadas.contains(red)) {
+                throw new ValidationException("Red no asignada");
+            }
+        }
+        return StringUtils.join(redes, ",");
     }
 
 }

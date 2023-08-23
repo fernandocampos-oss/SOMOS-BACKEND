@@ -8,6 +8,7 @@
         SELECT us.id_usuario id,
                us.nombres    nombres,
                us.id_rol     idRol,
+               us.id_rol_adicional idRolAdicional,
                us.cod_red    codRed,
                us.cod_unidad codUnidad
         FROM usuario us

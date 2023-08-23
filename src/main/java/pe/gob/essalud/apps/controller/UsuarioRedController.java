@@ -64,4 +64,10 @@ public class UsuarioRedController {
         usuarioRedService.habilitarUsuarioRed(idUsuario, codRed,habilitado == 1);
     }
 
+    @PreAuthorizeAdminCentral
+    @DeleteMapping("/usuario/{idUsuario}/red/{codRed}")
+    public void eliminarUsuarioRed(@PathVariable long idUsuario, @PathVariable String codRed) {
+        usuarioRedService.eliminarUsuarioRed(idUsuario, codRed);
+    }
+
 }

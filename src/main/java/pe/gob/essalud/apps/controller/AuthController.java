@@ -67,7 +67,8 @@ public class AuthController extends BaseController {
                 userSession.getNombres(),
                 userSession.getIdRol(),
                 userSession.getCodRed(),
-                userSession.getCodUnidad());
+                userSession.getCodUnidad(),
+                userSession.getIdRolAdicional());
     }
 
 }

@@ -2,6 +2,8 @@ package pe.gob.essalud.apps.dto.publicacion.request;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class PublicacionRequestDto {
 
@@ -9,5 +11,7 @@ public class PublicacionRequestDto {
     private String descripcion;
     private String urlRedireccion;
     private String imagenBase64;
+    private int alcance;
+    private List<String> redes;
 
 }

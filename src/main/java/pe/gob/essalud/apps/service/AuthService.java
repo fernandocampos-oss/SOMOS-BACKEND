@@ -16,6 +16,8 @@ public interface AuthService {
 
     boolean hasRole(int idRole);
 
+    boolean hasAdditionalRole(int idRole);
+
     String getCodRedSession();
 
     String getCodUnidadSession();

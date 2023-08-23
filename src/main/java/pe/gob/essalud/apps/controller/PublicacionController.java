@@ -24,6 +24,11 @@ public class PublicacionController {
         return publicacionService.listarPublicaciones();
     }
 
+    @GetMapping("/administrador")
+    public List<PublicacionResponseDto> listarPublicacionesAdministrador() {
+        return publicacionService.listarPublicacionesAdministrador();
+    }
+
     @PreAuthorizeAdmin
     @PostMapping
     public long crearPublicacion(@RequestBody PublicacionRequestDto request) {
