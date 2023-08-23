@@ -170,7 +170,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                     }
                     return response;
                 })
-                .sorted(Comparator.comparingInt(PublicacionResponseDto::getIdPublicacion))
+                .sorted(Comparator.comparingInt(PublicacionResponseDto::getIdPublicacion).reversed())
                 .collect(Collectors.toList());
 
         return publicacionesDto;
