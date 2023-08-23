@@ -79,6 +79,15 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     }
 
     @Override
+    public List<RedResponse> listarUsuarioRedesAsignadas() {
+        var usuarioRedList = usuarioRedRepository.findByUsuarioIdUsuario(authService.getIdUserSession());
+
+        return usuarioRedList.stream()
+                .map(ur -> modelMapper.map(ur.getRed(), RedResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void asignarRedesUsuario(UsuarioRedRequest request) {
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())

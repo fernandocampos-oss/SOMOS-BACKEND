@@ -3,9 +3,11 @@ package pe.gob.essalud.apps.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdmin;
 import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdminCentral;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
 import pe.gob.essalud.apps.dto.usuariored.request.UsuarioRedRequest;
+import pe.gob.essalud.apps.dto.usuariored.response.RedResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.UsuarioRedResponse;
 import pe.gob.essalud.apps.model.miessalud.RedPersonal;
 import pe.gob.essalud.apps.service.UsuarioRedService;
@@ -37,6 +39,12 @@ public class UsuarioRedController {
     @GetMapping
     public List<UsuarioRedResponse> listarUsuariosRedes() {
         return usuarioRedService.listarUsuariosRedes();
+    }
+
+    @PreAuthorizeAdmin
+    @GetMapping("/redes-asignadas")
+    public List<RedResponse> listarUsuarioRedesAsignadas() {
+        return usuarioRedService.listarUsuarioRedesAsignadas();
     }
 
     @PreAuthorizeAdminCentral
