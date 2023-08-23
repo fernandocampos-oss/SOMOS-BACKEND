@@ -145,9 +145,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     }
 
     private void validarRedesAsignadas(Publicacion publicacion, List<String> redesAsignadas) {
-        if (authService.hasRole(RoleType.ADMIN_SEDE) ||
-                (authService.hasRole(RoleType.ADMIN_CENTRAL) && authService.hasAdditionalRole(RoleType.ADMIN_SEDE)
-                        && publicacion.getTipoAlcance().equals(TIPO_ALCANCE_SEDE_RED))) {
+        if (!authService.hasRole(RoleType.ADMIN_CENTRAL)) {
             AtomicBoolean estaAsignado = new AtomicBoolean(false);
             redesAsignadas.forEach(codRed -> {
                 if (publicacion.getAlcanceRed().contains(codRed)) {
