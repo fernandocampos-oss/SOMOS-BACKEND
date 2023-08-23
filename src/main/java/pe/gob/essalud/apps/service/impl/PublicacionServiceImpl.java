@@ -49,7 +49,7 @@ public class PublicacionServiceImpl implements PublicacionService {
             });
             publicaciones.addAll(publicacionRepository.findPublicacionByTipoAlcanceOrderByIdPublicacionDesc(TIPO_ALCANCE_SEDE_CENTRAL));
             return listarPublicacionesDto(publicaciones);
-        } else if (authService.hasRole(RoleType.ADMIN_SEDE)) {
+        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL)) {
             return listarPublicacionesDto(publicacionRepository.findAll());
         }
         return listarPublicacionesDto(publicacionRepository.findPublicacionByTipoAlcanceOrderByIdPublicacionDesc(TIPO_ALCANCE_SEDE_CENTRAL));
@@ -163,7 +163,9 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .map(p -> {
                     PublicacionResponseDto response = modelMapper.map(p, PublicacionResponseDto.class);
                     response.setImagenBase64(UploadUtil.getFileBase64(p.getRutaImagen()));
-                    response.setRedes(Arrays.asList(p.getAlcanceRed().split(",")));
+                    if (StringUtils.isNotBlank(p.getAlcanceRed())) {
+                        response.setRedes(Arrays.asList(p.getAlcanceRed().split(",")));
+                    }
                     return response;
                 })
                 .sorted(Comparator.comparingInt(PublicacionResponseDto::getIdPublicacion))
