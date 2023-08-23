@@ -64,6 +64,8 @@ public class PublicacionServiceImpl implements PublicacionService {
                 publicaciones.addAll(publicacionRepository.findPublicacionesByAlcanceRed(codRed));
             });
             return listarPublicacionesDto(publicaciones);
+        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL)) {
+            return listarPublicacionesDto(publicacionRepository.findAll());
         }
         return listarPublicacionesDto(publicacionRepository.findPublicacionByTipoAlcanceOrderByIdPublicacionDesc(TIPO_ALCANCE_SEDE_CENTRAL));
     }
