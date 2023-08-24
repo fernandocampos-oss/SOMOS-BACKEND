@@ -26,7 +26,9 @@ import java.util.stream.Collectors;
 public class ProyectoServiceImpl implements ProyectoService {
 
     private static final String RUTA_IMAGENES_PROYECTO_GRUPO = "/imagenes/proyectos/grupos/";
+    private static final String RUTA_PDF_PROYECTO_IMPLEMENTACION = "/pdf/proyectos/implementaciones/";
     private static final String FORMATO_IMAGEN_PROYECTO_GRUPO = ".png";
+    private static final String FORMATO_PDF_PROYECTO_IMPLEMENTACION = ".pdf";
     private static final String SEPARADOR = "|";
 
     private final ProyectoRepository proyectoRepository;
@@ -68,8 +70,9 @@ public class ProyectoServiceImpl implements ProyectoService {
                     } else {
                         implementacion.setEnfoques(new ArrayList<>());
                     }
-                    proyecto.setImplementacion(implementacion);
+                    implementacion.setArchivoBase64(UploadUtil.getFileBase64(p.getProyectoImplementacion().getRutaArchivo()));
 
+                    proyecto.setImplementacion(implementacion);
                     return proyecto;
                 })
                 .collect(Collectors.toList());
@@ -114,6 +117,9 @@ public class ProyectoServiceImpl implements ProyectoService {
             if (request.getImplementacion().getEnfoques() != null && !request.getImplementacion().getEnfoques().isEmpty()) {
                 proyectoImplementacion.setEnfoque(String.join(SEPARADOR, request.getImplementacion().getEnfoques()));
             }
+            String rutaArchivo = uploadPath + RUTA_PDF_PROYECTO_IMPLEMENTACION + proyecto.getIdProyecto() + FORMATO_PDF_PROYECTO_IMPLEMENTACION;
+            rutaArchivo = UploadUtil.saveFileBase64(rutaArchivo, request.getImplementacion().getArchivoBase64());
+            proyectoImplementacion.setRutaArchivo(rutaArchivo);
             proyectoImplementacion.setProyecto(proyecto);
             proyectoImplementacion = proyectoImplementacionRepository.save(proyectoImplementacion);
             request.getImplementacion().setIdProyectoImplementacion(proyectoImplementacion.getIdProyectoImplementacion());
@@ -140,7 +146,7 @@ public class ProyectoServiceImpl implements ProyectoService {
                 boolean esNuevo = true;
                 for (ProyectoMiembro proyectoMiembro: proyecto.getProyectoMiembros()) {
                     miembrosRequest.add(modelMapper.map(proyectoMiembro, ProyectoMiembroRequest.class));
-                    if (proyectoMiembroRequest.getDni().equals(proyectoMiembro.getDni())) {
+                    if (proyectoMiembroRequest.getDni() != null && proyectoMiembroRequest.getDni().equals(proyectoMiembro.getDni())) {
                         esNuevo = false;
                         break;
                     }
@@ -177,6 +183,9 @@ public class ProyectoServiceImpl implements ProyectoService {
             proyectoImplementacion.setTecnologia(request.getImplementacion().getTecnologia());
             proyectoImplementacion.setTecnologiaFundamento(request.getImplementacion().getTecnologiaFundamento());
             proyectoImplementacion.setResultado(request.getImplementacion().getResultado());
+            String rutaArchivo = uploadPath + RUTA_PDF_PROYECTO_IMPLEMENTACION + proyecto.getIdProyecto() + FORMATO_PDF_PROYECTO_IMPLEMENTACION;
+            rutaArchivo = UploadUtil.saveFileBase64(rutaArchivo, request.getImplementacion().getArchivoBase64());
+            proyectoImplementacion.setRutaArchivo(rutaArchivo);
             proyectoImplementacionRepository.save(proyectoImplementacion);
             request.getImplementacion().setIdProyectoImplementacion(proyectoImplementacion.getIdProyectoImplementacion());
 
