@@ -16,6 +16,7 @@ public class ProyectoImplementacionRequest {
     private String tecnologia;
     private String tecnologiaFundamento;
     private String beneficio;
+    private String archivoBase64;
     private List<String> enfoques;
 
 }

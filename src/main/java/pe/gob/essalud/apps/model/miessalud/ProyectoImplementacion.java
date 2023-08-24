@@ -33,6 +33,8 @@ public class ProyectoImplementacion {
     private String beneficio;
     @Column(name = "enfoque")
     private String enfoque;
+    @Column(name = "ruta_archivo")
+    private String rutaArchivo;
     @OneToOne
     @JoinColumn(name = "id_proyecto")
     private Proyecto proyecto;

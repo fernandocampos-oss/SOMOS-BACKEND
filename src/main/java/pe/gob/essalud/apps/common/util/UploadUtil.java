@@ -35,7 +35,7 @@ public class UploadUtil {
         try {
             byte[] decodedBytes = Base64.getDecoder().decode(fileBase64);
             FileUtils.writeByteArrayToFile(new File(filePath), decodedBytes);
-        } catch (IOException e) {
+        } catch (Exception e) {
             filePath = "";
             e.printStackTrace();
         }
@@ -48,7 +48,7 @@ public class UploadUtil {
             Path path = Path.of(filePath);
             byte[] fileBytes = Files.readAllBytes(path);
             fileBase64 = Base64.getEncoder().encodeToString(fileBytes);;
-        } catch (IOException e) {
+        } catch (Exception e) {
             fileBase64 = "";
             e.printStackTrace();
         }
