@@ -203,7 +203,7 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
         usuarioRed.setUsuarioModificacion(authService.getIdUserSession());
         usuarioRedRepository.save(usuarioRed);
 
-        List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
+        List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario((int) idUsuario);
         if (redesAsignadas.isEmpty()) {
             if (usuario.getIdRol() == RoleType.ADMIN_SEDE) {
                 usuario.setIdRol(RoleType.TRABAJADOR);
