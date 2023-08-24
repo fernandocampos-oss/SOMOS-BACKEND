@@ -161,7 +161,6 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     }
 
     @Override
-    @Transactional
     public void habilitarUsuario(long idUsuario, boolean habilitado) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
@@ -175,7 +174,6 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     }
 
     @Override
-    @Transactional
     public void habilitarUsuarioRed(long idUsuario, String codRed, boolean habilitado) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
@@ -193,7 +191,6 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     }
 
     @Override
-    @Transactional
     public void eliminarUsuarioRed(long idUsuario, String codRed) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
