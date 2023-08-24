@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.proyecto.request.*;
-import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
+import pe.gob.essalud.apps.dto.usuariored.response.UsuarioDataResponse;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.*;
 import pe.gob.essalud.apps.repository.miessalud.*;
@@ -37,6 +37,7 @@ public class ProyectoServiceImpl implements ProyectoService {
     private final ProyectoDescripcionRepository proyectoDescripcionRepository;
     private final ProyectoImplementacionRepository proyectoImplementacionRepository;
     private final UsuarioRepository usuarioRepository;
+    private final RedPersonalRepository redPersonalRepository;
 
     private final AuthService authService;
     private final ModelMapper modelMapper;
@@ -146,7 +147,7 @@ public class ProyectoServiceImpl implements ProyectoService {
                 boolean esNuevo = true;
                 for (ProyectoMiembro proyectoMiembro: proyecto.getProyectoMiembros()) {
                     miembrosRequest.add(modelMapper.map(proyectoMiembro, ProyectoMiembroRequest.class));
-                    if (proyectoMiembroRequest.getDni() != null && proyectoMiembroRequest.getDni().equals(proyectoMiembro.getDni())) {
+                    if (proyectoMiembroRequest.getNumeroDocumento() != null && proyectoMiembroRequest.getNumeroDocumento().equals(proyectoMiembro.getNumeroDocumento())) {
                         esNuevo = false;
                         break;
                     }
@@ -196,24 +197,27 @@ public class ProyectoServiceImpl implements ProyectoService {
     }
 
     @Override
-    public List<UsuarioNombresResponse> listarUsuariosRed() {
+    public List<UsuarioDataResponse> listarUsuariosRed() {
+        String red = "";
+        Optional<RedPersonal> redPersonal = redPersonalRepository.findById(authService.getCodRedSession());
+        if (redPersonal.isPresent()) {
+            red = redPersonal.get().getDescripcion();
+        }
+        String finalRed = red;
         return usuarioRepository.findAllByCodigoRed(authService.getCodRedSession()).stream()
                 .map(u -> {
-                    String nombres = Optional.ofNullable(u.getNombres()).orElse("");
-                    String apellidos = Optional.ofNullable(u.getApellidos()).orElse("");
-                    return UsuarioNombresResponse.builder()
-                            .idUsuario(u.getIdUsuario())
-                            .nombresCompletos(nombres + " " + apellidos)
-                            .build();
+                    UsuarioDataResponse usuarioResponse = modelMapper.map(u, UsuarioDataResponse.class);
+                    usuarioResponse.setRed(finalRed);
+                    return usuarioResponse;
                 }).collect(Collectors.toList());
     }
 
     private void validarMiembro(ProyectoMiembroRequest proyectoMiembroRequest) {
-        if (!proyectoMiembroRepository.findByDni(proyectoMiembroRequest.getDni()).isEmpty()) {
-            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getDni() + ", ya está registrado en otro proyecto");
+        if (!proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento()).isEmpty()) {
+            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya está registrado en otro proyecto");
         }
         if (!proyectoRepository.findByUsuarioCreacion(proyectoMiembroRequest.getIdUsuario()).isEmpty()) {
-            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getDni() + ", ya es lider en otro proyecto");
+            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es lider en otro proyecto");
         }
     }
 

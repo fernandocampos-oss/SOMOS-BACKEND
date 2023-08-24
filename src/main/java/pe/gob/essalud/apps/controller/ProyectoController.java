@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.proyecto.request.ProyectoRequest;
-import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
+import pe.gob.essalud.apps.dto.usuariored.response.UsuarioDataResponse;
 import pe.gob.essalud.apps.service.ProyectoService;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class ProyectoController {
     }
 
     @GetMapping("/usuarios-red")
-    public List<UsuarioNombresResponse> listarUsuariosRed() {
+    public List<UsuarioDataResponse> listarUsuariosRed() {
         return proyectoService.listarUsuariosRed();
     }
 

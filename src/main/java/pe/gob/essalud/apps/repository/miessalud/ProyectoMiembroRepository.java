@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface ProyectoMiembroRepository extends JpaRepository<ProyectoMiembro, Integer> {
 
-    List<ProyectoMiembro> findByDni(String dni);
+    List<ProyectoMiembro> findByNumeroDocumento(String numeroDocumento);
 
 }

@@ -1,11 +1,11 @@
-package pe.gob.essalud.apps.dto.usuario.response;
+package pe.gob.essalud.apps.dto.usuariored.response;
 
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class UsuarioResponseDto {
+public class UsuarioDataResponse {
 
     private long idUsuario;
     private String numeroDocumento;
@@ -16,9 +16,6 @@ public class UsuarioResponseDto {
     private LocalDate fechaNacimiento;
     private String numeroCelular;
     private String correo;
-    private Integer idRol;
-    private String idEstado;
-    private String estado;
     private String red;
 
 }

@@ -19,10 +19,11 @@
                --us.id_ubigeo         idUbigeo,
                --us.direccion,
                --us.numero_telefono   numeroTelefono,
-               eu.descripcion       estado
-
+               eu.descripcion       estado,
+               r.descripcion red
         FROM usuario us
-                 INNER JOIN estado_usuario eu on us.id_estado_usuario = eu.id_estado_usuario
+            INNER JOIN estado_usuario eu on us.id_estado_usuario = eu.id_estado_usuario
+            LEFT JOIN red_personal r on us.cod_red = r.cod_red
         WHERE us.es_activo = true AND us.id_usuario = #{id}
     </select>
 
