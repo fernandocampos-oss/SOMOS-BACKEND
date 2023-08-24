@@ -8,6 +8,7 @@
         SELECT us.id_usuario        idUsuario,
                us.numero_documento  numeroDocumento,
                us.codigo_planilla   codigoPlanilla,
+               us.cargo,
                us.nombres,
                us.apellidos,
                us.fecha_nacimiento  fechaNacimiento,
