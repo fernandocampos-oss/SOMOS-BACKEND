@@ -84,6 +84,10 @@ public class ProyectoServiceImpl implements ProyectoService {
     public ProyectoRequest guardarProyecto(ProyectoRequest request) {
         if (request.getIdProyecto() == 0) {
 
+            if (!proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession()).isEmpty()) {
+                throw new ValidationException("El usuario ya es lider en otro proyecto");
+            }
+
             Proyecto proyecto = new Proyecto();
             proyecto.setEnviado(request.isEnviado());
             proyecto.setEsActivo(true);
@@ -130,6 +134,14 @@ public class ProyectoServiceImpl implements ProyectoService {
 
             Proyecto proyecto = proyectoRepository.findById(request.getIdProyecto())
                     .orElseThrow(() -> new ValidationException("El proyecto no existe"));
+
+            if (proyecto.isEnviado()) {
+                throw new ValidationException("El proyecto ya fue establecido como enviado, ya no puede modificarse");
+            }
+
+            if (!proyecto.getUsuarioCreacion().equals(authService.getIdUserSession())) {
+                throw new ValidationException("El usuario no es lider de este proyecto");
+            }
 
             ProyectoGrupo proyectoGrupo = proyecto.getProyectoGrupo();
             proyectoGrupo.setCategoria(request.getGrupo().getCategoria());
@@ -190,6 +202,7 @@ public class ProyectoServiceImpl implements ProyectoService {
             proyectoImplementacionRepository.save(proyectoImplementacion);
             request.getImplementacion().setIdProyectoImplementacion(proyectoImplementacion.getIdProyectoImplementacion());
 
+            proyecto.setEnviado(request.isEnviado());
             proyecto.setUsuarioModificacion(authService.getIdUserSession());
             proyectoRepository.save(proyecto);
         }
