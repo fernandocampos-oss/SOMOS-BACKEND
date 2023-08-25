@@ -23,6 +23,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
     @Query("SELECT u FROM Usuario u WHERE u.codigoRed = ?1 AND u.idEstadoUsuario = '02' ORDER BY u.nombres")
     List<Usuario> findAllByCodigoRed(String codigoRed);
+
+    @Query("SELECT u FROM Usuario u WHERE u.codigoRed in (?1) AND u.idEstadoUsuario = '02' ORDER BY u.nombres")
+    List<Usuario> findAllByCodigoRedes(List<String> codigoRedes);
     
     @Query("SELECT u FROM Usuario u WHERE u.numeroDocumento = ?1")
     Usuario findDocumento(String numeroDocumento);

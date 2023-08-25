@@ -30,6 +30,10 @@ public class ProyectoServiceImpl implements ProyectoService {
     private static final String FORMATO_IMAGEN_PROYECTO_GRUPO = ".png";
     private static final String FORMATO_PDF_PROYECTO_IMPLEMENTACION = ".pdf";
     private static final String SEPARADOR = "|";
+    private static final String COD_RED_SEDE_CENTRAL_AFESSALUD="0100";
+    private static final String DESCRIPCION_RED_SEDE_CENTRAL_AFESSALUD="SEDE CENTRAL LIMA-AFESSALUD";
+    private static final String COD_RED_SEDE_CENTRAL_FONDOSALUD="0200";
+    private static final String DESCRIPCION_RED_SEDE_CENTRAL_FONDOSALUD="SEDE CENTRAL LIMA-Fondo Salud";
 
     private final ProyectoRepository proyectoRepository;
     private final ProyectoGrupoRepository proyectoGrupoRepository;
@@ -217,10 +221,26 @@ public class ProyectoServiceImpl implements ProyectoService {
             red = redPersonal.get().getDescripcion();
         }
         String finalRed = red;
-        return usuarioRepository.findAllByCodigoRed(authService.getCodRedSession()).stream()
+
+        List<String> codigoRedes = Arrays.asList(authService.getCodRedSession());
+        if (authService.getCodRedSession().equals(COD_RED_SEDE_CENTRAL_AFESSALUD) ||
+                authService.getCodRedSession().equals(COD_RED_SEDE_CENTRAL_FONDOSALUD)) {
+            codigoRedes = Arrays.asList(COD_RED_SEDE_CENTRAL_AFESSALUD, COD_RED_SEDE_CENTRAL_FONDOSALUD);
+        }
+
+        List<String> finalCodigoRedes = codigoRedes;
+        return usuarioRepository.findAllByCodigoRedes(codigoRedes).stream()
                 .map(u -> {
                     UsuarioDataResponse usuarioResponse = modelMapper.map(u, UsuarioDataResponse.class);
-                    usuarioResponse.setRed(finalRed);
+                    if (finalCodigoRedes.size() > 1) {
+                        if (u.getCodigoRed().equals(COD_RED_SEDE_CENTRAL_AFESSALUD)) {
+                            usuarioResponse.setRed(DESCRIPCION_RED_SEDE_CENTRAL_AFESSALUD);
+                        } else {
+                            usuarioResponse.setRed(DESCRIPCION_RED_SEDE_CENTRAL_FONDOSALUD);
+                        }
+                    } else {
+                        usuarioResponse.setRed(finalRed);
+                    }
                     return usuarioResponse;
                 }).collect(Collectors.toList());
     }
