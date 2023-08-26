@@ -29,7 +29,7 @@ public class ProyectoServiceImpl implements ProyectoService {
     private static final String RUTA_PDF_PROYECTO_IMPLEMENTACION = "/pdf/proyectos/implementaciones/";
     private static final String FORMATO_IMAGEN_PROYECTO_GRUPO = ".png";
     private static final String FORMATO_PDF_PROYECTO_IMPLEMENTACION = ".pdf";
-    private static final String SEPARADOR = "|";
+    private static final String SEPARADOR = "-";
     private static final String COD_RED_SEDE_CENTRAL_AFESSALUD="0100";
     private static final String DESCRIPCION_RED_SEDE_CENTRAL_AFESSALUD="SEDE CENTRAL LIMA-AFESSALUD";
     private static final String COD_RED_SEDE_CENTRAL_FONDOSALUD="0200";
@@ -71,7 +71,12 @@ public class ProyectoServiceImpl implements ProyectoService {
 
                     ProyectoImplementacionRequest implementacion = modelMapper.map(p.getProyectoImplementacion(), ProyectoImplementacionRequest.class);
                     if (StringUtils.isNotBlank(p.getProyectoImplementacion().getEnfoque())) {
-                        implementacion.setEnfoques(Arrays.asList(p.getProyectoImplementacion().getEnfoque().split(SEPARADOR)));
+                        String[] enfoques = p.getProyectoImplementacion().getEnfoque().split(SEPARADOR);
+                        List<String> listaEnfoques = new ArrayList<>();
+                        for (String enfoque : enfoques) {
+                            listaEnfoques.add(enfoque);
+                        }
+                        implementacion.setEnfoques(listaEnfoques);
                     } else {
                         implementacion.setEnfoques(new ArrayList<>());
                     }
