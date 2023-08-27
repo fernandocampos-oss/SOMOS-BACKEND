@@ -94,7 +94,7 @@ public class ProyectoServiceImpl implements ProyectoService {
         if (request.getIdProyecto() == 0) {
 
             if (!proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession()).isEmpty()) {
-                throw new ValidationException("El usuario ya es lider en otro proyecto");
+                throw new ValidationException("El usuario ya es líder en otro proyecto");
             }
 
             Proyecto proyecto = new Proyecto();
@@ -142,14 +142,14 @@ public class ProyectoServiceImpl implements ProyectoService {
         } else {
 
             Proyecto proyecto = proyectoRepository.findById(request.getIdProyecto())
-                    .orElseThrow(() -> new ValidationException("El proyecto no existe"));
+                    .orElseThrow(() -> new ValidationException("La inscripción del proyecto no existe"));
 
             if (proyecto.isEnviado()) {
-                throw new ValidationException("El proyecto ya fue establecido como enviado, ya no puede modificarse");
+                throw new ValidationException("La inscripción del proyecto ya fue establecido como enviado, ya no puede modificarse");
             }
 
             if (!proyecto.getUsuarioCreacion().equals(authService.getIdUserSession())) {
-                throw new ValidationException("El usuario no es lider de este proyecto");
+                throw new ValidationException("El usuario no es líder del proyecto");
             }
 
             ProyectoGrupo proyectoGrupo = proyecto.getProyectoGrupo();
@@ -163,11 +163,9 @@ public class ProyectoServiceImpl implements ProyectoService {
             proyectoGrupoRepository.save(proyectoGrupo);
             request.getGrupo().setIdProyectoGrupo(proyectoGrupo.getIdProyectoGrupo());
 
-            List<ProyectoMiembroRequest> miembrosRequest = new ArrayList<>();
             for (ProyectoMiembroRequest proyectoMiembroRequest: request.getGrupo().getMiembros()) {
                 boolean esNuevo = true;
                 for (ProyectoMiembro proyectoMiembro: proyecto.getProyectoMiembros()) {
-                    miembrosRequest.add(modelMapper.map(proyectoMiembro, ProyectoMiembroRequest.class));
                     if (proyectoMiembroRequest.getNumeroDocumento() != null && proyectoMiembroRequest.getNumeroDocumento().equals(proyectoMiembro.getNumeroDocumento())) {
                         esNuevo = false;
                         break;
@@ -179,13 +177,19 @@ public class ProyectoServiceImpl implements ProyectoService {
                     proyectoMiembro.setProyecto(proyecto);
                     proyectoMiembro = proyectoMiembroRepository.save(proyectoMiembro);
                     proyectoMiembroRequest.setIdProyectoMiembro(proyectoMiembro.getIdProyectoMiembro());
-                    miembrosRequest.add(proyectoMiembroRequest);
+                } else {
+                    ProyectoMiembro proyectoMiembro = proyectoMiembroRepository.findById(proyectoMiembroRequest.getIdProyectoMiembro()).orElse(null);
+                    if (proyectoMiembro != null) {
+                        proyectoMiembro.setCorreo(proyectoMiembroRequest.getCorreo());
+                        proyectoMiembro.setNumeroCelular(proyectoMiembroRequest.getNumeroCelular());
+                        proyectoMiembroRepository.save(proyectoMiembro);
+                    }
                 }
             }
 
             for (ProyectoMiembro proyectoMiembro: proyecto.getProyectoMiembros()) {
                 boolean esAntiguo = true;
-                for (ProyectoMiembroRequest proyectoMiembroRequest: miembrosRequest) {
+                for (ProyectoMiembroRequest proyectoMiembroRequest: request.getGrupo().getMiembros()) {
                     if (proyectoMiembro.getNumeroDocumento().equals(proyectoMiembroRequest.getNumeroDocumento())) {
                         esAntiguo = false;
                     }
@@ -264,10 +268,7 @@ public class ProyectoServiceImpl implements ProyectoService {
 
     private void validarMiembro(ProyectoMiembroRequest proyectoMiembroRequest) {
         if (!proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento()).isEmpty()) {
-            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya está registrado en otro proyecto");
-        }
-        if (!proyectoRepository.findByUsuarioCreacion(proyectoMiembroRequest.getIdUsuario()).isEmpty()) {
-            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es lider en otro proyecto");
+            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es miembro de otro grupo");
         }
     }
 
