@@ -183,6 +183,18 @@ public class ProyectoServiceImpl implements ProyectoService {
                 }
             }
 
+            for (ProyectoMiembro proyectoMiembro: proyecto.getProyectoMiembros()) {
+                boolean esAntiguo = true;
+                for (ProyectoMiembroRequest proyectoMiembroRequest: miembrosRequest) {
+                    if (proyectoMiembro.getNumeroDocumento().equals(proyectoMiembroRequest.getNumeroDocumento())) {
+                        esAntiguo = false;
+                    }
+                }
+                if (esAntiguo) {
+                    proyectoMiembroRepository.delete(proyectoMiembro);
+                }
+            }
+
             ProyectoDescripcion proyectoDescripcion = proyecto.getProyectoDescripcion();
             proyectoDescripcion.setDescripcion(request.getDescripcion().getDescripcion());
             proyectoDescripcion.setContexto(request.getDescripcion().getContexto());
