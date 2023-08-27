@@ -40,7 +40,7 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
 
     @Override
     public List<UsuarioNombresResponse> listarAministradoresRed() {
-        return usuarioRepository.findByIdRolIn(Arrays.asList(RoleType.TRABAJADOR, RoleType.ADMIN_SEDE, RoleType.ADMIN_CENTRAL)).stream()
+        return usuarioRepository.findByIdRolIn(Arrays.asList(RoleType.TRABAJADOR, RoleType.ADMIN_SEDE/*, RoleType.ADMIN_CENTRAL*/)).stream()
                 .map(u -> {
                     String nombres = Optional.ofNullable(u.getNombres()).orElse("");
                     String apellidos = Optional.ofNullable(u.getApellidos()).orElse("");

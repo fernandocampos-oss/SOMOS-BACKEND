@@ -19,6 +19,7 @@ import pe.gob.essalud.apps.service.PublicacionService;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,16 +81,16 @@ public class PublicacionServiceImpl implements PublicacionService {
         if (authService.hasRole(RoleType.ADMIN_SEDE)) {
             publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_RED);
             publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
-        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL) && authService.hasAdditionalRole(RoleType.ADMIN_SEDE)) {
+        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL) /*&& authService.hasAdditionalRole(RoleType.ADMIN_SEDE)*/) {
             if (request.getAlcance() == TIPO_ALCANCE_SEDE_RED) {
                 publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_RED);
                 publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
             } else {
                 publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_CENTRAL);
             }
-        } else {
+        }/* else {
             publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_CENTRAL);
-        }
+        }*/
 
         publicacion.setEsActivo(true);
         publicacion = publicacionRepository.save(publicacion);
@@ -109,7 +110,7 @@ public class PublicacionServiceImpl implements PublicacionService {
 
         if (authService.hasRole(RoleType.ADMIN_SEDE)) {
             publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
-        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL) && authService.hasAdditionalRole(RoleType.ADMIN_SEDE)) {
+        } else if (authService.hasRole(RoleType.ADMIN_CENTRAL)/*&& authService.hasAdditionalRole(RoleType.ADMIN_SEDE)*/) {
             if (request.getAlcance() == TIPO_ALCANCE_SEDE_RED) {
                 publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_RED);
                 publicacion.setAlcanceRed(obtenereRedesAsignadas(redesAsignadas, request.getRedes()));
@@ -139,6 +140,15 @@ public class PublicacionServiceImpl implements PublicacionService {
         List<String> redesAsignadas = publicacionRepository.findRedesAsignadasUsuario(authService.getIdUserSession());
         validarRedesAsignadas(publicacion, redesAsignadas);
 
+        if (authService.hasRole(RoleType.ADMIN_SEDE)) {
+            String[] redes = publicacion.getAlcanceRed().split(",");
+            for (String red: redes) {
+                if (!redesAsignadas.contains(red)) {
+                    throw new ValidationException("La publicación también pertenece a una red no asignada");
+                }
+            }
+        }
+
         publicacion.setUsuarioModificacion(authService.getIdUserSession());
         publicacion.setEsActivo(false);
         publicacionRepository.save(publicacion);
@@ -160,6 +170,8 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     private List<PublicacionResponseDto> listarPublicacionesDto(List<Publicacion> publicacions) {
         List<PublicacionResponseDto> publicacionesDto = publicacions.stream()
+                .collect(Collectors.toMap(Publicacion::getIdPublicacion, Function.identity(), (existing, replacement) -> existing))
+                .values().stream()
                 .map(p -> {
                     PublicacionResponseDto response = modelMapper.map(p, PublicacionResponseDto.class);
                     response.setImagenBase64(UploadUtil.getFileBase64(p.getRutaImagen()));
@@ -175,12 +187,14 @@ public class PublicacionServiceImpl implements PublicacionService {
     }
 
     private String obtenereRedesAsignadas(List<String> redesAsignadas, List<String> redes) {
-        if (redesAsignadas.isEmpty()) {
-            throw new ValidationException("No tiene redes asignadas");
-        }
-        for (String red: redes) {
-            if (!redesAsignadas.contains(red)) {
-                throw new ValidationException("Red no asignada");
+        if (authService.hasRole(RoleType.ADMIN_SEDE)) {
+            if (redesAsignadas.isEmpty()) {
+                throw new ValidationException("No tiene redes asignadas");
+            }
+            for (String red: redes) {
+                if (!redesAsignadas.contains(red)) {
+                    throw new ValidationException("La publicación contiene una red no asignada");
+                }
             }
         }
         return StringUtils.join(redes, ",");
