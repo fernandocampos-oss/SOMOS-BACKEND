@@ -28,6 +28,8 @@ public class Usuario {
     private String nombres;
     @Column(name = "apellidos")
     private String apellidos;
+    @Column(name = "sexo")
+    private String sexo;
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
     @Column(name = "numero_celular")
@@ -40,12 +42,12 @@ public class Usuario {
     private String cargo;
     @Column(name = "fecha_ingreso")
     private String fechaIngreso;
+    @Column(name = "cod_red")
+    private String codigoRed;
+    @Column(name = "cod_unidad")
+    private String codigoUnidad;
     @Column(name = "es_activo")
     private boolean esActivo;
-    @Column(name = "id_sede")
-    private Integer idSede;
-    @Column(name = "id_zona_control")
-    private Integer idZonaControl;
     @Column(name = "id_rol")
     private int idRol;
     @Column(name = "password")
@@ -58,6 +60,8 @@ public class Usuario {
     private Integer usuarioModificacion;
     @Column(name = "id_estado_usuario")
     private String idEstadoUsuario;
+    @Column(name = "id_rol_adicional")
+    private Integer idRolAdicional;
 
     @PrePersist
     private void prePersist() {

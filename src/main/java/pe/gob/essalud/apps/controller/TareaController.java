@@ -1,24 +1,15 @@
 package pe.gob.essalud.apps.controller;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 
 import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import pe.gob.essalud.apps.dto.gestionrendimiento.TareaValidacionDTO;
-import pe.gob.essalud.apps.dto.gestionrendimiento.TareaValidacionTransaccionalDTO;
+import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
 import pe.gob.essalud.apps.service.TareaService;
 
@@ -31,27 +22,31 @@ public class TareaController {
     static final String TAREA = "tareas";
     private final TareaService tareaService;
 
-    @GetMapping("/listar/requerimientoPersonal/{idRequerimientoPersonal}")
-    public ResponseEntity<List<Tarea>> listarTareaPorRequermientoPersonal(@PathVariable("idRequerimientoPersonal") Number idRequerimientoPersonal) {
-        log.info("id_requerimiento_personal: [{}]", idRequerimientoPersonal);
-        List<Tarea> lista = tareaService.listarTareaPorRequermientoPersonal(idRequerimientoPersonal);
-        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
-    }
-
-    @PostMapping("/registrar/noDuplicado")
-    public ResponseEntity<Integer> registrarTareaNoDuplicado(@Valid @RequestBody TareaValidacionTransaccionalDTO obj) {
-        int dto = tareaService.registrarTareaNoDuplicado(obj);
-
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto).toUri();
+    @PostMapping("/registrar")
+    public ResponseEntity<Integer> registrarTarea(@Valid @RequestBody TareaDTO dto) {
+        int result = tareaService.registrarTarea(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result).toUri();
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/listar/personal/{idPersonal}")
-    public ResponseEntity<List<Tarea>> listarTareaPorPersonal(@PathVariable("idPersonal") Number idPersonal) {
-        log.info("id_personal: [{}]", idPersonal);
-        List<Tarea> lista = tareaService.listarTareaPorPersonal(idPersonal);
-        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
+    @GetMapping("/modificar")
+    public int actualizarTareaAdministrador(@RequestParam("nombreTarea") String nombreTarea, @RequestParam("plazo") String plazo, @RequestParam("idTarea") Number idTarea) {
+        return tareaService.actualizarTareaAdministrador(nombreTarea, plazo, idTarea);
     }
+
+//    @GetMapping("/listar/requerimientoPersonal/{idRequerimientoPersonal}")
+//    public ResponseEntity<List<Tarea>> listarTareaPorRequermientoPersonal(@PathVariable("idRequerimientoPersonal") Number idRequerimientoPersonal) {
+//        log.info("id_requerimiento_personal: [{}]", idRequerimientoPersonal);
+//        List<Tarea> lista = tareaService.listarTareaPorRequermientoPersonal(idRequerimientoPersonal);
+//        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
+//    }
+//
+//    @GetMapping("/listar/personal/{idPersonal}")
+//    public ResponseEntity<List<Tarea>> listarTareaPorPersonal(@PathVariable("idPersonal") Number idPersonal) {
+//        log.info("id_personal: [{}]", idPersonal);
+//        List<Tarea> lista = tareaService.listarTareaPorPersonal(idPersonal);
+//        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
+//    }
 
 }
 

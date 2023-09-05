@@ -16,9 +16,11 @@ public interface AuthService {
 
     boolean hasRole(int idRole);
 
-    int getIdSedeSession();
+    boolean hasAdditionalRole(int idRole);
 
-    Integer getIdZonaControlSession();
+    String getCodRedSession();
+
+    String getCodUnidadSession();
 
     UserSessionDto findByUsername(String username);
 

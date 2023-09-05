@@ -2,10 +2,7 @@ package pe.gob.essalud.apps.model.miessalud.gestionrendimiento;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Data
 @Entity
@@ -13,6 +10,7 @@ import javax.persistence.Table;
 public class EstadoTarea {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_estado_tarea")
     private Integer idEstadoTarea;
 

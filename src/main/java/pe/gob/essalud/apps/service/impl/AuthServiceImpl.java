@@ -78,13 +78,18 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     }
 
     @Override
-    public int getIdSedeSession() {
-        return getUserSession().getIdSede();
+    public boolean hasAdditionalRole(int idRole) {
+        return getUserSession().getIdRolAdicional() == idRole;
     }
 
     @Override
-    public Integer getIdZonaControlSession() {
-        return getUserSession().getIdZonaControl();
+    public String getCodRedSession() {
+        return getUserSession().getCodRed();
+    }
+
+    @Override
+    public String getCodUnidadSession() {
+        return getUserSession().getCodUnidad();
     }
 
     @Override
@@ -137,15 +142,16 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         String[] nombresArray = personaSAP.getNombres().split(",");
         usuarioModel.setNombres(nombresArray[1]);
         usuarioModel.setApellidos(nombresArray[0]);
+        usuarioModel.setSexo(personaSAP.getSexot());
         usuarioModel.setRegimen(personaSAP.getRegimen());
         usuarioModel.setCargo(personaSAP.getCargo());
         usuarioModel.setFechaIngreso(personaSAP.getFechaIngreso());
+        usuarioModel.setCodigoRed(personaSAP.getWerks());
+        usuarioModel.setCodigoUnidad(personaSAP.getOrgeh());
         usuarioModel.setEsActivo(true);
         usuarioModel.setIdRol(RoleType.TRABAJADOR);
         usuarioModel.setIdEstadoUsuario(EstadoUsuario.PENDIENTE_ACTIVACION);
         usuarioModel.setPassword(passwordEncoder.encode(model.getPassword()));
-        usuarioModel.setIdSede(0);
-        usuarioModel.setIdZonaControl(0);
         usuarioRepository.save(usuarioModel);
 
         long idUsuario = usuarioModel.getIdUsuario();

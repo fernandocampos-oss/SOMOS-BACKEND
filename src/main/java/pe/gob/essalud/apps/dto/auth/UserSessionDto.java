@@ -9,8 +9,9 @@ public class UserSessionDto {
 
     private int id;
     private String nombres;
-    private int idSede;
-    private Integer idZonaControl;
     private int idRol;
+    private String codRed;
+    private String codUnidad;
+    private int idRolAdicional;
 
 }

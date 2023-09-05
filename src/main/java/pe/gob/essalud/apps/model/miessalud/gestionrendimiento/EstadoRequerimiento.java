@@ -17,16 +17,17 @@ import lombok.Data;
 public class EstadoRequerimiento {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_estado_requerimiento")
     private Integer idEstadoRequerimiento;
 
-    @Column(name="codigo", nullable = false, length = 5)
+    @Column(name="codigo")
     private Integer codigo;
 
-    @Column(name="descripcion", nullable = false, length = 50)
+    @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name = "estado", nullable = true)
+    @Column(name = "estado")
     private boolean estado;
 
 }

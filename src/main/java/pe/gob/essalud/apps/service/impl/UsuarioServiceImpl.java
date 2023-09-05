@@ -5,8 +5,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.base.BaseService;
+import pe.gob.essalud.apps.client.PersonalSapUtilServiceClient;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.constants.RoleType;
+import pe.gob.essalud.apps.dto.personalsaputilservice.PersonaSAP;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
@@ -21,6 +23,7 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.UsuarioService;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,7 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     private final UsuarioMyRepository usuarioMyRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final PersonalSapUtilServiceClient _personalSapUtilServiceClient;
 
     @Override
     public List<UsuarioResponseDto> search() {
@@ -49,7 +53,6 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
 
     @Override
     public void update(long id, UsuarioRegisterUpdateRequestDto model) {
-        validateRoleRegisterUpdateUser(model);
         boolean alreadyExists = usuarioRepository.existsByNumeroDocumentoOrCodigoPlanillaAndIdUsuarioNot(
                 model.getNumeroDocumento(),
                 model.getCodigoPlanilla(),
@@ -69,19 +72,18 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
         Usuario usuarioModel = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("El usuario no existe"));
         if (authService.hasRole(RoleType.ADMIN_SEDE))
-            validateSede(usuarioModel.getIdSede());
+            validateRed(usuarioModel.getCodigoRed());
         usuarioRepository.deleteById(id);
     }
 
-    private void validateSede(int idSede) {
-        boolean userMatchesMySede = authService.getIdSedeSession() == idSede;
-        if (!userMatchesMySede)
+    private void validateRed(String codRed) {
+        boolean userMatchesMyRed = Objects.equals(authService.getCodRedSession(), codRed);
+        if (!userMatchesMyRed)
             throw new ForbiddenException();
     }
 
     @Override
     public long save(UsuarioRegisterUpdateRequestDto model) {
-        validateRoleRegisterUpdateUser(model);
         boolean alreadyExists = usuarioRepository.existsByNumeroDocumentoOrCodigoPlanilla(
                 model.getNumeroDocumento(),
                 model.getCodigoPlanilla());
@@ -95,14 +97,6 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
         usuarioModel.setIdEstadoUsuario(EstadoUsuario.ACTIVADO);
         usuarioRepository.save(usuarioModel);
         return usuarioModel.getIdUsuario();
-    }
-
-    private void validateRoleRegisterUpdateUser(UsuarioRegisterUpdateRequestDto model) {
-        if (authService.hasRole(RoleType.ADMIN_SEDE)) {
-            if (model.getIdRol() == RoleType.ADMIN_CENTRAL)
-                throw new ForbiddenException();
-            model.setIdSede(authService.getIdSedeSession());
-        }
     }
 
     @Override
@@ -138,9 +132,32 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    @Override
+    public void updateDatosSAP(long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(NotFoundException::new);
+
+        PersonaSAP personaSAP = _personalSapUtilServiceClient.getByNumDocAndFecNac(
+                usuario.getNumeroDocumento(),
+                usuario.getFechaNacimiento().toString());
+
+        if (personaSAP != null) {
+            String[] nombresArray = personaSAP.getNombres().split(",");
+            usuario.setNombres(nombresArray[1]);
+            usuario.setApellidos(nombresArray[0]);
+            usuario.setSexo(personaSAP.getSexot());
+            usuario.setRegimen(personaSAP.getRegimen());
+            usuario.setCargo(personaSAP.getCargo());
+            usuario.setFechaIngreso(personaSAP.getFechaIngreso());
+            usuario.setCodigoRed(personaSAP.getWerks());
+            usuario.setCodigoUnidad(personaSAP.getOrgeh());
+            usuarioRepository.save(usuario);
+        }
+    }
+
     private List<Usuario> getMyUsers() {
         return authService.hasRole(RoleType.ADMIN_CENTRAL)
                 ? usuarioRepository.findAllByIdEstadoUsuarioOrderByNombres(EstadoUsuario.ACTIVADO)
-                : usuarioRepository.findAllByIdSede(authService.getIdSedeSession());
+                : usuarioRepository.findAllByCodigoRed(authService.getCodRedSession());
     }
 }

@@ -22,4 +22,7 @@ public interface UsuarioService {
     List<UsuarioNombresResponse> getNombres(boolean mostrarTodos);
 
     void cambiarClave(long id, UsuarioCambiarClaveRequestDto request);
+
+    void updateDatosSAP(long id);
+
 }

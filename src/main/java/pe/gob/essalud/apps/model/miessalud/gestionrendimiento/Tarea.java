@@ -2,18 +2,11 @@ package pe.gob.essalud.apps.model.miessalud.gestionrendimiento;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 
 @Data
 @Entity
@@ -21,6 +14,7 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 public class Tarea {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tarea")
     private int idTarea;
 
@@ -30,29 +24,29 @@ public class Tarea {
     @Column(name = "plazo")
     private String plazo;
 
-    @Column(name = "estado", nullable = true)
-    private boolean estado;
-
-    @Column(name="porcentaje_avance", nullable = true, length = 3)
+    @Column(name="porcentaje_avance")
     private Integer porcentajeAvance;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="id_requerimiento_personal", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_requerimientopersonal"))
-    private RequerimientoPersonal requerimientoPersonal;
+    @JoinColumn(name="id_requerimiento_usuario", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_requerimientousuario"))
+    private RequerimientoUsuario requerimientoUsuario;
 
-    @ManyToOne
-    @JoinColumn(name="id_estado_tarea", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_estadotarea"))
-    private EstadoTarea estadoTarea;
+    @Column(name = "estado")
+    private boolean estado;
 
-    @Column(name = "id_usuario_creacion")
-    private Integer idUsuarioCreacion;
+//    @ManyToOne
+//    @JoinColumn(name="id_estado_tarea", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_estadotarea"))
+//    private EstadoTarea estadoTarea;
+
+    @Column(name = "usuario_creacion")
+    private Integer usuarioCreacion;
 
     @Column(name = "fecha_creacion")
     private LocalDateTime  fechaCreacion;
 
-    @Column(name = "id_usuario_modificacion")
-    private Integer idUsuarioModificacion;
+    @Column(name = "usuario_modificacion")
+    private Integer usuarioModificacion;
 
     @Column(name = "fecha_modificacion")
     private LocalDateTime  fechaModificacion;

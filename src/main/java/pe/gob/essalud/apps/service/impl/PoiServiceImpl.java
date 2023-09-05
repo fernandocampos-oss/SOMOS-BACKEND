@@ -16,7 +16,8 @@ public class PoiServiceImpl implements PoiService {
 
     @Override
     public Poi registrar(Poi obj) {
-        return poiRepository.save(obj);
+//        return poiRepository.save(obj);
+        return null;
     }
 
     @Override

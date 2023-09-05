@@ -3,10 +3,7 @@ package pe.gob.essalud.apps.model.miessalud.gestionrendimiento;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @NoArgsConstructor
 @Data
@@ -15,12 +12,13 @@ import javax.persistence.Table;
 public class TipoIngreso {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tipo_ingreso")
     private Integer idTipoIngreso;
 
-    @Column(name="descripcion", nullable = false, length = 250)
+    @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name = "estado", nullable = true)
+    @Column(name = "estado")
     private boolean estado;
 }
