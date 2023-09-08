@@ -51,11 +51,22 @@ public class ProyectoServiceImpl implements ProyectoService {
 
     @Override
     public List<ProyectoRequest> listarProyectos() {
-        return proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession()).stream()
+        List<Proyecto> proyectos = proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession());
+        if (proyectos.isEmpty()) {
+            List<ProyectoMiembro> miembros = proyectoMiembroRepository.findByIdUsuario(authService.getIdUserSession());
+            if (!miembros.isEmpty()) {
+                Proyecto proyecto = proyectoRepository.findById(miembros.get(0).getProyecto().getIdProyecto()).orElse(new Proyecto());
+                proyecto.setEnviado(true);
+                proyectos.add(proyecto);
+            }
+        }
+
+        return proyectos.stream()
                 .map(p -> {
                     ProyectoRequest proyecto = new ProyectoRequest();
                     proyecto.setIdProyecto(p.getIdProyecto());
                     proyecto.setEnviado(p.isEnviado());
+                    proyecto.setIdUsuario(p.getUsuarioCreacion());
 
                     ProyectoGrupoRequest grupo = modelMapper.map(p.getProyectoGrupo(), ProyectoGrupoRequest.class);
                     grupo.setImagenBase64(UploadUtil.getFileBase64(p.getProyectoGrupo().getRutaImagen()));
