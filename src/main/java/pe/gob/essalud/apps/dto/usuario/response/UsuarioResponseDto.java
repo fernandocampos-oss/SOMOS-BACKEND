@@ -20,5 +20,6 @@ public class UsuarioResponseDto {
     private String idEstado;
     private String estado;
     private String red;
+    private String unidad;
 
 }

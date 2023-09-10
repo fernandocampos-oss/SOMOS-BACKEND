@@ -15,10 +15,7 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.ProyectoService;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +39,7 @@ public class ProyectoServiceImpl implements ProyectoService {
     private final ProyectoImplementacionRepository proyectoImplementacionRepository;
     private final UsuarioRepository usuarioRepository;
     private final RedPersonalRepository redPersonalRepository;
+    private final UnidadOrganizativaRepository unidadOrganizativaRepository;
 
     private final AuthService authService;
     private final ModelMapper modelMapper;
@@ -51,52 +49,57 @@ public class ProyectoServiceImpl implements ProyectoService {
 
     @Override
     public List<ProyectoRequest> listarProyectos() {
-        List<Proyecto> proyectos = proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession());
-        if (proyectos.isEmpty()) {
-            List<ProyectoMiembro> miembros = proyectoMiembroRepository.findByIdUsuario(authService.getIdUserSession());
-            if (!miembros.isEmpty()) {
-                Proyecto proyecto = proyectoRepository.findById(miembros.get(0).getProyecto().getIdProyecto()).orElse(new Proyecto());
-                proyecto.setEnviado(true);
-                proyectos.add(proyecto);
+        try {
+            List<Proyecto> proyectos = proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession());
+            if (proyectos.isEmpty()) {
+                List<ProyectoMiembro> miembros = proyectoMiembroRepository.findByIdUsuario(authService.getIdUserSession());
+                if (!miembros.isEmpty()) {
+                    Proyecto proyecto = proyectoRepository.findById(miembros.get(0).getProyecto().getIdProyecto()).orElse(new Proyecto());
+                    proyecto.setEnviado(true);
+                    proyectos.add(proyecto);
+                }
             }
-        }
 
-        return proyectos.stream()
-                .map(p -> {
-                    ProyectoRequest proyecto = new ProyectoRequest();
-                    proyecto.setIdProyecto(p.getIdProyecto());
-                    proyecto.setEnviado(p.isEnviado());
-                    proyecto.setIdUsuario(p.getUsuarioCreacion());
+            return proyectos.stream()
+                    .map(p -> {
+                        ProyectoRequest proyecto = new ProyectoRequest();
+                        proyecto.setIdProyecto(p.getIdProyecto());
+                        proyecto.setEnviado(p.isEnviado());
+                        proyecto.setIdUsuario(p.getUsuarioCreacion());
 
-                    ProyectoGrupoRequest grupo = modelMapper.map(p.getProyectoGrupo(), ProyectoGrupoRequest.class);
-                    grupo.setImagenBase64(UploadUtil.getFileBase64(p.getProyectoGrupo().getRutaImagen()));
+                        ProyectoGrupoRequest grupo = modelMapper.map(p.getProyectoGrupo(), ProyectoGrupoRequest.class);
+                        grupo.setImagenBase64(UploadUtil.getFileBase64(p.getProyectoGrupo().getRutaImagen()));
 
-                    List<ProyectoMiembroRequest> miembros = p.getProyectoMiembros().stream()
-                                    .map(m -> modelMapper.map(m, ProyectoMiembroRequest.class))
-                                    .collect(Collectors.toList());
-                    grupo.setMiembros(miembros);
-                    proyecto.setGrupo(grupo);
+                        List<ProyectoMiembroRequest> miembros = p.getProyectoMiembros().stream()
+                                .map(m -> modelMapper.map(m, ProyectoMiembroRequest.class))
+                                .collect(Collectors.toList());
+                        grupo.setMiembros(miembros);
+                        proyecto.setGrupo(grupo);
 
-                    ProyectoDescripcionRequest descripcion = modelMapper.map(p.getProyectoDescripcion(), ProyectoDescripcionRequest.class);
-                    proyecto.setDescripcion(descripcion);
+                        ProyectoDescripcionRequest descripcion = modelMapper.map(p.getProyectoDescripcion(), ProyectoDescripcionRequest.class);
+                        proyecto.setDescripcion(descripcion);
 
-                    ProyectoImplementacionRequest implementacion = modelMapper.map(p.getProyectoImplementacion(), ProyectoImplementacionRequest.class);
-                    if (StringUtils.isNotBlank(p.getProyectoImplementacion().getEnfoque())) {
-                        String[] enfoques = p.getProyectoImplementacion().getEnfoque().split(SEPARADOR);
-                        List<String> listaEnfoques = new ArrayList<>();
-                        for (String enfoque : enfoques) {
-                            listaEnfoques.add(enfoque);
+                        ProyectoImplementacionRequest implementacion = modelMapper.map(p.getProyectoImplementacion(), ProyectoImplementacionRequest.class);
+                        if (StringUtils.isNotBlank(p.getProyectoImplementacion().getEnfoque())) {
+                            String[] enfoques = p.getProyectoImplementacion().getEnfoque().split(SEPARADOR);
+                            List<String> listaEnfoques = new ArrayList<>();
+                            for (String enfoque : enfoques) {
+                                listaEnfoques.add(enfoque);
+                            }
+                            implementacion.setEnfoques(listaEnfoques);
+                        } else {
+                            implementacion.setEnfoques(new ArrayList<>());
                         }
-                        implementacion.setEnfoques(listaEnfoques);
-                    } else {
-                        implementacion.setEnfoques(new ArrayList<>());
-                    }
-                    implementacion.setArchivoBase64(UploadUtil.getFileBase64(p.getProyectoImplementacion().getRutaArchivo()));
+                        implementacion.setArchivoBase64(UploadUtil.getFileBase64(p.getProyectoImplementacion().getRutaArchivo()));
 
-                    proyecto.setImplementacion(implementacion);
-                    return proyecto;
-                })
-                .collect(Collectors.toList());
+                        proyecto.setImplementacion(implementacion);
+                        return proyecto;
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 
     @Transactional
@@ -252,7 +255,6 @@ public class ProyectoServiceImpl implements ProyectoService {
         if (redPersonal.isPresent()) {
             red = redPersonal.get().getDescripcion();
         }
-        String finalRed = red;
 
         List<String> codigoRedes = Arrays.asList(authService.getCodRedSession());
         if (authService.getCodRedSession().equals(COD_RED_SEDE_CENTRAL_AFESSALUD) ||
@@ -260,7 +262,10 @@ public class ProyectoServiceImpl implements ProyectoService {
             codigoRedes = Arrays.asList(COD_RED_SEDE_CENTRAL_AFESSALUD, COD_RED_SEDE_CENTRAL_FONDOSALUD);
         }
 
+        String finalRed = red;
         List<String> finalCodigoRedes = codigoRedes;
+        List<UnidadOrganizativa> unidadOrganizativaList = unidadOrganizativaRepository.findAll();
+
         return usuarioRepository.findAllByCodigoRedes(codigoRedes).stream()
                 .map(u -> {
                     UsuarioDataResponse usuarioResponse = modelMapper.map(u, UsuarioDataResponse.class);
@@ -273,13 +278,20 @@ public class ProyectoServiceImpl implements ProyectoService {
                     } else {
                         usuarioResponse.setRed(finalRed);
                     }
+                    Optional<UnidadOrganizativa> unidad = unidadOrganizativaList.stream()
+                            .filter(uo -> uo.getCodUnidad().equals(u.getCodigoUnidad())).findFirst();
+                    unidad.ifPresent(un -> usuarioResponse.setUnidad(un.getDescripcion()));
                     return usuarioResponse;
                 }).collect(Collectors.toList());
     }
 
     private void validarMiembro(ProyectoMiembroRequest proyectoMiembroRequest) {
-        if (!proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento()).isEmpty()) {
-            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es miembro de otro grupo");
+        try {
+            if (!proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento()).isEmpty()) {
+                throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es miembro de otro grupo");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
