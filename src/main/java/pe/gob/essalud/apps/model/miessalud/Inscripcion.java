@@ -25,6 +25,8 @@ public class Inscripcion {
     private boolean esActivo;
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
+    @Column(name = "id_responsable")
+    private Integer idResponsable;
 
     @PrePersist
     private void prePersist() {
