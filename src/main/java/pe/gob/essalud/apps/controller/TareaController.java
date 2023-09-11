@@ -1,16 +1,19 @@
 package pe.gob.essalud.apps.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
+import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
 import pe.gob.essalud.apps.service.TareaService;
 
 @RestController
@@ -34,19 +37,19 @@ public class TareaController {
         return tareaService.actualizarTareaAdministrador(nombreTarea, plazo, idTarea);
     }
 
-//    @GetMapping("/listar/requerimientoPersonal/{idRequerimientoPersonal}")
-//    public ResponseEntity<List<Tarea>> listarTareaPorRequermientoPersonal(@PathVariable("idRequerimientoPersonal") Number idRequerimientoPersonal) {
-//        log.info("id_requerimiento_personal: [{}]", idRequerimientoPersonal);
-//        List<Tarea> lista = tareaService.listarTareaPorRequermientoPersonal(idRequerimientoPersonal);
-//        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/listar/personal/{idPersonal}")
-//    public ResponseEntity<List<Tarea>> listarTareaPorPersonal(@PathVariable("idPersonal") Number idPersonal) {
-//        log.info("id_personal: [{}]", idPersonal);
-//        List<Tarea> lista = tareaService.listarTareaPorPersonal(idPersonal);
-//        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
-//    }
+    @PostMapping("/registrar/evidencia")
+    public ResponseEntity<Integer> crearEvidencia(@Valid @RequestBody EvidenciaRequestDTO request) {
+        long result = tareaService.crearEvidencia(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result).toUri();
+        return ResponseEntity.created(location).build();
+    }
+
+    @GetMapping("/listar/evidencias/{idTarea}")
+    public ResponseEntity<List<EvidenciaResponseDTO>> listarEvidenciaTarea(@PathVariable("idTarea") Integer idTarea) {
+        List<EvidenciaResponseDTO> lista = tareaService.listarEvidenciaTarea(idTarea);
+        return new ResponseEntity<List<EvidenciaResponseDTO>>(lista, HttpStatus.OK);
+    }
+
 
 }
 

@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
@@ -13,6 +14,7 @@ import pe.gob.essalud.apps.service.RequerimientoUsuarioService;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioService {
@@ -102,12 +104,10 @@ public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioServ
         return requerimientoUsuarioRepository.agregarIntegranteUnidad(codUnidad, idUnidad);
     }
 
-
-
-
-//    @Override
-//    public List<RequerimientoUsuario> validarDuplicadoRequerimientoPersonal(Number idRequerimiento, Number idPersonal) {
-//        return requerimientoUsuarioRepository.validarDuplicadoRequerimientoPersonal(idRequerimiento, idPersonal);
-//    }
+    @Override
+    public int finalizarTareaAdministrador(Number idRequerimientoUsuario) {
+        log.info("[{}]", idRequerimientoUsuario);
+        return requerimientoUsuarioRepository.finalizarTareaAdministrador(idRequerimientoUsuario);
+    }
 
 }

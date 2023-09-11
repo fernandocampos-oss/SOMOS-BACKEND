@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
 
 public interface TareaRepository extends JpaRepository<Tarea, Integer> {
@@ -36,13 +37,12 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
                                             @Param("fechaModificaion") LocalDateTime fechaModificaion,
                                             @Param("idTarea") Number idTarea);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE evidencia SET ruta_imagen = ? WHERE id_evidencia=?", nativeQuery = true)
+    Integer actualizarRutaImagenEvidencia(@Param("rutaImagen") String rutaImagen, @Param("idEvidencia") Number idEvidencia);
 
-
-
-//    @Query(value = "SELECT * from tarea t WHERE t.id_requerimiento_personal=? AND t.estado=true ORDER BY t.id_tarea DESC", nativeQuery = true)
-//    List<Tarea> listarTareaPorRequermientoPersonal(@Param("idRequerimientoPersonal") Number idRequerimientoPersonal);
-//
-//    @Query(value = "SELECT * from tarea t WHERE t.id_requerimiento_personal=(select rp.id_requerimiento_personal from requerimiento_personal rp WHERE rp.id_personal=?) ORDER BY t.id_requerimiento_personal DESC", nativeQuery = true)
-//    List<Tarea> listarTareaPorPersonal(@Param("idPersonal") Number idPersonal);
+    @Query("SELECT e FROM Evidencia e WHERE e.tarea.idTarea = :idTarea ORDER BY e.fechaCreacion DESC")
+    List<Evidencia> listarEvidenciaTarea(@Param("idTarea") Integer idTarea);
 }
 

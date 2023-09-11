@@ -36,7 +36,5 @@ public interface RequerimientoUsuarioService extends IcrudService<RequerimientoU
 
     int agregarIntegranteUnidad(Number idUnidad);
 
-
-//    List<RequerimientoUsuario> validarDuplicadoRequerimientoPersonal(Number idRequerimiento, Number idPersonal);
-
+    int finalizarTareaAdministrador(Number idRequerimientoUsuario);
 }

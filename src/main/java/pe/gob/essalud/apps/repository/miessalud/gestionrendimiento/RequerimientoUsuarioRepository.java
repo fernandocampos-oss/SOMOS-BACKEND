@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
-import pe.gob.essalud.apps.model.miessalud.Usuario;
-import pe.gob.essalud.apps.model.miessalud.UsuarioRed;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
 
 import java.time.LocalDateTime;
@@ -30,7 +28,7 @@ public interface RequerimientoUsuarioRepository extends JpaRepository<Requerimie
     @Transactional
     @Modifying
     @Query(value = "INSERT INTO requerimiento_usuario(id_requerimiento, id_usuario, id_estado_requerimiento, cod_red, cod_unidad_solicitante, fecha_creacion) VALUES (:idRequerimiento, :idUsuario, :idEstadoRequerimiento, :codRed, :codUnidadOrganizacion, :fechaCreacion)", nativeQuery = true)
-    Integer registrarRequerimientoUsuario(@Param("idRequerimiento") Integer idRequerimiento,//
+    Integer registrarRequerimientoUsuario(@Param("idRequerimiento") Integer idRequerimiento,
                                           @Param("idUsuario") Number idUsuario,
                                           @Param("idEstadoRequerimiento") Number idEstadoRequerimiento,
                                           @Param("codRed") String codRed,
@@ -71,9 +69,10 @@ public interface RequerimientoUsuarioRepository extends JpaRepository<Requerimie
     @Query(value = "UPDATE usuario SET cod_unidad = ? WHERE id_usuario=? ", nativeQuery = true)
     public int agregarIntegranteUnidad(@Param("codUniddad") String codUniddad, @Param("idUsuario") Number idUsuario);
 
-
-//    @Query(value = "SELECT * FROM requerimiento_personal rp WHERE rp.id_requerimiento=? AND rp.id_personal=? ", nativeQuery = true)
-//    List<RequerimientoUsuario> validarDuplicadoRequerimientoPersonal(@Param("idRequerimiento") Number idRequerimiento, @Param("idPersonal") Number idPersonal);
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE requerimiento_usuario SET id_estado_requerimiento = 6 WHERE id_requerimiento_usuario=? ", nativeQuery = true)
+    public int finalizarTareaAdministrador(@Param("idRequerimientoUsuario") Number idRequerimientoUsuario);
 
 }
 

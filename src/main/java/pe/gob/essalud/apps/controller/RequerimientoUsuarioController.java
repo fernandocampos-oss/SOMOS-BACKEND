@@ -127,11 +127,9 @@ public class RequerimientoUsuarioController {
         return requerimientoUsuarioService.agregarIntegranteUnidad(idUsuario);
     }
 
-
-//    @GetMapping("/validar/duplicado/requerimiento/{idRequerimiento}/personal/{idPersonal}")
-//    public List<RequerimientoUsuario> validarDuplicadoRequerimientoPersonal(@PathVariable("idRequerimiento") Number idRequerimiento, @PathVariable("idPersonal") Number idPersonal) {
-//        log.info("idRequerimiento-idPersonal: [{}-{}]", idRequerimiento, idPersonal);
-//        return requerimientoUsuarioService.validarDuplicadoRequerimientoPersonal(idRequerimiento, idPersonal);
-//    }
+    @GetMapping("/finalizar/requerimiento")
+    public int finalizarTareaAdministrador(@RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
+        return requerimientoUsuarioService.finalizarTareaAdministrador(idRequerimientoUsuario);
+    }
 
 }
