@@ -3,6 +3,7 @@ package pe.gob.essalud.apps.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.constants.RoleType;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
 import pe.gob.essalud.apps.dto.usuariored.request.UsuarioRedRequest;
@@ -41,6 +42,7 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
     @Override
     public List<UsuarioNombresResponse> listarAministradoresRed() {
         return usuarioRepository.findByIdRolIn(Arrays.asList(RoleType.TRABAJADOR, RoleType.ADMIN_SEDE/*, RoleType.ADMIN_CENTRAL*/)).stream()
+                .filter(u -> u.getIdEstadoUsuario().equals(EstadoUsuario.ACTIVADO))
                 .map(u -> {
                     String nombres = Optional.ofNullable(u.getNombres()).orElse("");
                     String apellidos = Optional.ofNullable(u.getApellidos()).orElse("");

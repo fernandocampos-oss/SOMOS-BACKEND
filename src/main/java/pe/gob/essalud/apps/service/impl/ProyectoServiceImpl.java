@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.proyecto.request.*;
 import pe.gob.essalud.apps.dto.usuariored.response.UsuarioDataResponse;
@@ -267,6 +268,7 @@ public class ProyectoServiceImpl implements ProyectoService {
         List<UnidadOrganizativa> unidadOrganizativaList = unidadOrganizativaRepository.findAll();
 
         return usuarioRepository.findAllByCodigoRedes(codigoRedes).stream()
+                .filter(u -> u.getIdEstadoUsuario().equals(EstadoUsuario.ACTIVADO))
                 .map(u -> {
                     UsuarioDataResponse usuarioResponse = modelMapper.map(u, UsuarioDataResponse.class);
                     if (finalCodigoRedes.size() > 1) {
