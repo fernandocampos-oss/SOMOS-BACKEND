@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.proyecto.request.*;
+import pe.gob.essalud.apps.dto.proyecto.response.BandejaProyectosResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.UsuarioDataResponse;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.*;
@@ -60,47 +61,69 @@ public class ProyectoServiceImpl implements ProyectoService {
                     proyectos.add(proyecto);
                 }
             }
-
-            return proyectos.stream()
-                    .map(p -> {
-                        ProyectoRequest proyecto = new ProyectoRequest();
-                        proyecto.setIdProyecto(p.getIdProyecto());
-                        proyecto.setEnviado(p.isEnviado());
-                        proyecto.setIdUsuario(p.getUsuarioCreacion());
-
-                        ProyectoGrupoRequest grupo = modelMapper.map(p.getProyectoGrupo(), ProyectoGrupoRequest.class);
-                        grupo.setImagenBase64(UploadUtil.getFileBase64(p.getProyectoGrupo().getRutaImagen()));
-
-                        List<ProyectoMiembroRequest> miembros = p.getProyectoMiembros().stream()
-                                .map(m -> modelMapper.map(m, ProyectoMiembroRequest.class))
-                                .collect(Collectors.toList());
-                        grupo.setMiembros(miembros);
-                        proyecto.setGrupo(grupo);
-
-                        ProyectoDescripcionRequest descripcion = modelMapper.map(p.getProyectoDescripcion(), ProyectoDescripcionRequest.class);
-                        proyecto.setDescripcion(descripcion);
-
-                        ProyectoImplementacionRequest implementacion = modelMapper.map(p.getProyectoImplementacion(), ProyectoImplementacionRequest.class);
-                        if (StringUtils.isNotBlank(p.getProyectoImplementacion().getEnfoque())) {
-                            String[] enfoques = p.getProyectoImplementacion().getEnfoque().split(SEPARADOR);
-                            List<String> listaEnfoques = new ArrayList<>();
-                            for (String enfoque : enfoques) {
-                                listaEnfoques.add(enfoque);
-                            }
-                            implementacion.setEnfoques(listaEnfoques);
-                        } else {
-                            implementacion.setEnfoques(new ArrayList<>());
-                        }
-                        implementacion.setArchivoBase64(UploadUtil.getFileBase64(p.getProyectoImplementacion().getRutaArchivo()));
-
-                        proyecto.setImplementacion(implementacion);
-                        return proyecto;
-                    })
-                    .collect(Collectors.toList());
+            return obtenerProyectos(proyectos);
         } catch (Exception e) {
             e.printStackTrace();
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public BandejaProyectosResponse obtenerBandejaProyectos() {
+        try {
+            BandejaProyectosResponse bandejaProyectoResponse =  new BandejaProyectosResponse();
+            List<Proyecto> proyectos = proyectoRepository.findAll();
+            int total = proyectos.size();
+            int enviados = (int) proyectos.stream().filter(Proyecto::isEnviado).count();
+            int pendientesEnvio = total - enviados;
+            bandejaProyectoResponse.setTotal(total);
+            bandejaProyectoResponse.setEnviados(enviados);
+            bandejaProyectoResponse.setPendientesEnvio(pendientesEnvio);
+            bandejaProyectoResponse.setProyectos(obtenerProyectos(proyectos));
+            return bandejaProyectoResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private List<ProyectoRequest> obtenerProyectos(List<Proyecto> proyectos) {
+        return proyectos.stream()
+                .map(p -> {
+                    ProyectoRequest proyecto = new ProyectoRequest();
+                    proyecto.setIdProyecto(p.getIdProyecto());
+                    proyecto.setEnviado(p.isEnviado());
+                    proyecto.setIdUsuario(p.getUsuarioCreacion());
+
+                    ProyectoGrupoRequest grupo = modelMapper.map(p.getProyectoGrupo(), ProyectoGrupoRequest.class);
+                    grupo.setImagenBase64(UploadUtil.getFileBase64(p.getProyectoGrupo().getRutaImagen()));
+
+                    List<ProyectoMiembroRequest> miembros = p.getProyectoMiembros().stream()
+                            .map(m -> modelMapper.map(m, ProyectoMiembroRequest.class))
+                            .collect(Collectors.toList());
+                    grupo.setMiembros(miembros);
+                    proyecto.setGrupo(grupo);
+
+                    ProyectoDescripcionRequest descripcion = modelMapper.map(p.getProyectoDescripcion(), ProyectoDescripcionRequest.class);
+                    proyecto.setDescripcion(descripcion);
+
+                    ProyectoImplementacionRequest implementacion = modelMapper.map(p.getProyectoImplementacion(), ProyectoImplementacionRequest.class);
+                    if (StringUtils.isNotBlank(p.getProyectoImplementacion().getEnfoque())) {
+                        String[] enfoques = p.getProyectoImplementacion().getEnfoque().split(SEPARADOR);
+                        List<String> listaEnfoques = new ArrayList<>();
+                        for (String enfoque : enfoques) {
+                            listaEnfoques.add(enfoque);
+                        }
+                        implementacion.setEnfoques(listaEnfoques);
+                    } else {
+                        implementacion.setEnfoques(new ArrayList<>());
+                    }
+                    implementacion.setArchivoBase64(UploadUtil.getFileBase64(p.getProyectoImplementacion().getRutaArchivo()));
+
+                    proyecto.setImplementacion(implementacion);
+                    return proyecto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional
