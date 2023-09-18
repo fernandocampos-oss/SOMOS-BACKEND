@@ -61,11 +61,13 @@ public class EleccionServiceImpl implements EleccionService {
         segmentoRepository.findById(votoRequestDto.getIdSegmento())
                 .orElseThrow(() -> new ValidationException("El segmento no se encuentra registrado"));
 
-        Candidato candidato = candidatoRepository.findById(votoRequestDto.getIdCandidato())
-                .orElseThrow(() -> new ValidationException("La candidato no se encuentra registrado"));
+        if (votoRequestDto.getIdCandidato() > 0) {
+            Candidato candidato = candidatoRepository.findById(votoRequestDto.getIdCandidato())
+                    .orElseThrow(() -> new ValidationException("La candidato no se encuentra registrado"));
 
-        if (!candidato.getIdSegmento().equals(votoRequestDto.getIdSegmento())) {
-            throw new ValidationException("El segmento del voto no coincide con el segmento del candidato");
+            if (!candidato.getIdSegmento().equals(votoRequestDto.getIdSegmento())) {
+                throw new ValidationException("El segmento del voto no coincide con el segmento del candidato");
+            }
         }
 
         Integer idUsuario = authService.getIdUserSession();
