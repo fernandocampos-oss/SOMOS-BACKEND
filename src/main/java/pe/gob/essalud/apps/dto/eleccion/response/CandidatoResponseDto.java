@@ -6,6 +6,7 @@ import lombok.Data;
 public class CandidatoResponseDto {
 
     private int idCandidato;
+    private long idUsuario;
     private String numeroDocumento;
     private String nombres;
     private String apellidos;

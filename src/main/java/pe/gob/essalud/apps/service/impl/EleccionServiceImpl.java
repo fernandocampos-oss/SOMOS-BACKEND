@@ -44,7 +44,12 @@ public class EleccionServiceImpl implements EleccionService {
                 eleccionResponseDto.setCandidatos(new ArrayList<>());
                 for (Candidato candidato: eleccion.getCandidatos()) {
                     if (candidato.getIdSegmento().equals(votante.get().getIdSegmento())) {
-                        eleccionResponseDto.getCandidatos().add(modelMapper.map(candidato, CandidatoResponseDto.class));
+                        CandidatoResponseDto candidatoResponseDto = modelMapper.map(candidato, CandidatoResponseDto.class);
+                        Usuario usuarioCandidato = usuarioRepository.findDocumento(candidato.getNumeroDocumento());
+                        if (usuarioCandidato != null) {
+                            candidatoResponseDto.setIdUsuario(usuarioCandidato.getIdUsuario());
+                        }
+                        eleccionResponseDto.getCandidatos().add(candidatoResponseDto);
                     }
                 }
                 return eleccionResponseDto;
