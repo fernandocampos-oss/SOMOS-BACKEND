@@ -16,6 +16,7 @@
     <typeAliases>
         <typeAlias type="pe.gob.essalud.apps.dto.auth.UserSessionDto" alias="UserSession"/>
         <typeAlias type="pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto" alias="UsuarioResponse"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.inscripcion.response.UsuariosInscritosResponseDto" alias="UsuariosInscritosResponseDto"/>
     </typeAliases>
 
     <typeHandlers>

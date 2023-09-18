@@ -3,17 +3,19 @@ package pe.gob.essalud.apps.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.dto.inscripcion.response.InscripcionResponseDto;
+import pe.gob.essalud.apps.dto.inscripcion.response.ReporteInscritosDto;
+import pe.gob.essalud.apps.dto.inscripcion.response.UsuariosInscritosResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
-import pe.gob.essalud.apps.model.miessalud.Encuesta;
-import pe.gob.essalud.apps.model.miessalud.Inscripcion;
-import pe.gob.essalud.apps.model.miessalud.InscripcionPersona;
-import pe.gob.essalud.apps.model.miessalud.UsuarioEncuesta;
+import pe.gob.essalud.apps.model.miessalud.*;
 import pe.gob.essalud.apps.repository.miessalud.InscripcionPersonaRepository;
 import pe.gob.essalud.apps.repository.miessalud.InscripcionRepository;
+import pe.gob.essalud.apps.repository.miessalud.sqlmap.InscripcionMyRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.InscripcionService;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +24,7 @@ public class InscripcionServiceImpl implements InscripcionService {
 
     private final InscripcionRepository inscripcionRepository;
     private final InscripcionPersonaRepository inscripcionPersonaRepository;
+    private final InscripcionMyRepository inscripcionMyRepository;
 
     private final AuthService authService;
 
@@ -62,6 +65,21 @@ public class InscripcionServiceImpl implements InscripcionService {
 
             inscripcionPersonaRepository.save(inscripcionPersona);
         }
+    }
+
+    @Override
+    public ReporteInscritosDto getUsuariosInscritos(int idInscripcion){
+
+        ReporteInscritosDto reporte = new ReporteInscritosDto();
+        List<UsuariosInscritosResponseDto> usuariosInscritos = new ArrayList<>();
+
+        usuariosInscritos = inscripcionMyRepository.getUsuariosInscritos(idInscripcion);
+
+        reporte.setIdInscripcion(idInscripcion);
+        reporte.setDescripcion(inscripcionRepository.findByIdInscripcion(idInscripcion).getDescripcion());
+        reporte.setInscritos(usuariosInscritos);
+
+        return reporte;
     }
 
 
