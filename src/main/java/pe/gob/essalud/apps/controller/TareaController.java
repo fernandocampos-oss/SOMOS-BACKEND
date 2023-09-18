@@ -14,6 +14,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Poi;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoIngreso;
 import pe.gob.essalud.apps.service.TareaService;
 
 @RestController
@@ -50,6 +52,17 @@ public class TareaController {
         return new ResponseEntity<List<EvidenciaResponseDTO>>(lista, HttpStatus.OK);
     }
 
+    @GetMapping("/listar/pois")
+    public ResponseEntity<List<Poi>> listarAllPoi() {
+        List<Poi> lista = tareaService.listarAllPoi();
+        return new ResponseEntity<List<Poi>>(lista, HttpStatus.OK);
+    }
+
+    @GetMapping("/listar/tipoIngreso")
+    public ResponseEntity<List<TipoIngreso>> listarAllTipoIngreso() {
+        List<TipoIngreso> lista = tareaService.listarAllTipoIngreso();
+        return new ResponseEntity<List<TipoIngreso>>(lista, HttpStatus.OK);
+    }
 
 }
 

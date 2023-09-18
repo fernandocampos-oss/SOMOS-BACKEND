@@ -15,8 +15,7 @@ import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EvidenciaRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.TareaRepository;
 import pe.gob.essalud.apps.service.AuthService;
@@ -39,13 +38,11 @@ public class TareaServiceImpl implements TareaService {
 
     @Override
     public List<Tarea> listar() {
-//        return tareaRepository.findAll();
         return null;
     }
 
     @Override
     public Tarea registrar(Tarea obj) {
-//        return tareaRepository.save(obj);
         return null;
     }
 
@@ -75,7 +72,6 @@ public class TareaServiceImpl implements TareaService {
     public long crearEvidencia(EvidenciaRequestDTO request) {
         Evidencia evidencia = new Evidencia();
         evidencia.setDescripcion(request.getDescripcion());
-        evidencia.setPorcentajeAvance(request.getPorcentajeAvance());
         evidencia.setFechaCreacion(LocalDateTime.now(ZoneId.of("America/Lima")));
         evidencia.setEstado(true);
         evidencia.setUsuarioCreacion(authService.getIdUserSession());
@@ -86,8 +82,14 @@ public class TareaServiceImpl implements TareaService {
         evidencia.setSizeImagen(request.getSizeImagen());
         evidencia.setTipoImagen(request.getTipoImagen());
         evidencia.setExtension(request.getExtension());
-
+        evidencia.setPorcentajeAvance(request.getPorcentajeAvance());
         Evidencia result = evidenciaRepository.save(evidencia);
+
+        log.info("IdRequerimiento [{}]", request.getIdRequerimiento());
+        Requerimiento requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
+        int nuevoPorcentajeAvance = (requerimiento.getPorcentajeAvance() + request.getPorcentajeAvance());
+        log.info("incremento avance [{}]", nuevoPorcentajeAvance);
+        tareaRepository.actualizaPorcentajeAvanceRequerimiento(nuevoPorcentajeAvance, request.getIdRequerimiento());
 
         String rutaImagen = uploadPath + RUTA_IMAGENES_EVIDENCIA + result.getIdEvidencia() + FORMATO_IMAGEN_EVIDENCIA;
         rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
@@ -105,19 +107,26 @@ public class TareaServiceImpl implements TareaService {
             log.info("recorrido -i- [{}]", item.getIdEvidencia());
             String baseImagen = UploadUtil.getFileBase64(item.getRutaImagen());
             EvidenciaResponseDTO dto = new EvidenciaResponseDTO();
-
             dto.setIdEvidencia(item.getIdEvidencia());
             dto.setDescripcion(item.getDescripcion());
-            dto.setPorcentajeAvance(item.getPorcentajeAvance());
             dto.setFechaCreacion(item.getFechaCreacion());
-//            dto.setEstado(item.getEstado);
             dto.setImagenBase64(baseImagen);
             dto.setExtension(item.getExtension());
             dto.setNombreImagen(item.getNombreImagen());
+            dto.setPorcentajeAvance(item.getPorcentajeAvance());
             listDto.add(dto);
         }
         return listDto;
     }
 
+    @Override
+    public List<Poi> listarAllPoi() {
+        return tareaRepository.listarAllPoi();
+    }
+
+    @Override
+    public List<TipoIngreso> listarAllTipoIngreso() {
+        return tareaRepository.listarAllTipoIngreso();
+    }
 
 }

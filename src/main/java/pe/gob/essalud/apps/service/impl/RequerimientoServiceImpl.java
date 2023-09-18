@@ -6,7 +6,6 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pe.gob.essalud.apps.dto.auth.UserSessionDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.RequerimientoRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.RequerimientoUsuarioRepository;
@@ -23,7 +22,6 @@ public class RequerimientoServiceImpl implements RequerimientoService {
 
     @Override
     public List<Requerimiento> listar() {
-//        return requerimientoRepository.findAll();
         return null;
     }
 
@@ -37,13 +35,11 @@ public class RequerimientoServiceImpl implements RequerimientoService {
         if(req != null) {
             int idUsuario = authService.getIdUserSession();
             String codRed =  authService.getCodRedSession();
-//            UserSessionDto usuario= authService.getUserSession();
             String codUnidadOrganizacion= authService.getCodUnidadSession();
             requerimientoUsuarioRepository.registrarRequerimientoUsuario(req.getIdRequerimiento(), idUsuario, 1, codRed, codUnidadOrganizacion, LocalDateTime.now(ZoneId.of("America/Lima"))) ;
         }
         return req;
     }
-
 
 }
 

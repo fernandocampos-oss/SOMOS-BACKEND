@@ -3,8 +3,6 @@ package pe.gob.essalud.apps.dto.gestionrendimiento;
 import lombok.Data;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
 
-import java.util.List;
-
 @Data
 public class EvidenciaRequestDTO {
 
@@ -18,4 +16,5 @@ public class EvidenciaRequestDTO {
     private int sizeImagen;
     private String tipoImagen;
     private String extension;
+    private int idRequerimiento;
 }

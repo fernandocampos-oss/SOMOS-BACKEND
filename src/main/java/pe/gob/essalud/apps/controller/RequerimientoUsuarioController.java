@@ -7,12 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
-import pe.gob.essalud.apps.model.miessalud.Usuario;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Poi;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.UnidadOrganizativa;
-import pe.gob.essalud.apps.service.PoiService;
 import pe.gob.essalud.apps.service.RequerimientoService;
 import pe.gob.essalud.apps.service.RequerimientoUsuarioService;
 
@@ -28,14 +25,7 @@ public class RequerimientoUsuarioController {
 
     static final String REQUERIMIENTOS = "requerimientosUsuarios";
     private final RequerimientoUsuarioService requerimientoUsuarioService;
-    private final PoiService poiService;
     private final RequerimientoService requerimientoService;
-
-    @GetMapping("/listar/pois")
-    public ResponseEntity<List<Poi>> listar() {
-        List<Poi> lista = poiService.listar();
-        return new ResponseEntity<List<Poi>>(lista, HttpStatus.OK);
-    }
 
     @PostMapping("/registrar/requerimiento")
     public ResponseEntity<Object> registrar(@Valid @RequestBody Requerimiento requerimiento) {

@@ -8,20 +8,17 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 
 public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
     @Modifying
-    @Query(value = "INSERT INTO tarea(nombre_tarea, plazo, id_requerimiento_usuario, estado, usuario_creacion, fecha_creacion, porcentaje_avance) VALUES (:nombreTarea, :plazo, :idRequerimientoUsuario, true, :usuarioCreacion, :fechaCreacion, 0)", nativeQuery = true)
+    @Query(value = "INSERT INTO tarea(nombre_tarea, plazo, id_requerimiento_usuario, estado, usuario_creacion, fecha_creacion) VALUES (:nombreTarea, :plazo, :idRequerimientoUsuario, true, :usuarioCreacion, :fechaCreacion)", nativeQuery = true)
     Integer registrarTarea(@Param("nombreTarea") String nombreTarea,
                            @Param("plazo") String plazo,
                            @Param("idRequerimientoUsuario") Integer idRequerimientoUsuario,
                            @Param("usuarioCreacion") Number usuarioCreacion,
-                           @Param("fechaCreacion") LocalDateTime fechaCreacion
-//                         @Param("idEstadoTarea") Number idEstadoTarea,
-                           );
+                           @Param("fechaCreacion") LocalDateTime fechaCreacion);
 
     @Transactional
     @Modifying
@@ -44,5 +41,20 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
     @Query("SELECT e FROM Evidencia e WHERE e.tarea.idTarea = :idTarea ORDER BY e.fechaCreacion DESC")
     List<Evidencia> listarEvidenciaTarea(@Param("idTarea") Integer idTarea);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE requerimiento SET porcentaje_avance = ? WHERE id_requerimiento=? ", nativeQuery = true)
+    public int actualizaPorcentajeAvanceRequerimiento(@Param("porcentajeAvance") Number porcentajeAvance, @Param("idRequerimiento") Number idRequerimiento);
+
+    @Query("SELECT p FROM Poi p ORDER BY p.descripcion ASC")
+    List<Poi> listarAllPoi();
+
+    @Query("SELECT ti FROM TipoIngreso ti ORDER BY ti.descripcion ASC")
+    List<TipoIngreso> listarAllTipoIngreso();
+
+    @Query("SELECT r FROM Requerimiento r WHERE r.idRequerimiento = :idRequerimiento")
+    Requerimiento getByIdRequerimiento(@Param("idRequerimiento") Integer idRequerimiento);
+
 }
 

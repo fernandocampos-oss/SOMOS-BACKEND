@@ -12,16 +12,16 @@ public class Evidencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_evidencia")
-    private Long idEvidencia;
+    private Integer idEvidencia;
 
     @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name="porcentaje_avance")
-    private int porcentajeAvance;
-
     @Column(name = "estado")
     private boolean estado;
+
+    @Column(name="porcentaje_avance")
+    private int porcentajeAvance;
 
     @ManyToOne
     @JoinColumn(name="id_tarea", nullable = false, foreignKey = @ForeignKey(name="fk_evidencia_tarea"))

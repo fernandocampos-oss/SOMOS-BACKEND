@@ -30,7 +30,7 @@ public class Requerimiento {
     private String identificador;
 
     @Column(name="porcentaje_avance")
-    private Integer porcentajeAvance;
+    private int porcentajeAvance;
 
     @Column(name = "estado")
     private boolean estado;

@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.model.miessalud.gestionrendimiento;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.*;
 
@@ -16,16 +17,13 @@ public class Tarea {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tarea")
-    private int idTarea;
+    private Integer idTarea;
 
     @Column(name="nombre_tarea", nullable = true, length = 170)
     private String nombreTarea;
 
     @Column(name = "plazo")
     private String plazo;
-
-    @Column(name="porcentaje_avance")
-    private Integer porcentajeAvance;
 
     @JsonIgnore
     @ManyToOne
@@ -34,10 +32,6 @@ public class Tarea {
 
     @Column(name = "estado")
     private boolean estado;
-
-//    @ManyToOne
-//    @JoinColumn(name="id_estado_tarea", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_estadotarea"))
-//    private EstadoTarea estadoTarea;
 
     @Column(name = "usuario_creacion")
     private Integer usuarioCreacion;

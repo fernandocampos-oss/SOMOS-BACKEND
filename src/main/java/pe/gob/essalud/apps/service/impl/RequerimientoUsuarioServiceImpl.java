@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
-import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.UnidadOrganizativa;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.RequerimientoUsuarioRepository;
@@ -106,7 +105,7 @@ public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioServ
 
     @Override
     public int finalizarTareaAdministrador(Number idRequerimientoUsuario) {
-        log.info("[{}]", idRequerimientoUsuario);
+        log.info("idRequerimientoUsuario [{}]", idRequerimientoUsuario);
         return requerimientoUsuarioRepository.finalizarTareaAdministrador(idRequerimientoUsuario);
     }
 
