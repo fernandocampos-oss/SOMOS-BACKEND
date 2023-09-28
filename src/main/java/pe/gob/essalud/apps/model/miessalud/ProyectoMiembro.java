@@ -36,6 +36,8 @@ public class ProyectoMiembro {
     private String correo;
     @Column(name = "red")
     private String red;
+    @Column(name = "unidad")
+    private String unidad;
     @ManyToOne
     @JoinColumn(name = "id_proyecto")
     private Proyecto proyecto;

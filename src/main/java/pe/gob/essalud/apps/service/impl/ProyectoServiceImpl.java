@@ -5,8 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.proyecto.request.*;
+import pe.gob.essalud.apps.dto.proyecto.response.BandejaProyectosResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.UsuarioDataResponse;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.*;
@@ -15,10 +17,7 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.ProyectoService;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +41,7 @@ public class ProyectoServiceImpl implements ProyectoService {
     private final ProyectoImplementacionRepository proyectoImplementacionRepository;
     private final UsuarioRepository usuarioRepository;
     private final RedPersonalRepository redPersonalRepository;
+    private final UnidadOrganizativaRepository unidadOrganizativaRepository;
 
     private final AuthService authService;
     private final ModelMapper modelMapper;
@@ -51,18 +51,56 @@ public class ProyectoServiceImpl implements ProyectoService {
 
     @Override
     public List<ProyectoRequest> listarProyectos() {
-        return proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession()).stream()
+        try {
+            List<Proyecto> proyectos = proyectoRepository.findByUsuarioCreacion(authService.getIdUserSession());
+            if (proyectos.isEmpty()) {
+                List<ProyectoMiembro> miembros = proyectoMiembroRepository.findByIdUsuario(authService.getIdUserSession());
+                if (!miembros.isEmpty()) {
+                    Proyecto proyecto = proyectoRepository.findById(miembros.get(0).getProyecto().getIdProyecto()).orElse(new Proyecto());
+                    proyecto.setEnviado(true);
+                    proyectos.add(proyecto);
+                }
+            }
+            return obtenerProyectos(proyectos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public BandejaProyectosResponse obtenerBandejaProyectos() {
+        try {
+            BandejaProyectosResponse bandejaProyectoResponse =  new BandejaProyectosResponse();
+            List<Proyecto> proyectos = proyectoRepository.findAll();
+            int total = proyectos.size();
+            int enviados = (int) proyectos.stream().filter(Proyecto::isEnviado).count();
+            int pendientesEnvio = total - enviados;
+            bandejaProyectoResponse.setTotal(total);
+            bandejaProyectoResponse.setEnviados(enviados);
+            bandejaProyectoResponse.setPendientesEnvio(pendientesEnvio);
+            bandejaProyectoResponse.setProyectos(obtenerProyectos(proyectos));
+            return bandejaProyectoResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private List<ProyectoRequest> obtenerProyectos(List<Proyecto> proyectos) {
+        return proyectos.stream()
                 .map(p -> {
                     ProyectoRequest proyecto = new ProyectoRequest();
                     proyecto.setIdProyecto(p.getIdProyecto());
                     proyecto.setEnviado(p.isEnviado());
+                    proyecto.setIdUsuario(p.getUsuarioCreacion());
 
                     ProyectoGrupoRequest grupo = modelMapper.map(p.getProyectoGrupo(), ProyectoGrupoRequest.class);
                     grupo.setImagenBase64(UploadUtil.getFileBase64(p.getProyectoGrupo().getRutaImagen()));
 
                     List<ProyectoMiembroRequest> miembros = p.getProyectoMiembros().stream()
-                                    .map(m -> modelMapper.map(m, ProyectoMiembroRequest.class))
-                                    .collect(Collectors.toList());
+                            .map(m -> modelMapper.map(m, ProyectoMiembroRequest.class))
+                            .collect(Collectors.toList());
                     grupo.setMiembros(miembros);
                     proyecto.setGrupo(grupo);
 
@@ -241,7 +279,6 @@ public class ProyectoServiceImpl implements ProyectoService {
         if (redPersonal.isPresent()) {
             red = redPersonal.get().getDescripcion();
         }
-        String finalRed = red;
 
         List<String> codigoRedes = Arrays.asList(authService.getCodRedSession());
         if (authService.getCodRedSession().equals(COD_RED_SEDE_CENTRAL_AFESSALUD) ||
@@ -249,8 +286,12 @@ public class ProyectoServiceImpl implements ProyectoService {
             codigoRedes = Arrays.asList(COD_RED_SEDE_CENTRAL_AFESSALUD, COD_RED_SEDE_CENTRAL_FONDOSALUD);
         }
 
+        String finalRed = red;
         List<String> finalCodigoRedes = codigoRedes;
+        List<UnidadOrganizativa> unidadOrganizativaList = unidadOrganizativaRepository.findAll();
+
         return usuarioRepository.findAllByCodigoRedes(codigoRedes).stream()
+                .filter(u -> u.getIdEstadoUsuario().equals(EstadoUsuario.ACTIVADO))
                 .map(u -> {
                     UsuarioDataResponse usuarioResponse = modelMapper.map(u, UsuarioDataResponse.class);
                     if (finalCodigoRedes.size() > 1) {
@@ -262,13 +303,20 @@ public class ProyectoServiceImpl implements ProyectoService {
                     } else {
                         usuarioResponse.setRed(finalRed);
                     }
+                    Optional<UnidadOrganizativa> unidad = unidadOrganizativaList.stream()
+                            .filter(uo -> uo.getCodUnidad().equals(u.getCodigoUnidad())).findFirst();
+                    unidad.ifPresent(un -> usuarioResponse.setUnidad(un.getDescripcion()));
                     return usuarioResponse;
                 }).collect(Collectors.toList());
     }
 
     private void validarMiembro(ProyectoMiembroRequest proyectoMiembroRequest) {
-        if (!proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento()).isEmpty()) {
-            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es miembro de otro grupo");
+        try {
+            if (!proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento()).isEmpty()) {
+                throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es miembro de otro grupo");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

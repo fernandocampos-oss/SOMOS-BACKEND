@@ -17,5 +17,6 @@ public class UsuarioDataResponse {
     private String numeroCelular;
     private String correo;
     private String red;
+    private String unidad;
 
 }

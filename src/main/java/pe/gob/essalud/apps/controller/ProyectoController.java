@@ -3,7 +3,9 @@ package pe.gob.essalud.apps.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdminCentral;
 import pe.gob.essalud.apps.dto.proyecto.request.ProyectoRequest;
+import pe.gob.essalud.apps.dto.proyecto.response.BandejaProyectosResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.UsuarioDataResponse;
 import pe.gob.essalud.apps.service.ProyectoService;
 
@@ -21,6 +23,12 @@ public class ProyectoController {
     @GetMapping
     public List<ProyectoRequest> listarProyectos() {
         return proyectoService.listarProyectos();
+    }
+
+    @PreAuthorizeAdminCentral
+    @GetMapping("/bandeja")
+    public BandejaProyectosResponse obtenerBandejaProyectos() {
+        return proyectoService.obtenerBandejaProyectos();
     }
 
     @GetMapping("/usuarios-red")
