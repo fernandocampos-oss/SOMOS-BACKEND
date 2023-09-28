@@ -1,19 +1,21 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.LiderEquipo;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.UnidadOrganizativa;
+import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.LiderEquipoRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.RequerimientoUsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.UnidadOrganizativaRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.RequerimientoUsuarioService;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioService {
@@ -21,6 +23,7 @@ public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioServ
     private final RequerimientoUsuarioRepository requerimientoUsuarioRepository;
     private final AuthService authService;
     private final UnidadOrganizativaRepository unidadOrganizativaRepository;
+    private final LiderEquipoRepository liderEquipoRepository;
 
     @Override
     public List<RequerimientoUsuario> listar() {
@@ -33,9 +36,19 @@ public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioServ
     }
 
     @Override
-    public List<RequerimientoUsuario> listarRequerimientosPrincipalPorUnidadOrganizativa() {
-        String codUnidadOrganizacion= authService.getCodUnidadSession();
-        return requerimientoUsuarioRepository.listarRequerimientosPrincipalPorUnidadOrganizativa(codUnidadOrganizacion);
+    public List<RequerimientoUsuario> listarRequerimientosIntegrantesPrincipal() {
+        long idLider = authService.getIdUserSession();
+        List<LiderEquipo> listIntegrantes = new ArrayList<>();
+        listIntegrantes = liderEquipoRepository.listarIntegrantesPorLider(idLider);
+
+        List<RequerimientoUsuario> getRequerimientosAllIntegrantesPorLider =new ArrayList<>();
+
+        List<Long> arrayIdIntegrantes = new ArrayList<Long>();
+        for (LiderEquipo integrante : listIntegrantes) {
+            arrayIdIntegrantes.add(integrante.getIntegrante().getIdUsuario());
+		}
+        getRequerimientosAllIntegrantesPorLider = requerimientoUsuarioRepository.listarRequerimientosIntegrantesPrincipal(arrayIdIntegrantes);
+        return getRequerimientosAllIntegrantesPorLider;
     }
 
     @Override
@@ -77,35 +90,18 @@ public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioServ
     }
 
     @Override
-    public List<PersonalDTO> listarPersonalPorUnidadOrganizacional() {
-        String codUnidadOrganizacion= authService.getCodUnidadSession();
-        return requerimientoUsuarioRepository.listarPersonalPorUnidadOrganizacional(codUnidadOrganizacion);
-    }
-
-    @Override
     public List<RequerimientoUsuario> listarRequerimientosPorPersonal(Number idUsuario) {
         return requerimientoUsuarioRepository.listarRequerimientosPorPersonal(idUsuario);
     }
 
     @Override
-    public List<PersonalDTO> listarPersonalGeneral() {
-        return requerimientoUsuarioRepository.listarPersonalGeneral();
-    }
-
-    @Override
-    public int eliminarIntegranteUnidad(Number idUnidad) {
-        return requerimientoUsuarioRepository.eliminarIntegranteUnidad(idUnidad);
-    }
-
-    @Override
-    public int agregarIntegranteUnidad(Number idUnidad) {
-        String codUnidad= authService.getCodUnidadSession();
-        return requerimientoUsuarioRepository.agregarIntegranteUnidad(codUnidad, idUnidad);
+    public List<PersonalDTO> listarPersonalPorRed() {
+        String codRed =  authService.getCodRedSession();
+        return requerimientoUsuarioRepository.listarPersonalPorRed(codRed);
     }
 
     @Override
     public int finalizarTareaAdministrador(Number idRequerimientoUsuario) {
-        log.info("idRequerimientoUsuario [{}]", idRequerimientoUsuario);
         return requerimientoUsuarioRepository.finalizarTareaAdministrador(idRequerimientoUsuario);
     }
 

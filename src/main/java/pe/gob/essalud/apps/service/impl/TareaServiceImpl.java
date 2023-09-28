@@ -23,7 +23,6 @@ import pe.gob.essalud.apps.service.TareaService;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class TareaServiceImpl implements TareaService {
 
     private static final String RUTA_IMAGENES_EVIDENCIA = "/imagenes/requerimientos/";
@@ -85,10 +84,8 @@ public class TareaServiceImpl implements TareaService {
         evidencia.setPorcentajeAvance(request.getPorcentajeAvance());
         Evidencia result = evidenciaRepository.save(evidencia);
 
-        log.info("IdRequerimiento [{}]", request.getIdRequerimiento());
         Requerimiento requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
         int nuevoPorcentajeAvance = (requerimiento.getPorcentajeAvance() + request.getPorcentajeAvance());
-        log.info("incremento avance [{}]", nuevoPorcentajeAvance);
         tareaRepository.actualizaPorcentajeAvanceRequerimiento(nuevoPorcentajeAvance, request.getIdRequerimiento());
 
         String rutaImagen = uploadPath + RUTA_IMAGENES_EVIDENCIA + result.getIdEvidencia() + FORMATO_IMAGEN_EVIDENCIA;
@@ -104,7 +101,6 @@ public class TareaServiceImpl implements TareaService {
         List<Evidencia> list = tareaRepository.listarEvidenciaTarea(idTarea);
         List<EvidenciaResponseDTO> listDto = new ArrayList<>();
         for (Evidencia item : list) {
-            log.info("recorrido -i- [{}]", item.getIdEvidencia());
             String baseImagen = UploadUtil.getFileBase64(item.getRutaImagen());
             EvidenciaResponseDTO dto = new EvidenciaResponseDTO();
             dto.setIdEvidencia(item.getIdEvidencia());

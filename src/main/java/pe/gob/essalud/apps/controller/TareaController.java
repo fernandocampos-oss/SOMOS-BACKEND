@@ -21,7 +21,6 @@ import pe.gob.essalud.apps.service.TareaService;
 @RestController
 @RequestMapping(TareaController.TAREA)
 @RequiredArgsConstructor
-@Slf4j
 public class TareaController {
 
     static final String TAREA = "tareas";

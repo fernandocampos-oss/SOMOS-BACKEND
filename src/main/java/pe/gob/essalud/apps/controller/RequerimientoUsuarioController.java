@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
+import pe.gob.essalud.apps.dto.publicacion.request.PublicacionRequestDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.UnidadOrganizativa;
@@ -20,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping(RequerimientoUsuarioController.REQUERIMIENTOS)
 @RequiredArgsConstructor
-@Slf4j
 public class RequerimientoUsuarioController {
 
     static final String REQUERIMIENTOS = "requerimientosUsuarios";
@@ -35,6 +36,11 @@ public class RequerimientoUsuarioController {
         return ResponseEntity.created(location).build();
     }
 
+    @PutMapping("modificar/requerimiento/{idRequerimiento}")
+    public void modificarRequerimiento(@PathVariable Integer idRequerimiento, @RequestBody Requerimiento request) {
+        requerimientoService.modificarRequerimiento(idRequerimiento, request);
+    }
+
     @PostMapping("tareas/registrar/transaccion")
     public ResponseEntity<Object> registrar(@Valid @RequestBody RequerimientoUsuario obj) {
         RequerimientoUsuario reqPer = requerimientoUsuarioService.registrar(obj);
@@ -43,8 +49,8 @@ public class RequerimientoUsuarioController {
     }
 
     @GetMapping("/listar/principal")
-    public ResponseEntity<List<RequerimientoUsuario>> listarRequerimientosPrincipalPorUnidadOrganizativa() {
-        List<RequerimientoUsuario> lista = requerimientoUsuarioService.listarRequerimientosPrincipalPorUnidadOrganizativa();
+    public ResponseEntity<List<RequerimientoUsuario>> listarRequerimientosIntegrantesPrincipal() {
+        List<RequerimientoUsuario> lista = requerimientoUsuarioService.listarRequerimientosIntegrantesPrincipal();
         return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
     }
 
@@ -69,7 +75,6 @@ public class RequerimientoUsuarioController {
 
     @GetMapping("/aprobar")
     public int aprobarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
-        log.info("estado-idRequerimiento: [{}-{}]", estado, idRequerimientoUsuario);
         return requerimientoUsuarioService.aprobarRequerimiento(estado, idRequerimientoUsuario);
     }
 
@@ -88,33 +93,16 @@ public class RequerimientoUsuarioController {
         return requerimientoUsuarioService.listarRedes();
     }
 
-    @GetMapping("/listar/personal")
-    public ResponseEntity<List<PersonalDTO>> listarPersonalPorUnidadOrganizacional() {
-        List<PersonalDTO> lista = requerimientoUsuarioService.listarPersonalPorUnidadOrganizacional();
-        return new ResponseEntity<List<PersonalDTO>>(lista, HttpStatus.OK);
-    }
-
     @GetMapping("/listar/requerimientos/{idUsuario}/personal")
     public ResponseEntity<List<RequerimientoUsuario>> listarRequerimientosPorPersonal(@PathVariable("idUsuario") Number idUsuario) {
-        log.info("idUsuario: [{}]", idUsuario);
         List<RequerimientoUsuario> lista = requerimientoUsuarioService.listarRequerimientosPorPersonal(idUsuario);
         return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
     }
 
-    @GetMapping("/listar/personal/general")
-    public ResponseEntity<List<PersonalDTO>> listarPersonalGeneral() {
-        List<PersonalDTO> lista = requerimientoUsuarioService.listarPersonalGeneral();
+    @GetMapping("/listar/personal/red")
+    public ResponseEntity<List<PersonalDTO>> listarPersonalPorRed() {
+        List<PersonalDTO> lista = requerimientoUsuarioService.listarPersonalPorRed();
         return new ResponseEntity<List<PersonalDTO>>(lista, HttpStatus.OK);
-    }
-
-    @GetMapping("/integrante/eliminar")
-    public int eliminarIntegranteUnidad(@RequestParam("idUsuario") Number idUsuario) {
-        return requerimientoUsuarioService.eliminarIntegranteUnidad(idUsuario);
-    }
-
-    @GetMapping("/integrante/agregar")
-    public int agregarIntegranteUnidad(@RequestParam("idUsuario") Number idUsuario) {
-        return requerimientoUsuarioService.agregarIntegranteUnidad(idUsuario);
     }
 
     @GetMapping("/finalizar/requerimiento")

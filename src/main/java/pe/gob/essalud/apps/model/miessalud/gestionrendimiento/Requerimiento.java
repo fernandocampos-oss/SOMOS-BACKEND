@@ -39,6 +39,9 @@ public class Requerimiento {
     @JoinColumn(name="id_tipo_ingreso", nullable = false, foreignKey = @ForeignKey(name="fk_requerimiento_tipoingreso"))
     private TipoIngreso tipoIngreso;
 
+    @Column(name = "es_jefe")
+    private boolean esJefe;
+
     @Column(name = "usuario_creacion")
     private Integer usuarioCreacion;
 

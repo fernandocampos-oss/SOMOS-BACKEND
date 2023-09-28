@@ -5,7 +5,12 @@ import java.time.ZoneId;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import pe.gob.essalud.apps.dto.publicacion.request.PublicacionRequestDto;
+import pe.gob.essalud.apps.exceptions.ValidationException;
+import pe.gob.essalud.apps.model.miessalud.Publicacion;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.RequerimientoRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.RequerimientoUsuarioRepository;
@@ -14,6 +19,7 @@ import pe.gob.essalud.apps.service.RequerimientoService;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RequerimientoServiceImpl implements RequerimientoService {
 
     private final RequerimientoRepository requerimientoRepository;
@@ -29,6 +35,7 @@ public class RequerimientoServiceImpl implements RequerimientoService {
     public Requerimiento registrar(Requerimiento model) {
         if (model != null) {
             model.setEstado(true);
+            model.setUsuarioCreacion(authService.getIdUserSession());
             model.setFechaCreacion(LocalDateTime.now(ZoneId.of("America/Lima")));
         }
         Requerimiento req = requerimientoRepository.save(model);
@@ -36,9 +43,20 @@ public class RequerimientoServiceImpl implements RequerimientoService {
             int idUsuario = authService.getIdUserSession();
             String codRed =  authService.getCodRedSession();
             String codUnidadOrganizacion= authService.getCodUnidadSession();
-            requerimientoUsuarioRepository.registrarRequerimientoUsuario(req.getIdRequerimiento(), idUsuario, 1, codRed, codUnidadOrganizacion, LocalDateTime.now(ZoneId.of("America/Lima"))) ;
+            requerimientoUsuarioRepository.registrarRequerimientoUsuario(req.getIdRequerimiento(), idUsuario, 1, codRed, codUnidadOrganizacion, LocalDateTime.now(ZoneId.of("America/Lima")), req.isEsJefe()) ;
         }
         return req;
+    }
+
+    @Override
+    public void modificarRequerimiento(Integer idRequerimiento, Requerimiento request) {
+        requerimientoRepository.modificarRequerimiento(request.getNombre(),
+                request.getDescripcion(),
+                request.getTipoIngreso().getIdTipoIngreso(),
+                request.getIdentificador(),
+                LocalDateTime.now(ZoneId.of("America/Lima")),
+                authService.getIdUserSession(),
+                idRequerimiento);
     }
 
 }

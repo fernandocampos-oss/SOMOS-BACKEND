@@ -51,6 +51,9 @@ public class RequerimientoUsuario {
     @Column(name = "fecha_creacion")
     private LocalDateTime  fechaCreacion;
 
+    @Column(name = "es_jefe")
+    private boolean esJefe;
+
     @OneToMany(mappedBy = "requerimientoUsuario", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Tarea> listTarea;
 
