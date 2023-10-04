@@ -27,6 +27,8 @@ public class Inscripcion {
     private LocalDateTime fechaCreacion;
     @Column(name = "id_responsable")
     private Integer idResponsable;
+    @Column(name = "id_publicacion")
+    private Long idPublicacion;
 
     @PrePersist
     private void prePersist() {

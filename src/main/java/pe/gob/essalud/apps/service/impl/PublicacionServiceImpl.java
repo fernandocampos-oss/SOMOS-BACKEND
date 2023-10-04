@@ -12,7 +12,9 @@ import pe.gob.essalud.apps.dto.publicacion.request.PublicacionRequestDto;
 import pe.gob.essalud.apps.dto.publicacion.response.PublicacionResponseDto;
 import pe.gob.essalud.apps.exceptions.ForbiddenException;
 import pe.gob.essalud.apps.exceptions.ValidationException;
+import pe.gob.essalud.apps.model.miessalud.Inscripcion;
 import pe.gob.essalud.apps.model.miessalud.Publicacion;
+import pe.gob.essalud.apps.repository.miessalud.InscripcionRepository;
 import pe.gob.essalud.apps.repository.miessalud.PublicacionRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PublicacionService;
@@ -32,6 +34,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     private static final String FORMATO_IMAGEN_PUBLICACION = ".png";
 
     private final PublicacionRepository publicacionRepository;
+    private final InscripcionRepository inscripcionRepository;
     private final AuthService authService;
     private final ModelMapper modelMapper;
 
@@ -97,6 +100,11 @@ public class PublicacionServiceImpl implements PublicacionService {
         String rutaImagen = uploadPath + RUTA_IMAGENES_PUBLICACIONES + publicacion.getIdPublicacion() + FORMATO_IMAGEN_PUBLICACION;
         rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
         publicacion.setRutaImagen(rutaImagen);
+
+        if (publicacion.isAnuncio()) {
+            crearInscripcionAsociadaPublicacion(publicacion);
+        }
+
         return publicacion.getIdPublicacion();
     }
 
@@ -125,6 +133,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         publicacion.setTitulo(request.getTitulo());
         publicacion.setDescripcion(request.getDescripcion());
         publicacion.setUrlRedireccion(request.getUrlRedireccion());
+        publicacion.setAnuncio(request.isAnuncio());
         String rutaImagen = uploadPath + RUTA_IMAGENES_PUBLICACIONES + publicacion.getIdPublicacion() + FORMATO_IMAGEN_PUBLICACION;
         rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
         publicacion.setRutaImagen(rutaImagen);
@@ -178,6 +187,9 @@ public class PublicacionServiceImpl implements PublicacionService {
                     if (StringUtils.isNotBlank(p.getAlcanceRed())) {
                         response.setRedes(Arrays.asList(p.getAlcanceRed().split(",")));
                     }
+                    if (p.isAnuncio()) {
+                        response.setIdInscripcion(inscripcionRepository.findByIdPublicacion(p.getIdPublicacion()).orElse(new Inscripcion()).getIdInscripcion());
+                    }
                     return response;
                 })
                 .sorted(Comparator.comparingInt(PublicacionResponseDto::getIdPublicacion).reversed())
@@ -198,6 +210,15 @@ public class PublicacionServiceImpl implements PublicacionService {
             }
         }
         return StringUtils.join(redes, ",");
+    }
+
+    public void crearInscripcionAsociadaPublicacion(Publicacion publicacion) {
+        Inscripcion inscripcion = new Inscripcion();
+        inscripcion.setDescripcion(publicacion.getTitulo());
+        inscripcion.setEsActivo(true);
+        inscripcion.setIdResponsable(publicacion.getUsuarioCreacion());
+        inscripcion.setIdPublicacion(publicacion.getIdPublicacion());
+        inscripcionRepository.save(inscripcion);
     }
 
 }

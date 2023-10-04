@@ -15,6 +15,8 @@ public class PublicacionResponseDto {
     private String urlRedireccion;
     private LocalDateTime fechaCreacion;
     private int tipoAlcance;
+    private boolean anuncio;
+    private int idInscripcion;
     private List<String> redes;
 
 }

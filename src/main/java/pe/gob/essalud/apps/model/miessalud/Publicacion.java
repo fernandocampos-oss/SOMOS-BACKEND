@@ -30,6 +30,8 @@ public class Publicacion {
     private Integer tipoAlcance;
     @Column(name = "alcance_red")
     private String alcanceRed;
+    @Column(name = "anuncio")
+    private boolean anuncio;
     @Column(name = "es_activo")
     private boolean esActivo;
     @Column(name = "usuario_creacion", nullable = false)

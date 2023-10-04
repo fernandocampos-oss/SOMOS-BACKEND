@@ -12,6 +12,7 @@ public class PublicacionRequestDto {
     private String urlRedireccion;
     private String imagenBase64;
     private int alcance;
+    private boolean anuncio;
     private List<String> redes;
 
 }
