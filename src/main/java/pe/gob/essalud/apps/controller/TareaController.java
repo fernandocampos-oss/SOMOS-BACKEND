@@ -45,10 +45,10 @@ public class TareaController {
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/listar/evidencias/{idTarea}")
-    public ResponseEntity<List<EvidenciaResponseDTO>> listarEvidenciaTarea(@PathVariable("idTarea") Integer idTarea) {
-        List<EvidenciaResponseDTO> lista = tareaService.listarEvidenciaTarea(idTarea);
-        return new ResponseEntity<List<EvidenciaResponseDTO>>(lista, HttpStatus.OK);
+    @GetMapping("/obtener/evidencia/{idTarea}")
+    public ResponseEntity<EvidenciaResponseDTO> getEvidenciaPorTarea(@PathVariable("idTarea") Integer idTarea) {
+        EvidenciaResponseDTO evidencia = tareaService.getEvidenciaPorTarea(idTarea);
+        return new ResponseEntity<EvidenciaResponseDTO>(evidencia, HttpStatus.OK);
     }
 
     @GetMapping("/listar/pois")

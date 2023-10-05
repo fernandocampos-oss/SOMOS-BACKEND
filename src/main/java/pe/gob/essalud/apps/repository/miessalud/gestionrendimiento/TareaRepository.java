@@ -2,6 +2,7 @@ package pe.gob.essalud.apps.repository.miessalud.gestionrendimiento;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,12 +14,15 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
     @Modifying
-    @Query(value = "INSERT INTO tarea(nombre_tarea, plazo, id_requerimiento_usuario, estado, usuario_creacion, fecha_creacion) VALUES (:nombreTarea, :plazo, :idRequerimientoUsuario, true, :usuarioCreacion, :fechaCreacion)", nativeQuery = true)
+    @Query(value = "INSERT INTO tarea(nombre_tarea, plazo, id_requerimiento_usuario, estado, usuario_creacion, fecha_creacion, porcentaje_inicial, tiene_imagen, tiene_pdf) VALUES (:nombreTarea, :plazo, :idRequerimientoUsuario, true, :usuarioCreacion, :fechaCreacion, :porcentajeInicial, :tieneImagen, :tienePdf)", nativeQuery = true)
     Integer registrarTarea(@Param("nombreTarea") String nombreTarea,
-                           @Param("plazo") String plazo,
+                           @Param("plazo") LocalDateTime plazo,
                            @Param("idRequerimientoUsuario") Integer idRequerimientoUsuario,
                            @Param("usuarioCreacion") Number usuarioCreacion,
-                           @Param("fechaCreacion") LocalDateTime fechaCreacion);
+                           @Param("fechaCreacion") LocalDateTime fechaCreacion,
+                           @Param("porcentajeInicial") Number porcentajeInicial,
+                           @Param("tieneImagen") Number tieneImagen,
+                           @Param("tienePdf") Number tienePdf);
 
     @Transactional
     @Modifying
@@ -39,8 +43,8 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
     @Query(value = "UPDATE evidencia SET ruta_imagen = ? WHERE id_evidencia=?", nativeQuery = true)
     Integer actualizarRutaImagenEvidencia(@Param("rutaImagen") String rutaImagen, @Param("idEvidencia") Number idEvidencia);
 
-    @Query("SELECT e FROM Evidencia e WHERE e.tarea.idTarea = :idTarea ORDER BY e.fechaCreacion DESC")
-    List<Evidencia> listarEvidenciaTarea(@Param("idTarea") Integer idTarea);
+    @Query("SELECT e FROM Evidencia e WHERE e.tarea.idTarea = :idTarea")
+    Optional<Evidencia> getEvidenciaPorTarea(@Param("idTarea") Integer idTarea);
 
     @Transactional
     @Modifying
@@ -55,6 +59,13 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
     @Query("SELECT r FROM Requerimiento r WHERE r.idRequerimiento = :idRequerimiento")
     Requerimiento getByIdRequerimiento(@Param("idRequerimiento") Integer idRequerimiento);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE tarea SET tiene_imagen = ?, tiene_pdf = ? WHERE id_tarea=?", nativeQuery = true)
+    Integer actualizarEstadoArchivoTarea(@Param("tieneImagen") Number tieneImagen,
+                                         @Param("tienePdf") Number tienePdf,
+                                         @Param("idTarea") Number idTarea);
 
 }
 

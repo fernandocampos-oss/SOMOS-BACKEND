@@ -17,7 +17,7 @@ public interface TareaService extends IcrudService<Tarea> {
 
     long crearEvidencia(EvidenciaRequestDTO request);
 
-    List<EvidenciaResponseDTO> listarEvidenciaTarea(Integer idTarea);
+    EvidenciaResponseDTO getEvidenciaPorTarea(Integer idTarea);
 
     List<Poi> listarAllPoi();
 

@@ -1,8 +1,8 @@
 package pe.gob.essalud.apps.service;
 
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
+import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.UnidadOrganizativa;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public interface RequerimientoUsuarioService extends IcrudService<RequerimientoU
 
     int derivarRequerimiento(Number estado, String motivo, String codUnidadReceptor, Number idRequerimientoUsuario);
 
-    List<UnidadOrganizativa> listarRedes();
+    List<UnidadOrganizativa> listarUnidad();
 
     List<RequerimientoUsuario> listarRequerimientosPorPersonal(Number idUsuario);
 

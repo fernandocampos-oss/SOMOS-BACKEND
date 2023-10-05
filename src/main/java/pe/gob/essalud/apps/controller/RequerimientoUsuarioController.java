@@ -1,17 +1,14 @@
 package pe.gob.essalud.apps.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
-import pe.gob.essalud.apps.dto.publicacion.request.PublicacionRequestDto;
+import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.UnidadOrganizativa;
 import pe.gob.essalud.apps.service.RequerimientoService;
 import pe.gob.essalud.apps.service.RequerimientoUsuarioService;
 
@@ -72,7 +69,6 @@ public class RequerimientoUsuarioController {
         return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
     }
 
-
     @GetMapping("/aprobar")
     public int aprobarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
         return requerimientoUsuarioService.aprobarRequerimiento(estado, idRequerimientoUsuario);
@@ -89,8 +85,8 @@ public class RequerimientoUsuarioController {
     }
 
     @GetMapping("/listar/unidadOrganizacion")
-    public List<UnidadOrganizativa> listarRedes() {
-        return requerimientoUsuarioService.listarRedes();
+    public List<UnidadOrganizativa> listarUnidad() {
+        return requerimientoUsuarioService.listarUnidad();
     }
 
     @GetMapping("/listar/requerimientos/{idUsuario}/personal")

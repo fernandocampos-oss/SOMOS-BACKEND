@@ -3,12 +3,12 @@ package pe.gob.essalud.apps.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
+import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.LiderEquipo;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.UnidadOrganizativa;
+import pe.gob.essalud.apps.repository.miessalud.UnidadOrganizativaRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.LiderEquipoRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.RequerimientoUsuarioRepository;
-import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.UnidadOrganizativaRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.RequerimientoUsuarioService;
 
@@ -85,7 +85,7 @@ public class RequerimientoUsuarioServiceImpl implements RequerimientoUsuarioServ
     }
 
     @Override
-    public List<UnidadOrganizativa> listarRedes() {
+    public List<UnidadOrganizativa> listarUnidad() {
         return unidadOrganizativaRepository.findAll();
     }
 

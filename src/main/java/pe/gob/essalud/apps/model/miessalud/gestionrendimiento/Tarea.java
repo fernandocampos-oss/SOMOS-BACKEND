@@ -23,7 +23,7 @@ public class Tarea {
     private String nombreTarea;
 
     @Column(name = "plazo")
-    private String plazo;
+    private LocalDateTime plazo;
 
     @JsonIgnore
     @ManyToOne
@@ -32,6 +32,15 @@ public class Tarea {
 
     @Column(name = "estado")
     private boolean estado;
+
+    @Column(name="porcentaje_inicial")
+    private int porcentajeInicial;
+
+    @Column(name = "tiene_imagen")
+    private int tieneImagen;
+
+    @Column(name = "tiene_pdf")
+    private int tienePdf;
 
     @Column(name = "usuario_creacion")
     private Integer usuarioCreacion;

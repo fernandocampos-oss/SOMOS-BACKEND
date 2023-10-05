@@ -30,14 +30,14 @@ public class Evidencia {
     @Column(name = "ruta_imagen")
     private String rutaImagen;
 
-    @Column(name = "nombre_imagen")
-    private String nombreImagen;
-
-    @Column(name = "size_imagen")
-    private int sizeImagen;
-
-    @Column(name = "tipo_imagen")
-    private String tipoImagen;
+//    @Column(name = "nombre_imagen")
+//    private String nombreImagen;
+//
+//    @Column(name = "size_imagen")
+//    private int sizeImagen;
+//
+//    @Column(name = "tipo_imagen")
+//    private String tipoImagen;
 
     @Column(name = "extension")
     private String extension;
