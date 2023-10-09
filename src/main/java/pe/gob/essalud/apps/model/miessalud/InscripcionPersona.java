@@ -24,6 +24,12 @@ public class InscripcionPersona {
     private boolean estadoActivo;
     @Column(name = "fecha_inscripcion", updatable = false)
     private LocalDateTime fechaInscripcion;
+    @Column(name = "descripcion")
+    private String descripcion;
+    @Column(name = "id_lider")
+    private Integer idLider;
+    @Column(name = "ruta_imagen")
+    private String rutaImagen;
 
     @PrePersist
     private void prePersist() {
