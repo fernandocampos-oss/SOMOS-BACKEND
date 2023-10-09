@@ -13,6 +13,7 @@ import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.*;
 import pe.gob.essalud.apps.repository.miessalud.InscripcionPersonaRepository;
 import pe.gob.essalud.apps.repository.miessalud.InscripcionRepository;
+import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.sqlmap.InscripcionMyRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.InscripcionService;
@@ -29,6 +30,7 @@ public class InscripcionServiceImpl implements InscripcionService {
     private final InscripcionRepository inscripcionRepository;
     private final InscripcionPersonaRepository inscripcionPersonaRepository;
     private final InscripcionMyRepository inscripcionMyRepository;
+    private final UsuarioRepository usuarioRepository;
     private static final String RUTA_IMAGENES_INSCRIPCIONES = "/imagenes/inscripciones/";
     private static final String FORMATO_IMAGEN_INSCRIPCION = ".png";
 
@@ -61,8 +63,6 @@ public class InscripcionServiceImpl implements InscripcionService {
     @Transactional
     public void guardarInscripcion(InscripcionRequestDto request){
 
-        System.out.println(request.getIdInscripcion());
-        System.out.println(request);
         Inscripcion inscripcion = inscripcionRepository.findById(request.getIdInscripcion())
                 .orElseThrow(() -> new ValidationException("La encuesta no se encuentra activa o registrada"));
 
@@ -76,6 +76,9 @@ public class InscripcionServiceImpl implements InscripcionService {
 
                 inscripcionPersonaRepository.save(inscripcionPersona);
             } else if (request.getTipoInscripcion() == 2) {
+                for (Integer idInscrito: request.getInscritos()){
+                    validarMiembroInscripcion(idInscrito, request.getIdInscripcion());
+                }
                 String rutaImagen = uploadPath + RUTA_IMAGENES_INSCRIPCIONES + request.getIdInscripcion() + "_" + idUsuario + FORMATO_IMAGEN_INSCRIPCION;
                 rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
                 for (Integer idInscrito: request.getInscritos()){
@@ -115,5 +118,24 @@ public class InscripcionServiceImpl implements InscripcionService {
             return true;
         }
         return false;
+    }
+
+    private void validarMiembroInscripcion(Integer idUsuario, Integer idInscripcion) {
+
+        Optional<InscripcionPersona> miembroInscripcion;
+        try{
+            miembroInscripcion = inscripcionPersonaRepository.findByIdUsuarioAndIdInscripcion(idUsuario, idInscripcion);
+        } catch(Exception e){
+            e.printStackTrace();
+            miembroInscripcion = Optional.empty();
+        }
+        if (!miembroInscripcion.isEmpty()) {
+            Optional<Usuario> user = usuarioRepository.findById(Long.valueOf(idUsuario));
+            throw new ValidationException("El integrante con DNI " + user.get().getNumeroDocumento() + ", ya se encuentra inscrito en otro grupo");
+        }
+        /*try {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
     }
 }
