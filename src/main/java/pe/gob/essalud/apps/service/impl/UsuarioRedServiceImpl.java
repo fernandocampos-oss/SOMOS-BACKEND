@@ -5,10 +5,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.common.constants.EstadoUsuario;
 import pe.gob.essalud.apps.common.constants.RoleType;
+import pe.gob.essalud.apps.dto.auth.UserSessionDto;
+import pe.gob.essalud.apps.dto.usuario.response.UsuarioInformacionResponseDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
+import pe.gob.essalud.apps.dto.usuariored.request.AdministracionRedUsuariosRequestDto;
 import pe.gob.essalud.apps.dto.usuariored.request.UsuarioRedRequest;
-import pe.gob.essalud.apps.dto.usuariored.response.RedResponse;
-import pe.gob.essalud.apps.dto.usuariored.response.UsuarioRedResponse;
+import pe.gob.essalud.apps.dto.usuariored.response.*;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.RedPersonal;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
@@ -18,6 +20,7 @@ import pe.gob.essalud.apps.repository.miessalud.PublicacionRepository;
 import pe.gob.essalud.apps.repository.miessalud.RedPersonalRepository;
 import pe.gob.essalud.apps.repository.miessalud.UsuarioRedRepository;
 import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
+import pe.gob.essalud.apps.repository.miessalud.sqlmap.UsuarioRedMyRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.UsuarioRedService;
 
@@ -32,6 +35,7 @@ import java.util.stream.Collectors;
 public class UsuarioRedServiceImpl implements UsuarioRedService {
 
     private final UsuarioRedRepository usuarioRedRepository;
+    private final UsuarioRedMyRepository usuarioRedMyRepository;
     private final UsuarioRepository usuarioRepository;
     private final RedPersonalRepository redPersonalRepository;
     private final PublicacionRepository publicacionRepository;
@@ -216,4 +220,79 @@ public class UsuarioRedServiceImpl implements UsuarioRedService {
         }
     }
 
+    @Override
+    public AdministracionRedUsuariosResponseDto obtenerUsuariosRedes(AdministracionRedUsuariosRequestDto request){
+        UserSessionDto activeUser = authService.getUserSession();
+        AdministracionRedUsuariosResponseDto respuesta = new AdministracionRedUsuariosResponseDto();
+        List<UsuarioInformacionResponseDto> usuariosRed = new ArrayList<>();
+        List<String> codigosRedes = new ArrayList<>();
+        if(activeUser.getIdRol() == RoleType.ADMIN_CENTRAL){
+
+            respuesta.setRedes(listarRedes());
+        }
+        else{
+            List<RedPersonal> redes = new ArrayList<>();
+            for (RedPersonal red : usuarioRedMyRepository.getRedesAsignadasActivas(activeUser.getId())){
+                redes.add(red);
+            }
+            respuesta.setRedes(redes);
+        }
+        if(request.getCodRed() == ""){
+            codigosRedes = respuesta.getRedes().stream().map(RedPersonal::getCodRed).collect(Collectors.toList());
+            for(UsuarioInformacionResponseDto usuario :usuarioRedMyRepository.getUsuariosRedActivos(codigosRedes, request.getCantidad())){
+                usuariosRed.add(usuario);
+            }
+        }
+        else{
+            codigosRedes.add(request.getCodRed());
+            for(UsuarioInformacionResponseDto usuario :usuarioRedMyRepository.getUsuariosRedActivos(codigosRedes, request.getCantidad())){
+                usuariosRed.add(usuario);
+            }
+        }
+        respuesta.setUsuarios(usuariosRed);
+        return respuesta;
+    }
+
+    @Override
+    public DatosRedesAsignadasResponse getDatosRedesAsignadas(){
+        UserSessionDto activeUser = authService.getUserSession();
+        DatosRedesAsignadasResponse respuesta = new DatosRedesAsignadasResponse();
+        List<RedPersonal> redes = new ArrayList<>();
+        List<DatoRedResponse> redesInfo = new ArrayList<>();
+        int cantidadUsuarios = 0;
+        int cantidadAdmin = 0;
+        int cantidadAsist = 0;
+        if(activeUser.getIdRol() == RoleType.ADMIN_CENTRAL){
+            redes = listarRedes();
+        }
+        else{
+            for (RedPersonal red : usuarioRedMyRepository.getRedesAsignadasActivas(activeUser.getId())){
+                redes.add(red);
+            }
+        }
+        redes.forEach(red->{
+            if (usuarioRedMyRepository.getDatosRedesAsignadas(red.getCodRed()) != null){
+                redesInfo.add(usuarioRedMyRepository.getDatosRedesAsignadas(red.getCodRed()));
+            }
+            else{
+                DatoRedResponse RedVacia = new DatoRedResponse();
+                RedVacia.setCodRed(red.getCodRed());
+                RedVacia.setDescripcion(red.getDescripcion());
+                RedVacia.setCantidad(0);
+                RedVacia.setPersonalAdministrativo(0);
+                RedVacia.setPersonalAsistencial(0);
+                redesInfo.add(RedVacia);
+            }
+        });
+        respuesta.setDatosRedes(redesInfo);
+        for (DatoRedResponse red: respuesta.getDatosRedes()) {
+            cantidadUsuarios += red.getCantidad();
+            cantidadAdmin += red.getPersonalAdministrativo();
+            cantidadAsist += red.getPersonalAsistencial();
+        }
+        respuesta.setCuentaTotalUsuarios(cantidadUsuarios);
+        respuesta.setCuentaAdministrativos(cantidadAdmin);
+        respuesta.setCuentaAsistenciales(cantidadAsist);
+        return respuesta;
+    }
 }

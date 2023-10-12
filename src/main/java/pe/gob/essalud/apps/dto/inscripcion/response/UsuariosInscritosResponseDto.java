@@ -15,5 +15,8 @@ public class UsuariosInscritosResponseDto {
     private String correo;
     private boolean estadoActivo;
     private LocalDate fechaInscripcion;
+    private String descripcion;
+    public Integer idLider;
+    private String rutaImagen;
 
 }

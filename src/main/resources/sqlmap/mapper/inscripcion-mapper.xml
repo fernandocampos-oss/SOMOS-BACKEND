@@ -12,7 +12,10 @@
                 u.numero_celular 				numeroCelular,
                 u.correo,
                 i.estado_activo					estadoActivo,
-                i.fecha_inscripcion				fechaInscripcion
+                i.fecha_inscripcion				fechaInscripcion,
+                i.descripcion,
+                i.id_lider                      idLider,
+                i.ruta_imagen                   rutaImagen
         FROM inscripcion_persona i
         INNER JOIN usuario u ON u.id_usuario = i.id_usuario
         WHERE i.id_inscripcion = #{idInscripcion}
