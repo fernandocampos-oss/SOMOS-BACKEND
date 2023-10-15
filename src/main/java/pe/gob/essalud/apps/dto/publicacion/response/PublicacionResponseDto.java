@@ -16,6 +16,7 @@ public class PublicacionResponseDto {
     private LocalDateTime fechaCreacion;
     private int tipoAlcance;
     private boolean anuncio;
+    private boolean votacion;
     private int idInscripcion;
     private List<String> redes;
 

@@ -102,7 +102,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         publicacion.setRutaImagen(rutaImagen);
 
         if (publicacion.isAnuncio()) {
-            crearInscripcionAsociadaPublicacion(publicacion);
+            crearInscripcionAsociadaPublicacion(publicacion, request.isVotacion());
         }
 
         return publicacion.getIdPublicacion();
@@ -188,7 +188,9 @@ public class PublicacionServiceImpl implements PublicacionService {
                         response.setRedes(Arrays.asList(p.getAlcanceRed().split(",")));
                     }
                     if (p.isAnuncio()) {
-                        response.setIdInscripcion(inscripcionRepository.findByIdPublicacion(p.getIdPublicacion()).orElse(new Inscripcion()).getIdInscripcion());
+                        Inscripcion inscripcion = inscripcionRepository.findByIdPublicacion(p.getIdPublicacion()).orElse(new Inscripcion());
+                        response.setIdInscripcion(inscripcion.getIdInscripcion());
+                        response.setVotacion(inscripcion.isVotacion());
                     }
                     return response;
                 })
@@ -212,12 +214,14 @@ public class PublicacionServiceImpl implements PublicacionService {
         return StringUtils.join(redes, ",");
     }
 
-    public void crearInscripcionAsociadaPublicacion(Publicacion publicacion) {
+    public void crearInscripcionAsociadaPublicacion(Publicacion publicacion, boolean votacion) {
         Inscripcion inscripcion = new Inscripcion();
         inscripcion.setDescripcion(publicacion.getTitulo());
         inscripcion.setEsActivo(true);
         inscripcion.setIdResponsable(publicacion.getUsuarioCreacion());
         inscripcion.setIdPublicacion(publicacion.getIdPublicacion());
+        inscripcion.setVotacion(votacion);
+        inscripcion.setVotoActivo(false);
         inscripcionRepository.save(inscripcion);
     }
 

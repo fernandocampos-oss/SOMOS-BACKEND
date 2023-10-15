@@ -29,6 +29,10 @@ public class Inscripcion {
     private Integer idResponsable;
     @Column(name = "id_publicacion")
     private Long idPublicacion;
+    @Column(name = "votacion")
+    private boolean votacion;
+    @Column(name = "voto_activo")
+    private boolean votoActivo;
 
     @PrePersist
     private void prePersist() {
