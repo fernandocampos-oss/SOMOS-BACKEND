@@ -107,6 +107,7 @@ public class InscripcionServiceImpl implements InscripcionService {
     @Override
     public ReporteInscritosDto getUsuariosInscritos(int idInscripcion){
         ReporteInscritosDto reporte = new ReporteInscritosDto();
+        Inscripcion inscripcionRequerida = inscripcionRepository.findByIdInscripcion(idInscripcion);
         Optional<InscripcionPersona> ins = inscripcionPersonaRepository.findByIdUsuarioAndIdInscripcion(347,4);
         List<UsuariosInscritosResponseDto> usuariosInscritos;
         usuariosInscritos = inscripcionMyRepository.getUsuariosInscritos(idInscripcion);
@@ -120,20 +121,11 @@ public class InscripcionServiceImpl implements InscripcionService {
                 }
                 return x;
             });
-            /*usuariosInscritos.stream().map(user->{
-                        if(user.getIdUsuario() == user.getIdLider()){
-                            user.setRutaImagen(UploadUtil.getFileBase64(user.getRutaImagen()));
-                        }else{
-                            user.setRutaImagen(UploadUtil.getFileBase64(user.getRutaImagen()));
-                        }
-                        return user;
-                });
-            Map<Object, List<UsuariosInscritosResponseDto>> usuariosGrupo =
-                    usuariosInscritos.stream().collect(Collectors.groupingBy(w -> w.idLider));
-            System.out.println(usuariosGrupo);*/
         }
         reporte.setIdInscripcion(idInscripcion);
-        reporte.setDescripcion(inscripcionRepository.findByIdInscripcion(idInscripcion).getDescripcion());
+        reporte.setDescripcion(inscripcionRequerida.getDescripcion());
+        reporte.setVotacion(inscripcionRequerida.isVotacion());
+        reporte.setVotoActivo(inscripcionRequerida.isVotoActivo());
         reporte.setInscritos(usuariosInscritos);
 
         return reporte;
