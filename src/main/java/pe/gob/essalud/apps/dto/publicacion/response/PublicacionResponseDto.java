@@ -17,6 +17,7 @@ public class PublicacionResponseDto {
     private int tipoAlcance;
     private boolean anuncio;
     private boolean votacion;
+    private boolean votoActivo;
     private int idInscripcion;
     private List<String> redes;
 

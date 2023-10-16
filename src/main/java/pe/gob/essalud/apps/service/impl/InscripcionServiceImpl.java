@@ -193,6 +193,15 @@ public class InscripcionServiceImpl implements InscripcionService {
         }
     }
 
+    @Override
+    public void activarVotacion(int idInscripcion, boolean votoActivo) {
+        Inscripcion inscripcion = inscripcionRepository.findById(idInscripcion)
+                .orElseThrow(() -> new ValidationException("La inscripción no se encuentra activa o registrada"));
+
+        inscripcion.setVotoActivo(votoActivo);
+        inscripcionRepository.save(inscripcion);
+    }
+
     public boolean usuarioEstaInscrito(Integer idUsuario, int idInscripcion) {
         Optional<InscripcionPersona> usuarioInscripcion = inscripcionPersonaRepository.findByIdUsuarioAndIdInscripcion(idUsuario, idInscripcion);
         if (usuarioInscripcion.isPresent()) {

@@ -19,4 +19,6 @@ public interface InscripcionService {
      List<InscripcionVotacionResponseDto> listarVotacionesActivas();
 
      void guardarVoto(InscripcionVotoRequestDto votoRequestDto);
+
+     void activarVotacion(int idInscripcion, boolean votoActivo);
 }

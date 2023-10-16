@@ -47,4 +47,9 @@ public class InscripcionController {
         inscripcionService.guardarVoto(votoRequestDto);
     }
 
+    @PutMapping("/{idInscripcion}/activar-votacion/{votoActivo}")
+    public void activarVotacion(@PathVariable int idInscripcion, @PathVariable boolean votoActivo) {
+        inscripcionService.activarVotacion(idInscripcion, votoActivo);
+    }
+
 }

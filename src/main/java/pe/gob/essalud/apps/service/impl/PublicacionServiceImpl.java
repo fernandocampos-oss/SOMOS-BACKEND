@@ -191,6 +191,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                         Inscripcion inscripcion = inscripcionRepository.findByIdPublicacion(p.getIdPublicacion()).orElse(new Inscripcion());
                         response.setIdInscripcion(inscripcion.getIdInscripcion());
                         response.setVotacion(inscripcion.isVotacion());
+                        response.setVotoActivo(inscripcion.isVotoActivo());
                     }
                     return response;
                 })
