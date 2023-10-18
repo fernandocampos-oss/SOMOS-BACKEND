@@ -20,5 +20,16 @@
         INNER JOIN usuario u ON u.id_usuario = i.id_usuario
         WHERE i.id_inscripcion = #{idInscripcion}
     </select>
-
+    <select id="getVotacionesInscripcion" resultType="ReporteInscVotacionResponseDto">
+        SELECT
+                ip.id_ins_persona               idInsPersona,
+                ip.id_lider                     idLider,
+                count(*)                        votos
+        FROM inscripcion_voto iv
+        INNER JOIN inscripcion_persona ip ON ip.id_ins_persona = iv.id_candidato
+        WHERE iv.id_inscripcion = #{idInscripcion}
+        GROUP BY ip.id_ins_persona,
+        ip.id_lider
+        ORDER BY ip.id_ins_persona
+    </select>
 </mapper>

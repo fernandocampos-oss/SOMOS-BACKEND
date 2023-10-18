@@ -17,6 +17,7 @@
         <typeAlias type="pe.gob.essalud.apps.dto.auth.UserSessionDto" alias="UserSession"/>
         <typeAlias type="pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto" alias="UsuarioResponse"/>
         <typeAlias type="pe.gob.essalud.apps.dto.inscripcion.response.UsuariosInscritosResponseDto" alias="UsuariosInscritosResponseDto"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.inscripcion.response.ReporteInscVotacionResponseDto" alias="ReporteInscVotacionResponseDto"/>
         <typeAlias type="pe.gob.essalud.apps.dto.usuario.response.UsuarioInformacionResponseDto" alias="UsuarioInformacionResponseDto"/>
         <typeAlias type="pe.gob.essalud.apps.model.miessalud.RedPersonal" alias="RedPersonal"/>
         <typeAlias type="pe.gob.essalud.apps.dto.usuariored.response.DatoRedResponse" alias="DatoRedResponse"/>

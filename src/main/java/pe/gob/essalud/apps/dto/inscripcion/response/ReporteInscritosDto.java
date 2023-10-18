@@ -12,4 +12,5 @@ public class ReporteInscritosDto {
     private boolean votacion;
     private boolean votoActivo;
     private List<UsuariosInscritosResponseDto> inscritos;
+    private List<ReporteInscVotacionResponseDto> votacionesResultado;
 }

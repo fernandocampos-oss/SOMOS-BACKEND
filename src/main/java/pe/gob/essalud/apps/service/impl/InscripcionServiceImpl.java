@@ -121,6 +121,10 @@ public class InscripcionServiceImpl implements InscripcionService {
                 }
                 return x;
             });
+
+        }
+        if (inscripcionRequerida.isVotacion()){
+            reporte.setVotacionesResultado(inscripcionMyRepository.getVotacionesInscripcion(idInscripcion));
         }
         reporte.setIdInscripcion(idInscripcion);
         reporte.setDescripcion(inscripcionRequerida.getDescripcion());
