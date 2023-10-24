@@ -108,7 +108,6 @@ public class InscripcionServiceImpl implements InscripcionService {
     public ReporteInscritosDto getUsuariosInscritos(int idInscripcion){
         ReporteInscritosDto reporte = new ReporteInscritosDto();
         Inscripcion inscripcionRequerida = inscripcionRepository.findByIdInscripcion(idInscripcion);
-        Optional<InscripcionPersona> ins = inscripcionPersonaRepository.findByIdUsuarioAndIdInscripcion(347,4);
         List<UsuariosInscritosResponseDto> usuariosInscritos;
         usuariosInscritos = inscripcionMyRepository.getUsuariosInscritos(idInscripcion);
         if (idInscripcion == 2){
