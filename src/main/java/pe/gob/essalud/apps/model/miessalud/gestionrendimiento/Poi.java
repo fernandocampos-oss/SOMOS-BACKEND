@@ -17,10 +17,6 @@ public class Poi {
     @Column(name="descripcion")
     private String descripcion;
 
-    @ManyToOne
-    @JoinColumn(name="id_indicador", nullable = false, foreignKey = @ForeignKey(name="fk_poi_indicador"))
-    private Indicador indicador;
-
     @Column(name = "estado")
     private boolean estado;
 

@@ -14,6 +14,9 @@ public class EstadoTarea {
     @Column(name = "id_estado_tarea")
     private Integer idEstadoTarea;
 
+    @Column(name="codigo")
+    private Integer codigo;
+
     @Column(name="descripcion", nullable = false)
     private String descripcion;
 

@@ -87,11 +87,11 @@ public class TareaServiceImpl implements TareaService {
         Evidencia result = evidenciaRepository.save(evidencia);
 
         Requerimiento requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
-        int nuevoPorcentajeAvance = (requerimiento.getPorcentajeAvance() + request.getPorcentajeAvance());
-        if(nuevoPorcentajeAvance > 100){
-            throw new ValidationException("El porcentaje ingresado excede el 100%");
-        }
-        tareaRepository.actualizaPorcentajeAvanceRequerimiento(nuevoPorcentajeAvance, request.getIdRequerimiento());
+//        int nuevoPorcentajeAvance = (requerimiento.getPorcentajeAvance() + request.getPorcentajeAvance());
+//        if(nuevoPorcentajeAvance > 100){
+//            throw new ValidationException("El porcentaje ingresado excede el 100%");
+//        }
+//        tareaRepository.actualizaPorcentajeAvanceRequerimiento(nuevoPorcentajeAvance, request.getIdRequerimiento());
 
         if(result.getExtension().equals("pdf")){
             String rutaArchivo = uploadPath + RUTA_PDF_EVIDENCIA + result.getIdEvidencia() + FORMATO_PDF_EVIDENCIA;

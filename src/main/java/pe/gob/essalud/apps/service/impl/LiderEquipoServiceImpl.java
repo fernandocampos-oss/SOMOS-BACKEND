@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.base.BaseService;
+import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
+import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.LiderEquipo;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.LiderEquipoRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.LiderEquipoService;
@@ -47,5 +50,15 @@ public class LiderEquipoServiceImpl extends BaseService implements LiderEquipoSe
     public int eliminarIntegrante(Number idIntegrante) {
         return liderEquipoRepository.eliminarIntegrante(idIntegrante);
     }
+
+//    @Override
+//    public List<Votante> listAllVotante() {
+//        return liderEquipoRepository.listAllVotante();
+//    }
+
+//    @Override
+//    public Usuario findUsuarioByNumeroDocumento(String numeroDocumento) {
+//        return liderEquipoRepository.findUsuarioByNumeroDocumento(numeroDocumento);
+//    }
 
 }

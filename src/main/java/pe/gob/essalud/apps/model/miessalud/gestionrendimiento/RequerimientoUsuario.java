@@ -54,6 +54,12 @@ public class RequerimientoUsuario {
     @Column(name = "es_jefe")
     private boolean esJefe;
 
+    @Column(name = "fecha_finalizacion")
+    private LocalDateTime  fechaFinalizacion;
+
+    @Column(name = "anio_registro")
+    private int  anioRegistro;
+
     @OneToMany(mappedBy = "requerimientoUsuario", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Tarea> listTarea;
 

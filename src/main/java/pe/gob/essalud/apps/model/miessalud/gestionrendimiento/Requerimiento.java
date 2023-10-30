@@ -26,11 +26,11 @@ public class Requerimiento {
     @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name="identificador")
-    private String identificador;
+//    @Column(name="identificador")
+//    private String identificador;
 
-    @Column(name="porcentaje_avance")
-    private int porcentajeAvance;
+    @Column(name="valor_meta")
+    private int valorMeta;
 
     @Column(name = "estado")
     private boolean estado;
@@ -41,6 +41,10 @@ public class Requerimiento {
 
     @Column(name = "es_jefe")
     private boolean esJefe;
+
+    @ManyToOne
+    @JoinColumn(name="id_tipo_valor_meta", nullable = false, foreignKey = @ForeignKey(name="fk_req_valormeta"))
+    private TipoValorMeta tipoValorMeta;
 
     @Column(name = "usuario_creacion")
     private Integer usuarioCreacion;

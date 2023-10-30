@@ -1,5 +1,6 @@
 package pe.gob.essalud.apps.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -43,7 +44,10 @@ public class RequerimientoServiceImpl implements RequerimientoService {
             int idUsuario = authService.getIdUserSession();
             String codRed =  authService.getCodRedSession();
             String codUnidadOrganizacion= authService.getCodUnidadSession();
-            requerimientoUsuarioRepository.registrarRequerimientoUsuario(req.getIdRequerimiento(), idUsuario, 1, codRed, codUnidadOrganizacion, LocalDateTime.now(ZoneId.of("America/Lima")), req.isEsJefe()) ;
+
+            LocalDate fecha_actual = LocalDate.now();
+            int anio_registro = fecha_actual.getYear();
+            requerimientoUsuarioRepository.registrarRequerimientoUsuario(req.getIdRequerimiento(), idUsuario, 1, codRed, codUnidadOrganizacion, LocalDateTime.now(ZoneId.of("America/Lima")), req.isEsJefe(), anio_registro) ;
         }
         return req;
     }
@@ -53,7 +57,7 @@ public class RequerimientoServiceImpl implements RequerimientoService {
         requerimientoRepository.modificarRequerimiento(request.getNombre(),
                 request.getDescripcion(),
                 request.getTipoIngreso().getIdTipoIngreso(),
-                request.getIdentificador(),
+//                request.getIdentificador(),
                 LocalDateTime.now(ZoneId.of("America/Lima")),
                 authService.getIdUserSession(),
                 idRequerimiento);

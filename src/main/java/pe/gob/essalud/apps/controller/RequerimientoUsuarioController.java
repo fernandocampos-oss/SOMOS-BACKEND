@@ -9,6 +9,8 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Requerimiento;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.RequerimientoUsuario;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoIngreso;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoValorMeta;
 import pe.gob.essalud.apps.service.RequerimientoService;
 import pe.gob.essalud.apps.service.RequerimientoUsuarioService;
 
@@ -63,21 +65,21 @@ public class RequerimientoUsuarioController {
         return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
     }
 
-    @GetMapping("/listar/rechazado")
-    public ResponseEntity<List<RequerimientoUsuario>> listarRequerimientosRechazadoPorUsuario() {
-        List<RequerimientoUsuario> lista = requerimientoUsuarioService.listarRequerimientosRechazadoPorUsuario();
-        return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
-    }
+//    @GetMapping("/listar/rechazado")
+//    public ResponseEntity<List<RequerimientoUsuario>> listarRequerimientosRechazadoPorUsuario() {
+//        List<RequerimientoUsuario> lista = requerimientoUsuarioService.listarRequerimientosRechazadoPorUsuario();
+//        return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
+//    }
 
     @GetMapping("/aprobar")
     public int aprobarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
         return requerimientoUsuarioService.aprobarRequerimiento(estado, idRequerimientoUsuario);
     }
 
-    @GetMapping("/rechazar")
-    public int rechazarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("motivo") String motivo, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
-        return requerimientoUsuarioService.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
-    }
+//    @GetMapping("/rechazar")
+//    public int rechazarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("motivo") String motivo, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
+//        return requerimientoUsuarioService.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
+//    }
 
     @GetMapping("/derivar")
     public int derivarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("motivo") String motivo, @RequestParam("codUnidadReceptor") String codUnidadReceptor, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
@@ -94,7 +96,7 @@ public class RequerimientoUsuarioController {
         List<RequerimientoUsuario> lista = requerimientoUsuarioService.listarRequerimientosPorPersonal(idUsuario);
         return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
     }
-
+//
     @GetMapping("/listar/personal/red")
     public ResponseEntity<List<PersonalDTO>> listarPersonalPorRed() {
         List<PersonalDTO> lista = requerimientoUsuarioService.listarPersonalPorRed();
@@ -104,6 +106,18 @@ public class RequerimientoUsuarioController {
     @GetMapping("/finalizar/requerimiento")
     public int finalizarTareaAdministrador(@RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
         return requerimientoUsuarioService.finalizarTareaAdministrador(idRequerimientoUsuario);
+    }
+
+    @GetMapping("/reporte/excel/anio/{anio}")
+    public ResponseEntity<List<RequerimientoUsuario>> getAllRequerimientoUsuarioPorAnio(@PathVariable("anio") Number anio) {
+        List<RequerimientoUsuario> lista = requerimientoUsuarioService.getAllRequerimientoUsuarioPorAnio(anio);
+        return new ResponseEntity<List<RequerimientoUsuario>>(lista, HttpStatus.OK);
+    }
+
+    @GetMapping("/listar/tipoValorMeta")
+    public ResponseEntity<List<TipoValorMeta>> listarAllTipoValorMeta() {
+        List<TipoValorMeta> lista = requerimientoUsuarioService.listarAllTipoValorMeta();
+        return new ResponseEntity<List<TipoValorMeta>>(lista, HttpStatus.OK);
     }
 
 }
