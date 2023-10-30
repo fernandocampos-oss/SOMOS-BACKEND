@@ -311,12 +311,16 @@ public class ProyectoServiceImpl implements ProyectoService {
     }
 
     private void validarMiembro(ProyectoMiembroRequest proyectoMiembroRequest) {
+
+        List<ProyectoMiembro> miembroList;
         try {
-            if (!proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento()).isEmpty()) {
-                throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es miembro de otro grupo");
-            }
+            miembroList = proyectoMiembroRepository.findByNumeroDocumento(proyectoMiembroRequest.getNumeroDocumento());
         } catch (Exception e) {
             e.printStackTrace();
+            miembroList = new ArrayList<>();
+        }
+        if (!miembroList.isEmpty()) {
+            throw new ValidationException("El integrante con DNI " + proyectoMiembroRequest.getNumeroDocumento() + ", ya es miembro de otro grupo");
         }
     }
 

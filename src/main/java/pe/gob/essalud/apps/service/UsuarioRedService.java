@@ -1,7 +1,10 @@
 package pe.gob.essalud.apps.service;
 
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
+import pe.gob.essalud.apps.dto.usuariored.request.AdministracionRedUsuariosRequestDto;
 import pe.gob.essalud.apps.dto.usuariored.request.UsuarioRedRequest;
+import pe.gob.essalud.apps.dto.usuariored.response.AdministracionRedUsuariosResponseDto;
+import pe.gob.essalud.apps.dto.usuariored.response.DatosRedesAsignadasResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.RedResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.UsuarioRedResponse;
 import pe.gob.essalud.apps.model.miessalud.RedPersonal;
@@ -19,5 +22,6 @@ public interface UsuarioRedService {
     void habilitarUsuario(long idUsuario, boolean habilitado);
     void habilitarUsuarioRed(long idUsuario, String codRed, boolean habilitado);
     void eliminarUsuarioRed(long idUsuario, String codRed);
-
+    AdministracionRedUsuariosResponseDto obtenerUsuariosRedes(AdministracionRedUsuariosRequestDto request);
+    DatosRedesAsignadasResponse getDatosRedesAsignadas();
 }

@@ -18,7 +18,7 @@ public class Inscripcion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_inscripcion")
-    private Integer idInscripcion;
+    private int idInscripcion;
     @Column(name = "descripcion")
     private String descripcion;
     @Column(name = "es_activo")
@@ -27,6 +27,12 @@ public class Inscripcion {
     private LocalDateTime fechaCreacion;
     @Column(name = "id_responsable")
     private Integer idResponsable;
+    @Column(name = "id_publicacion")
+    private Long idPublicacion;
+    @Column(name = "votacion")
+    private boolean votacion;
+    @Column(name = "voto_activo")
+    private boolean votoActivo;
 
     @PrePersist
     private void prePersist() {

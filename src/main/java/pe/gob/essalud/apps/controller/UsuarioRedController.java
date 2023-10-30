@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdmin;
 import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdminCentral;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
+import pe.gob.essalud.apps.dto.usuariored.request.AdministracionRedUsuariosRequestDto;
 import pe.gob.essalud.apps.dto.usuariored.request.UsuarioRedRequest;
+import pe.gob.essalud.apps.dto.usuariored.response.AdministracionRedUsuariosResponseDto;
+import pe.gob.essalud.apps.dto.usuariored.response.DatosRedesAsignadasResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.RedResponse;
 import pe.gob.essalud.apps.dto.usuariored.response.UsuarioRedResponse;
 import pe.gob.essalud.apps.model.miessalud.RedPersonal;
@@ -78,4 +81,13 @@ public class UsuarioRedController {
         usuarioRedService.eliminarUsuarioRed(idUsuario, codRed);
     }
 
+    @PreAuthorizeAdmin
+    @PostMapping("/usuarios-red-asignada")
+    public AdministracionRedUsuariosResponseDto obtenerUsuariosRedes(@RequestBody AdministracionRedUsuariosRequestDto request){
+        return usuarioRedService.obtenerUsuariosRedes(request);
+    }
+
+    @PreAuthorizeAdmin
+    @GetMapping("/datos-redes")
+    public DatosRedesAsignadasResponse getDatosRedesAsignadas(){ return usuarioRedService.getDatosRedesAsignadas();}
 }
