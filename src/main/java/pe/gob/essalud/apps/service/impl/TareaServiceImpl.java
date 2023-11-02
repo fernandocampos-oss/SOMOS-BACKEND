@@ -1,7 +1,6 @@
 package pe.gob.essalud.apps.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -16,10 +15,10 @@ import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
-import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EvidenciaRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.TareaRepository;
+import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.TipoIngresoRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.TareaService;
 
@@ -53,16 +52,16 @@ public class TareaServiceImpl implements TareaService {
     @Transactional
     @Override
     public Integer registrarTarea(TareaDTO dto) {
-        int result = tareaRepository.actualizarPoi(dto.getPoi().getIdPoi(), dto.getRequerimientoUsuario().getIdRequerimientoUsuario());
+        int result = tareaRepository.actualizarPoi(dto.getPoi().getIdActividad(), dto.getRequerimientoUsuario().getIdIndicadorUsuario());
         int usuarioCreacion = authService.getIdUserSession();
         if (!dto.getListTarea().isEmpty()) {
             for (Tarea i : dto.getListTarea()) {
-                tareaRepository.registrarTarea(i.getNombreTarea(), i.getPlazo(),
-                        dto.getRequerimientoUsuario().getIdRequerimientoUsuario(), usuarioCreacion,
-                        LocalDateTime.now(ZoneId.of("America/Lima")), i.getPorcentajeInicial(), 0, 0);
+                tareaRepository.registrarTarea(i.getNombre(), i.getPlazo(),
+                        dto.getRequerimientoUsuario().getIdIndicadorUsuario(), usuarioCreacion,
+                        LocalDateTime.now(ZoneId.of("America/Lima")), i.getPeso(), 0, 0);
             }
         }
-        return dto.getRequerimientoUsuario().getIdRequerimientoUsuario();
+        return dto.getRequerimientoUsuario().getIdIndicadorUsuario();
     }
 
     @Override
@@ -86,7 +85,7 @@ public class TareaServiceImpl implements TareaService {
         evidencia.setPorcentajeAvance(request.getPorcentajeAvance());
         Evidencia result = evidenciaRepository.save(evidencia);
 
-        Requerimiento requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
+        Indicador requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
 //        int nuevoPorcentajeAvance = (requerimiento.getPorcentajeAvance() + request.getPorcentajeAvance());
 //        if(nuevoPorcentajeAvance > 100){
 //            throw new ValidationException("El porcentaje ingresado excede el 100%");
@@ -129,13 +128,10 @@ public class TareaServiceImpl implements TareaService {
     }
 
     @Override
-    public List<Poi> listarAllPoi() {
+    public List<Actividad> listarAllPoi() {
         return tareaRepository.listarAllPoi();
     }
 
-    @Override
-    public List<TipoIngreso> listarAllTipoIngreso() {
-        return tareaRepository.listarAllTipoIngreso();
-    }
+
 
 }

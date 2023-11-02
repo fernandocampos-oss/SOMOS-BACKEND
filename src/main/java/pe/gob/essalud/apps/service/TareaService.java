@@ -3,7 +3,7 @@ package pe.gob.essalud.apps.service;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Poi;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoIngreso;
 
@@ -19,7 +19,7 @@ public interface TareaService extends IcrudService<Tarea> {
 
     EvidenciaResponseDTO getEvidenciaPorTarea(Integer idTarea);
 
-    List<Poi> listarAllPoi();
+    List<Actividad> listarAllPoi();
 
-    List<TipoIngreso> listarAllTipoIngreso();
+
 }

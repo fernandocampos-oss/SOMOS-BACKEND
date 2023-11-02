@@ -8,14 +8,13 @@ import javax.persistence.*;
 @Entity
 @Table(name = "estado_tarea")
 public class EstadoTarea {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_estado_tarea")
     private Integer idEstadoTarea;
 
     @Column(name="codigo")
-    private Integer codigo;
+    private String codigo;
 
     @Column(name="descripcion", nullable = false)
     private String descripcion;

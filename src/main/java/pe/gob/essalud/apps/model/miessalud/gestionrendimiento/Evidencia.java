@@ -41,16 +41,12 @@ public class Evidencia {
 
     @Column(name = "extension")
     private String extension;
-
     @Column(name = "usuario_creacion")
     private Integer usuarioCreacion;
-
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
-
     @Column(name = "usuario_modificacion")
     private Integer usuarioModificacion;
-
     @Column(name = "fecha_modificacion")
     private LocalDateTime  fechaModificacion;
 

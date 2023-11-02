@@ -1,7 +1,5 @@
 package pe.gob.essalud.apps.model.miessalud.gestionrendimiento;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,16 +11,15 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "estado_requerimiento")
-public class EstadoRequerimiento {
-
+@Table(name = "estado_indicador")
+public class EstadoIndicador {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_estado_requerimiento")
-    private Integer idEstadoRequerimiento;
+    @Column(name = "id_estado_indicador")
+    private Integer idEstadoIndicador;
 
     @Column(name="codigo")
-    private Integer codigo;
+    private String codigo;
 
     @Column(name="descripcion")
     private String descripcion;

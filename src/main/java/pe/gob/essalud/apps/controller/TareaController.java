@@ -6,7 +6,6 @@ import java.util.List;
 import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
 import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Poi;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoIngreso;
 import pe.gob.essalud.apps.service.TareaService;
 
@@ -22,8 +21,8 @@ import pe.gob.essalud.apps.service.TareaService;
 @RequestMapping(TareaController.TAREA)
 @RequiredArgsConstructor
 public class TareaController {
-
     static final String TAREA = "tareas";
+
     private final TareaService tareaService;
 
     @PostMapping("/registrar")
@@ -52,16 +51,12 @@ public class TareaController {
     }
 
     @GetMapping("/listar/pois")
-    public ResponseEntity<List<Poi>> listarAllPoi() {
-        List<Poi> lista = tareaService.listarAllPoi();
-        return new ResponseEntity<List<Poi>>(lista, HttpStatus.OK);
+    public ResponseEntity<List<Actividad>> listarAllPoi() {
+        List<Actividad> lista = tareaService.listarAllPoi();
+        return new ResponseEntity<List<Actividad>>(lista, HttpStatus.OK);
     }
 
-    @GetMapping("/listar/tipoIngreso")
-    public ResponseEntity<List<TipoIngreso>> listarAllTipoIngreso() {
-        List<TipoIngreso> lista = tareaService.listarAllTipoIngreso();
-        return new ResponseEntity<List<TipoIngreso>>(lista, HttpStatus.OK);
-    }
+
 
 }
 

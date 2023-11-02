@@ -25,5 +25,6 @@ public class Votante {
     private String apellidos;
     @Column(name = "id_segmento")
     private Integer idSegmento;
-
+    @Column(name = "id_usuario")
+    private Integer idUsuario;
 }

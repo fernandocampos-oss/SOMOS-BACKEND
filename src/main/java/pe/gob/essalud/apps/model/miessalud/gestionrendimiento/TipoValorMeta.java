@@ -22,7 +22,7 @@ public class TipoValorMeta {
     private Integer idTipoValorMeta;
 
     @Column(name="codigo")
-    private Integer codigo;
+    private String codigo;
 
     @Column(name="descripcion")
     private String descripcion;
