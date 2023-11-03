@@ -26,13 +26,26 @@ public class Inscripcion {
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
     @Column(name = "id_responsable")
-    private Integer idResponsable;
+    private String idResponsable;
     @Column(name = "id_publicacion")
     private Long idPublicacion;
     @Column(name = "votacion")
     private boolean votacion;
     @Column(name = "voto_activo")
     private boolean votoActivo;
+    @Column(name = "imagen_activa")
+    private boolean imagenActiva;
+    @Column(name = "imagen_descripcion")
+    private String imagenDescripcion;
+    @Column(name = "texto_activo")
+    private boolean textoActivo;
+    @Column(name = "texto_descripcion")
+    private String textoDescripcion;
+    @Column(name = "grupo_activo")
+    private boolean grupoActivo;
+    @Column(name = "grupo_longitud")
+    private Integer grupoLongitud;
+
 
     @PrePersist
     private void prePersist() {

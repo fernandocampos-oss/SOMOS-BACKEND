@@ -20,10 +20,7 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.InscripcionService;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,6 +58,26 @@ public class InscripcionServiceImpl implements InscripcionService {
             }
             else{
                 inscripcionResponse.setEnviado(true);
+            }
+            return inscripcionResponse;
+        }
+        return null;
+    }
+
+    @Override
+    public InscripcionDatosResponseDto buscarDatosInscripcionPorId(int idInscripcion){
+
+        Inscripcion inscripcion = inscripcionRepository.findByIdInscripcion(idInscripcion);
+        if(inscripcion != null){
+            InscripcionDatosResponseDto inscripcionResponse = new InscripcionDatosResponseDto();
+            inscripcionResponse.setImagenActiva(inscripcion.isImagenActiva());
+            inscripcionResponse.setImagenDescripcion(inscripcion.getImagenDescripcion());
+            inscripcionResponse.setTextoActivo(inscripcion.isTextoActivo());
+            inscripcionResponse.setTextoDescripcion(inscripcion.getTextoDescripcion());
+            inscripcionResponse.setGrupoActivo(inscripcion.isGrupoActivo());
+            inscripcionResponse.setGrupoLongitud(inscripcion.getGrupoLongitud());
+            if (authService.getUserSession().getIdRol() == 3 || authService.getUserSession().getIdRol() == 4){
+                inscripcionResponse.setResponsables(Arrays.asList(inscripcion.getIdResponsable().split(",")));
             }
             return inscripcionResponse;
         }
