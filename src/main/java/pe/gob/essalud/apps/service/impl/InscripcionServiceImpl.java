@@ -93,27 +93,46 @@ public class InscripcionServiceImpl implements InscripcionService {
 
         Integer idUsuario = authService.getIdUserSession();
         if(!usuarioEstaInscrito(idUsuario,inscripcion.getIdInscripcion())){
-            if(request.getTipoInscripcion() == 1){
+            if(!inscripcion.isGrupoActivo()){
                 InscripcionPersona inscripcionPersona = new InscripcionPersona();
                 inscripcionPersona.setIdInscripcion(request.getIdInscripcion());
                 inscripcionPersona.setIdUsuario(idUsuario);
                 inscripcionPersona.setEstadoActivo(true);
+                if(inscripcion.isTextoActivo()){
+                    inscripcionPersona.setDescripcion(request.getDescripcion());
+                }
+                if(inscripcion.isImagenActiva()){
+                    String rutaImagen = uploadPath + RUTA_IMAGENES_INSCRIPCIONES + request.getIdInscripcion() + "_" + idUsuario + FORMATO_IMAGEN_INSCRIPCION;
+                    rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
+                    inscripcionPersona.setRutaImagen(rutaImagen);
+                }
 
                 inscripcionPersonaRepository.save(inscripcionPersona);
-            } else if (request.getTipoInscripcion() == 2) {
+            }
+            else{
                 for (Integer idInscrito: request.getInscritos()){
                     validarMiembroInscripcion(idInscrito, request.getIdInscripcion());
                 }
-                String rutaImagen = uploadPath + RUTA_IMAGENES_INSCRIPCIONES + request.getIdInscripcion() + "_" + idUsuario + FORMATO_IMAGEN_INSCRIPCION;
-                rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
+
+                String rutaImagen = "";
+
+                if(inscripcion.isImagenActiva()){
+                    String rutaImagen64 = uploadPath + RUTA_IMAGENES_INSCRIPCIONES + request.getIdInscripcion() + "_" + idUsuario + FORMATO_IMAGEN_INSCRIPCION;
+                    rutaImagen = UploadUtil.saveFileBase64(rutaImagen64, request.getImagenBase64());
+                }
+
                 for (Integer idInscrito: request.getInscritos()){
                     InscripcionPersona inscripcionPersona = new InscripcionPersona();
                     inscripcionPersona.setIdInscripcion(request.getIdInscripcion());
                     inscripcionPersona.setIdUsuario(idInscrito);
-                    inscripcionPersona.setDescripcion(request.getDescripcion());
                     inscripcionPersona.setIdLider(idUsuario);
                     inscripcionPersona.setEstadoActivo(true);
-                    inscripcionPersona.setRutaImagen(rutaImagen);
+                    if(inscripcion.isTextoActivo()){
+                        inscripcionPersona.setDescripcion(request.getDescripcion());
+                    }
+                    if(inscripcion.isImagenActiva()){
+                        inscripcionPersona.setRutaImagen(rutaImagen);
+                    }
 
                     inscripcionPersonaRepository.save(inscripcionPersona);
                 }
