@@ -1,7 +1,6 @@
 package pe.gob.essalud.apps.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.time.ZoneId;
 import java.util.Optional;
 
@@ -12,13 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import pe.gob.essalud.apps.common.util.UploadUtil;
-import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
-import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
-import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.TareaRequestDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
-import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EvidenciaRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.TareaRepository;
-import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.TipoIngresoRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.TareaService;
 
@@ -27,111 +24,73 @@ import pe.gob.essalud.apps.service.TareaService;
 @Slf4j
 public class TareaServiceImpl implements TareaService {
 
-    private static final String RUTA_IMAGENES_EVIDENCIA = "/imagenes/requerimientos/";
-    private static final String RUTA_PDF_EVIDENCIA = "/pdf/requerimientos/";
-//    private static final String FORMATO_IMAGEN_EVIDENCIA = ".png";
+    private static final String RUTA_IMAGENES_GESTION_RENDIMIENTO = "/imagenes/gestion-rendimiento/";
+    private static final String RUTA_PDF_GESTION_RENDIMIENTO = "/pdf/gestion-rendimiento/";
+    private static final String FORMATO_IMAGEN_EVIDENCIA = ".png";
     private static final String FORMATO_PDF_EVIDENCIA = ".pdf";
 
     private final TareaRepository tareaRepository;
     private final AuthService authService;
-    private final EvidenciaRepository evidenciaRepository;
 
     @Value("${upload-path}")
     private String uploadPath;
 
-    @Override
-    public List<Tarea> listar() {
-        return null;
-    }
-
-    @Override
-    public Tarea registrar(Tarea obj) {
-        return null;
-    }
-
     @Transactional
     @Override
-    public Integer registrarTarea(TareaDTO dto) {
-        int result = tareaRepository.actualizarPoi(dto.getPoi().getIdActividad(), dto.getRequerimientoUsuario().getIdIndicadorUsuario());
-        int usuarioCreacion = authService.getIdUserSession();
+    public Integer registrarTarea(TareaRequestDto dto) {
+        int result = tareaRepository.actualizarActividad(dto.getActividad().getIdActividad(), dto.getIndicadorUsuario().getIdIndicadorUsuario());
         if (!dto.getListTarea().isEmpty()) {
             for (Tarea i : dto.getListTarea()) {
-                tareaRepository.registrarTarea(i.getNombre(), i.getPlazo(),
-                        dto.getRequerimientoUsuario().getIdIndicadorUsuario(), usuarioCreacion,
-                        LocalDateTime.now(ZoneId.of("America/Lima")), i.getPeso(), 0, 0);
+                i.setIndicadorUsuario(dto.getIndicadorUsuario());
+                i.setUsuarioCreacion(authService.getIdUserSession());
+                i.setEstado(true);
+                tareaRepository.save(i);
             }
         }
-        return dto.getRequerimientoUsuario().getIdIndicadorUsuario();
+        return dto.getIndicadorUsuario().getIdIndicadorUsuario();
     }
 
     @Override
-    public int actualizarTareaAdministrador(String nombreTarea, String plazo, Number idTarea) {
-        int usuarioModificacion = authService.getIdUserSession();
-        return tareaRepository.actualizarTareaAdministrador(nombreTarea, plazo, usuarioModificacion, LocalDateTime.now(ZoneId.of("America/Lima")), idTarea);
+    public int actualizarTareaAdministrador(String nombre, String plazo, Number idTarea) {
+        return tareaRepository.actualizarTareaAdministrador(nombre, plazo, authService.getIdUserSession(), LocalDateTime.now(ZoneId.of("America/Lima")), idTarea);
     }
 
     @Transactional
     @Override
-    public long crearEvidencia(EvidenciaRequestDTO request) {
-        Evidencia evidencia = new Evidencia();
-        evidencia.setDescripcion(request.getDescripcion());
-        evidencia.setFechaCreacion(LocalDateTime.now(ZoneId.of("America/Lima")));
-        evidencia.setEstado(true);
-        evidencia.setUsuarioCreacion(authService.getIdUserSession());
-        Tarea tarea = new Tarea();
-        tarea.setIdTarea(request.getTarea().getIdTarea());
-        evidencia.setTarea(tarea);
-        evidencia.setExtension(request.getExtension());
-        evidencia.setPorcentajeAvance(request.getPorcentajeAvance());
-        Evidencia result = evidenciaRepository.save(evidencia);
-
-        Indicador requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
+    public long crearEvidenciaTarea(EvidenciaRequestDto request) {
+//        Indicador requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
 //        int nuevoPorcentajeAvance = (requerimiento.getPorcentajeAvance() + request.getPorcentajeAvance());
 //        if(nuevoPorcentajeAvance > 100){
 //            throw new ValidationException("El porcentaje ingresado excede el 100%");
 //        }
 //        tareaRepository.actualizaPorcentajeAvanceRequerimiento(nuevoPorcentajeAvance, request.getIdRequerimiento());
 
-        if(result.getExtension().equals("pdf")){
-            String rutaArchivo = uploadPath + RUTA_PDF_EVIDENCIA + result.getIdEvidencia() + FORMATO_PDF_EVIDENCIA;
-            rutaArchivo = UploadUtil.saveFileBase64(rutaArchivo, request.getImagenBase64());
-            tareaRepository.actualizarRutaImagenEvidencia(rutaArchivo, result.getIdEvidencia());
-
-            tareaRepository.actualizarEstadoArchivoTarea(0,1, result.getTarea().getIdTarea());
+        if(request.getExtension().equals("pdf")){
+            String rutaFile = uploadPath + RUTA_PDF_GESTION_RENDIMIENTO + request.getIdTarea() + FORMATO_PDF_EVIDENCIA;
+            rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
+            tareaRepository.crearEvidencia(request.getEvidenciaDescripcion(), rutaFile, request.getExtension(), LocalDateTime.now(ZoneId.of("America/Lima")),request.getIdTarea());
         }else{
-            String rutaImagen = uploadPath + RUTA_IMAGENES_EVIDENCIA + result.getIdEvidencia() + "." + result.getExtension();
-            rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
-            tareaRepository.actualizarRutaImagenEvidencia(rutaImagen, result.getIdEvidencia());
-
-            tareaRepository.actualizarEstadoArchivoTarea(1,0, result.getTarea().getIdTarea());
+            String rutaFile = uploadPath + RUTA_IMAGENES_GESTION_RENDIMIENTO + request.getIdTarea() + FORMATO_IMAGEN_EVIDENCIA;
+            rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
+            tareaRepository.crearEvidencia(request.getEvidenciaDescripcion(), rutaFile, "png", LocalDateTime.now(ZoneId.of("America/Lima")), request.getIdTarea());
         }
-
-        return result.getIdEvidencia();
+        return request.getIdTarea();
     }
 
     @Override
-    public EvidenciaResponseDTO getEvidenciaPorTarea(Integer idTarea) {
-        Optional<Evidencia> evidencia = tareaRepository.getEvidenciaPorTarea(idTarea);
+    public EvidenciaResponseDto getEvidenciaByTarea(Integer idTarea) {
+        Optional<Tarea> tarea = tareaRepository.findById(idTarea);
+        log.info("idTarea [{}]", tarea.get().getIdTarea());
+        EvidenciaResponseDto dto = new EvidenciaResponseDto();
+        if (tarea.isPresent()) {
+            String baseImagen = UploadUtil.getFileBase64(tarea.get().getEvidenciaRutaFile());
 
-        EvidenciaResponseDTO dto = new EvidenciaResponseDTO();
-        if (evidencia.isPresent()) {
-            String baseImagen = UploadUtil.getFileBase64(evidencia.get().getRutaImagen());
-
-            dto.setIdEvidencia(evidencia.get().getIdEvidencia());
-            dto.setDescripcion(evidencia.get().getDescripcion());
-            dto.setFechaCreacion(evidencia.get().getFechaCreacion());
-            dto.setImagenBase64(baseImagen);
-            dto.setExtension(evidencia.get().getExtension());
-            dto.setPorcentajeAvance(evidencia.get().getPorcentajeAvance());
+            dto.setEvidenciaDescripcion(tarea.get().getEvidenciaDescripcion());
+            dto.setEvidenciaFechaRegistro(tarea.get().getEvidenciaFechaRegistro());
+            dto.setFileBase64(baseImagen);
+            dto.setExtension(tarea.get().getEvidenciaExtensionFile());
         }
         return dto;
     }
-
-    @Override
-    public List<Actividad> listarAllPoi() {
-        return tareaRepository.listarAllPoi();
-    }
-
-
 
 }

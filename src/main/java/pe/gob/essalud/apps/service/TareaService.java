@@ -1,25 +1,17 @@
 package pe.gob.essalud.apps.service;
 
-import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaResponseDTO;
-import pe.gob.essalud.apps.dto.gestionrendimiento.EvidenciaRequestDTO;
-import pe.gob.essalud.apps.dto.gestionrendimiento.TareaDTO;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoIngreso;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.TareaRequestDto;
 
-import java.util.List;
+public interface TareaService {
 
-public interface TareaService extends IcrudService<Tarea> {
+    Integer registrarTarea(TareaRequestDto dto);
 
-    Integer registrarTarea(TareaDTO dto);
+    int actualizarTareaAdministrador(String nombre, String plazo, Number idTarea);
 
-    int actualizarTareaAdministrador(String nombreTarea, String plazo, Number idTarea);
+    long crearEvidenciaTarea(EvidenciaRequestDto request);
 
-    long crearEvidencia(EvidenciaRequestDTO request);
-
-    EvidenciaResponseDTO getEvidenciaPorTarea(Integer idTarea);
-
-    List<Actividad> listarAllPoi();
-
+    EvidenciaResponseDto getEvidenciaByTarea(Integer idTarea);
 
 }

@@ -13,26 +13,15 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 
 public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
+    @Transactional
     @Modifying
-    @Query(value = "INSERT INTO tarea(nombre_tarea, plazo, id_requerimiento_usuario, estado, usuario_creacion, fecha_creacion, porcentaje_inicial, tiene_imagen, tiene_pdf) VALUES (:nombreTarea, :plazo, :idRequerimientoUsuario, true, :usuarioCreacion, :fechaCreacion, :porcentajeInicial, :tieneImagen, :tienePdf)", nativeQuery = true)
-    Integer registrarTarea(@Param("nombreTarea") String nombreTarea,
-                           @Param("plazo") LocalDateTime plazo,
-                           @Param("idRequerimientoUsuario") Integer idRequerimientoUsuario,
-                           @Param("usuarioCreacion") Number usuarioCreacion,
-                           @Param("fechaCreacion") LocalDateTime fechaCreacion,
-                           @Param("porcentajeInicial") Number porcentajeInicial,
-                           @Param("tieneImagen") Number tieneImagen,
-                           @Param("tienePdf") Number tienePdf);
+    @Query(value = "UPDATE indicador_usuario SET id_estado_indicador=2, id_actividad = ? WHERE id_indicador_usuario=? ", nativeQuery = true)
+    public int actualizarActividad(@Param("idActividad") Number idActividad, @Param("idIndicadorUsuario") Number idIndicadorUsuario);
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE requerimiento_usuario SET id_poi = ? WHERE id_requerimiento_usuario=? ", nativeQuery = true)
-    public int actualizarPoi(@Param("idPoi") Number idPoi, @Param("idRequerimientoUsuario") Number idRequerimientoUsuario);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE tarea SET nombre_tarea = ? , plazo= ? , usuario_modificacion=?, fecha_modificacion=? WHERE id_tarea=? ", nativeQuery = true)
-    public int actualizarTareaAdministrador(@Param("nombreTarea") String nombreTarea,
+    @Query(value = "UPDATE tarea SET nombre = ? , plazo= ? , usuario_modificacion=?, fecha_modificacion=? WHERE id_tarea=? ", nativeQuery = true)
+    public int actualizarTareaAdministrador(@Param("nombre") String nombre,
                                             @Param("plazo") String plazo,
                                             @Param("usuarioModificacion") Number usuarioModificacion,
                                             @Param("fechaModificaion") LocalDateTime fechaModificaion,
@@ -40,29 +29,22 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE evidencia SET ruta_imagen = ? WHERE id_evidencia=?", nativeQuery = true)
-    Integer actualizarRutaImagenEvidencia(@Param("rutaImagen") String rutaImagen, @Param("idEvidencia") Number idEvidencia);
-
-    @Query("SELECT e FROM Evidencia e WHERE e.tarea.idTarea = :idTarea")
-    Optional<Evidencia> getEvidenciaPorTarea(@Param("idTarea") Integer idTarea);
+    @Query(value = "UPDATE tarea SET evidencia_descripcion=?, evidencia_ruta_file=?, evidencia_extension_file=?, evidencia_fecha_registro=? WHERE id_tarea=?", nativeQuery = true)
+    Integer crearEvidencia(@Param("evidenciaDescripcion") String evidenciaDescripcion,
+                           @Param("rutaFile") String rutaFile,
+                           @Param("extension") String extension,
+                           @Param("evidenciaFechaRegistro") LocalDateTime evidenciaFechaRegistro,
+                           @Param("idTarea") Number idTarea);
 
 //    @Transactional
 //    @Modifying
 //    @Query(value = "UPDATE requerimiento SET porcentaje_avance = ? WHERE id_requerimiento=? ", nativeQuery = true)
 //    public int actualizaPorcentajeAvanceRequerimiento(@Param("porcentajeAvance") Number porcentajeAvance, @Param("idRequerimiento") Number idRequerimiento);
 
-    @Query("SELECT p FROM Actividad p ORDER BY p.descripcion ASC")
-    List<Actividad> listarAllPoi();
 
-    @Query("SELECT r FROM Indicador r WHERE r.idIndicador = :idIndicador")
-    Indicador getByIdRequerimiento(@Param("idIndicador") Integer idIndicador);
+//    @Query("SELECT r FROM Indicador r WHERE r.idIndicador = :idIndicador")
+//    Indicador getByIdRequerimiento(@Param("idIndicador") Integer idIndicador);
 
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE tarea SET tiene_imagen = ?, tiene_pdf = ? WHERE id_tarea=?", nativeQuery = true)
-    Integer actualizarEstadoArchivoTarea(@Param("tieneImagen") Number tieneImagen,
-                                         @Param("tienePdf") Number tienePdf,
-                                         @Param("idTarea") Number idTarea);
 
 }
 

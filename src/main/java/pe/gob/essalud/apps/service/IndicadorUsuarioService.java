@@ -1,32 +1,26 @@
 package pe.gob.essalud.apps.service;
 
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.GestionIndicadoresTrabajadorDto;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.IndicadorUsuario;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoIngreso;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.TipoValorMeta;
 
 import java.util.List;
 
-public interface IndicadorUsuarioService extends IcrudService<IndicadorUsuario> {
+public interface IndicadorUsuarioService {
 
-    List<IndicadorUsuario> listarRequerimientosIntegrantesPrincipal();
+    List<GestionIndicadoresTrabajadorDto> listarTrabajadoresIndicadoresJefePrincipal();
 
-    List<IndicadorUsuario> listarRequerimientosPendientesPorUsuario();
+    List<IndicadorUsuario> listarIndicadoresPendientesPorUsuario();
 
-    List<IndicadorUsuario> listarRequerimientosFinalizadoPorUsuario();
+    List<IndicadorUsuario> listarIndicadoresFinalizadoPorUsuario();
 
-//    List<RequerimientoUsuario> listarRequerimientosRechazadoPorUsuario();
-
-    int aprobarRequerimiento(Number estado, Number idRequerimientoUsuario);
+//    int aprobarIndicador(Number estado, Number idIndicadorUsuario);
 
 //    int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario);
 
-//    int derivarRequerimiento(Number estado, String motivo, String codUnidadReceptor, Number idRequerimientoUsuario);
-
-//    List<UnidadOrganizativa> listarUnidad();
-
-    List<IndicadorUsuario> listarRequerimientosPorPersonal(Number idUsuario);
-//
-//    List<PersonalDTO> listarPersonalPorRed();
+//    List<IndicadorUsuario> getlistIndicadoresByIdUsuario(Number idUsuario);
 
     int finalizarTareaAdministrador(Number idRequerimientoUsuario);
 
@@ -36,6 +30,6 @@ public interface IndicadorUsuarioService extends IcrudService<IndicadorUsuario> 
 
     List<TipoValorMeta> getAllTipoValorMeta();
 
-
+    List<Actividad> getAllActividades();
 
 }

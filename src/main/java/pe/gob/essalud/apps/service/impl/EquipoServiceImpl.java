@@ -3,8 +3,7 @@ package pe.gob.essalud.apps.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pe.gob.essalud.apps.base.BaseService;
-import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
@@ -24,10 +23,9 @@ public class EquipoServiceImpl implements EquipoService {
 
     @Override
     public void registrarTrabajador(Equipo equipo) {
-        log.info(">>>>> [{}]", authService.getIdUserSession());
         if (equipo != null) {
             Votante getJefeVotante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
-            log.info(">>>>>getJefeVotante [{}]", getJefeVotante);
+            log.info("JefeVotante [{}]", getJefeVotante);
             if(getJefeVotante != null){
                 Votante votante = new Votante();
                 votante.setIdVotante(getJefeVotante.getIdVotante());
@@ -43,8 +41,7 @@ public class EquipoServiceImpl implements EquipoService {
 
     @Override
     public List<Equipo> getListTrabajadoresByIdUsuarioJefe() {
-        int idLider = authService.getIdUserSession();
-        return equipoRepository.getListTrabajadoresByIdUsuarioJefe(idLider);
+        return equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
     }
 
     @Override
@@ -53,13 +50,13 @@ public class EquipoServiceImpl implements EquipoService {
     }
 
     @Override
-    public List<PersonalDTO> listAllVotante() {
-        return equipoRepository.listAllVotante();
+    public List<TrabajadorResponseDto> listAllVotante() {
+        return equipoRepository.listAllVotante(authService.getIdUserSession());
     }
 
-//    @Override
-//    public Usuario findUsuarioByNumeroDocumento(String numeroDocumento) {
-//        return liderEquipoRepository.findUsuarioByNumeroDocumento(numeroDocumento);
-//    }
+    @Override
+    public Votante getVotanteByIdUsuario() {
+        return equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+    }
 
 }

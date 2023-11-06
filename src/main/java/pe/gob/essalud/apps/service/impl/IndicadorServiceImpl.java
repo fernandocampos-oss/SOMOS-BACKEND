@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Indicador;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.IndicadorRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.IndicadorUsuarioRepository;
@@ -24,18 +25,8 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final AuthService authService;
 
     @Override
-    public List<Indicador> listar() {
-        return null;
-    }
-
-    @Override
-    public Indicador registrar(Indicador model) {
-        return null;
-    }
-
-    @Override
     public Indicador registrarIndicador(Indicador model) {
-        log.info(">>>>model [{}]", model);
+        log.info("indicador [{}]", model);
         if (model != null) {
             model.setEstado(true);
             model.setUsuarioCreacion(authService.getIdUserSession());
@@ -48,7 +39,7 @@ public class IndicadorServiceImpl implements IndicadorService {
 
             LocalDate fechaActualTmp = LocalDate.now();
             int anioRegistroIndicador = fechaActualTmp.getYear();
-            requerimientoUsuarioRepository.registrarIndicadorUsuario(result.getIdIndicador(), codRed, codUnidad, idUsuario, 1, LocalDateTime.now(ZoneId.of("America/Lima")), anioRegistroIndicador) ;
+            requerimientoUsuarioRepository.registrarIndicadorUsuario(result.getIdIndicador(), codRed, codUnidad, idUsuario, 1, LocalDateTime.now(ZoneId.of("America/Lima")), anioRegistroIndicador, 0) ;
         }
         return result;
     }

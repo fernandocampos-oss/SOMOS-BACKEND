@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.service;
 
-import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 
 import java.util.List;
@@ -13,8 +14,8 @@ public interface EquipoService {
 
     int eliminarTrabajador(Number idEquipo);
 
-    List<PersonalDTO> listAllVotante();
+    List<TrabajadorResponseDto> listAllVotante();
 
-//    Usuario findUsuarioByNumeroDocumento(String numeroDocumento);
+    Votante getVotanteByIdUsuario();
 
 }

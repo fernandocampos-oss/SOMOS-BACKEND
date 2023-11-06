@@ -26,6 +26,9 @@ public class IndicadorUsuario {
     @Column(name="cod_unidad")
     private String codUnidad;
 
+    @Column(name="peso_total")
+    private int pesoTotal;
+
     @ManyToOne
     @JoinColumn(name="id_usuario", nullable = false, foreignKey = @ForeignKey(name="fk_indicador_usuario"))
     private Usuario usuario;

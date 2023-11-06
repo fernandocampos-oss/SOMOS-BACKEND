@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pe.gob.essalud.apps.dto.gestionrendimiento.PersonalDTO;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 import pe.gob.essalud.apps.service.EquipoService;
 
@@ -24,7 +25,7 @@ public class EquipoController {
     }
 
     @GetMapping("/listar")
-    public ResponseEntity<List<Equipo>> getListTrabajadoresByIdUsuarioLider() {
+    public ResponseEntity<List<Equipo>> getListTrabajadoresByIdUsuarioJefe() {
         List<Equipo> lista = equipoService.getListTrabajadoresByIdUsuarioJefe();
         return new ResponseEntity<List<Equipo>>(lista, HttpStatus.OK);
     }
@@ -35,15 +36,15 @@ public class EquipoController {
     }
 
     @GetMapping("/listar/votantes")
-    public ResponseEntity<List<PersonalDTO>> listAllVotante() {
-        List<PersonalDTO> listAllVotante = equipoService.listAllVotante();
-        return new ResponseEntity<List<PersonalDTO>>(listAllVotante, HttpStatus.OK);
+    public ResponseEntity<List<TrabajadorResponseDto>> listAllVotante() {
+        List<TrabajadorResponseDto> listAllVotante = equipoService.listAllVotante();
+        return new ResponseEntity<List<TrabajadorResponseDto>>(listAllVotante, HttpStatus.OK);
     }
 
-//    @GetMapping("/obtener/usuario/{numeroDocumento}")
-//    public ResponseEntity<Usuario> findUsuarioByNumeroDocumento(@PathVariable("numeroDocumento") String numeroDocumento) {
-//        Usuario usuario = liderEquipoService.findUsuarioByNumeroDocumento(numeroDocumento);
-//        return new ResponseEntity<Usuario>(usuario, HttpStatus.OK);
-//    }
+    @GetMapping("/obtener/votante/segmento")
+    public ResponseEntity<Votante> getVotanteByIdUsuario() {
+        Votante usuario = equipoService.getVotanteByIdUsuario();
+        return new ResponseEntity<Votante>(usuario, HttpStatus.OK);
+    }
 
 }

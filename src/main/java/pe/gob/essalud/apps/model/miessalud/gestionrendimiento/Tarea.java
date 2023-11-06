@@ -27,8 +27,23 @@ public class Tarea {
     @Column(name="motivo_rechazo")
     private String motivoRechazo;
 
-    @Column(name="peso")
-    private int peso;
+    @Column(name="peso_fraccion")
+    private int pesoFraccion;
+
+    @Column(name="evidencia_descripcion")
+    private String evidenciaDescripcion;
+
+    @Column(name = "evidencia_extension_file")
+    private String evidenciaExtensionFile;
+
+    @Column(name = "evidencia_ruta_file")
+    private String evidenciaRutaFile;
+
+    @Column(name = "evidencia_fecha_registro")
+    private LocalDateTime evidenciaFechaRegistro;
+
+    @Column(name="evaluacion_comentario")
+    private String evaluacionComentario;
 
     @JsonIgnore
     @ManyToOne
