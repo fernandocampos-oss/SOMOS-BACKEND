@@ -5,10 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.inscripcion.request.InscripcionRequestDto;
 import pe.gob.essalud.apps.dto.inscripcion.request.InscripcionVotoRequestDto;
-import pe.gob.essalud.apps.dto.inscripcion.response.InscripcionDatosResponseDto;
-import pe.gob.essalud.apps.dto.inscripcion.response.InscripcionResponseDto;
-import pe.gob.essalud.apps.dto.inscripcion.response.InscripcionVotacionResponseDto;
-import pe.gob.essalud.apps.dto.inscripcion.response.ReporteInscritosDto;
+import pe.gob.essalud.apps.dto.inscripcion.response.*;
 import pe.gob.essalud.apps.service.InscripcionService;
 
 import java.util.List;
@@ -58,4 +55,8 @@ public class InscripcionController {
         inscripcionService.activarVotacion(idInscripcion, votoActivo);
     }
 
+    @GetMapping("/asignaciones")
+    public List<InscripcionAsignadaResponseDto> getInscripcionesAsignadas(){
+        return inscripcionService.inscripcionesAsignadas();
+    }
 }

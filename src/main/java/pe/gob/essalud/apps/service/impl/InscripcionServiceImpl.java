@@ -146,17 +146,26 @@ public class InscripcionServiceImpl implements InscripcionService {
         Inscripcion inscripcionRequerida = inscripcionRepository.findByIdInscripcion(idInscripcion);
         List<UsuariosInscritosResponseDto> usuariosInscritos;
         usuariosInscritos = inscripcionMyRepository.getUsuariosInscritos(idInscripcion);
-        if (idInscripcion == 2){
-            usuariosInscritos.replaceAll(x->{
-                if (x.getIdUsuario() == x.getIdLider()){
+        if (inscripcionRequerida.isGrupoActivo()){
+            if(inscripcionRequerida.isImagenActiva()){
+                usuariosInscritos.replaceAll(x->{
+                    if (x.getIdUsuario() == x.getIdLider()){
+                        x.setRutaImagen(UploadUtil.getFileBase64(x.getRutaImagen()));
+                    }
+                    else{
+                        x.setRutaImagen(null);
+                    }
+                    return x;
+                });
+            }
+        }
+        else{
+            if(inscripcionRequerida.isImagenActiva()){
+                usuariosInscritos.replaceAll(x->{
                     x.setRutaImagen(UploadUtil.getFileBase64(x.getRutaImagen()));
-                }
-                else{
-                    x.setRutaImagen(null);
-                }
-                return x;
-            });
-
+                    return x;
+                });
+            }
         }
         if (inscripcionRequerida.isVotacion()){
             reporte.setVotacionesResultado(inscripcionMyRepository.getVotacionesInscripcion(idInscripcion));
@@ -239,6 +248,22 @@ public class InscripcionServiceImpl implements InscripcionService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<InscripcionAsignadaResponseDto> inscripcionesAsignadas(){
+        List<Inscripcion> inscripciones = inscripcionRepository.findInscripcionesByIdResponsable(Integer.toString(authService.getIdUserSession()));
+        Collections.sort(inscripciones, Comparator.comparing(Inscripcion::getFechaCreacion).reversed());
+
+        List<InscripcionAsignadaResponseDto> list = new ArrayList<>();
+        for (Inscripcion ins : inscripciones){
+            InscripcionAsignadaResponseDto asignacion = new InscripcionAsignadaResponseDto();
+            asignacion.setIdInscripcion(ins.getIdInscripcion());
+            asignacion.setNombreInscripcion(ins.getDescripcion());
+            list.add(asignacion);
+        }
+
+        return list;
     }
 
     private void validarMiembroInscripcion(Integer idUsuario, Integer idInscripcion) {
