@@ -7,7 +7,11 @@
     <select id="getUsuariosInscritos" resultType="UsuariosInscritosResponseDto">
         SELECT 	i.id_usuario 					idUsuario,
                 u.numero_documento 				numeroDocumento,
+                u.codigo_planilla				codigoPlanilla,
                 u.apellidos || ' ' || u.nombres nombreCompleto,
+                rp.descripcion					red,
+                uo.descripcion					unidadOrganica,
+                u.cargo,
                 u.regimen,
                 u.numero_celular 				numeroCelular,
                 u.correo,
@@ -18,7 +22,9 @@
                 i.ruta_imagen                   rutaImagen
         FROM inscripcion_persona i
         INNER JOIN usuario u ON u.id_usuario = i.id_usuario
-        WHERE i.id_inscripcion = #{idInscripcion}
+        LEFT JOIN red_personal rp ON rp.cod_red = u.cod_red
+        LEFT JOIN unidad_organizativa uo ON uo.cod_unidad = u.cod_unidad
+        WHERE i.id_inscripcion = 2
     </select>
     <select id="getVotacionesInscripcion" resultType="ReporteInscVotacionResponseDto">
         SELECT

@@ -10,7 +10,11 @@ public class UsuariosInscritosResponseDto {
 
     private int idUsuario;
     private String numeroDocumento;
+    private String codigoPlanilla;
     private String nombreCompleto;
+    private String red;
+    private String unidadOrganica;
+    private String cargo;
     private String regimen;
     private String numeroCelular;
     private String correo;
