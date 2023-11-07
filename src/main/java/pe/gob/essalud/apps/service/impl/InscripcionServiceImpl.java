@@ -20,10 +20,7 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.InscripcionService;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,6 +65,26 @@ public class InscripcionServiceImpl implements InscripcionService {
     }
 
     @Override
+    public InscripcionDatosResponseDto buscarDatosInscripcionPorId(int idInscripcion){
+
+        Inscripcion inscripcion = inscripcionRepository.findByIdInscripcion(idInscripcion);
+        if(inscripcion != null){
+            InscripcionDatosResponseDto inscripcionResponse = new InscripcionDatosResponseDto();
+            inscripcionResponse.setImagenActiva(inscripcion.isImagenActiva());
+            inscripcionResponse.setImagenDescripcion(inscripcion.getImagenDescripcion());
+            inscripcionResponse.setTextoActivo(inscripcion.isTextoActivo());
+            inscripcionResponse.setTextoDescripcion(inscripcion.getTextoDescripcion());
+            inscripcionResponse.setGrupoActivo(inscripcion.isGrupoActivo());
+            inscripcionResponse.setGrupoLongitud(inscripcion.getGrupoLongitud());
+            if (authService.getUserSession().getIdRol() == 3 || authService.getUserSession().getIdRol() == 4){
+                inscripcionResponse.setResponsables(Arrays.asList(inscripcion.getIdResponsable().split(",")));
+            }
+            return inscripcionResponse;
+        }
+        return null;
+    }
+
+    @Override
     @Transactional
     public void guardarInscripcion(InscripcionRequestDto request){
 
@@ -76,27 +93,46 @@ public class InscripcionServiceImpl implements InscripcionService {
 
         Integer idUsuario = authService.getIdUserSession();
         if(!usuarioEstaInscrito(idUsuario,inscripcion.getIdInscripcion())){
-            if(request.getTipoInscripcion() == 1){
+            if(!inscripcion.isGrupoActivo()){
                 InscripcionPersona inscripcionPersona = new InscripcionPersona();
                 inscripcionPersona.setIdInscripcion(request.getIdInscripcion());
                 inscripcionPersona.setIdUsuario(idUsuario);
                 inscripcionPersona.setEstadoActivo(true);
+                if(inscripcion.isTextoActivo()){
+                    inscripcionPersona.setDescripcion(request.getDescripcion());
+                }
+                if(inscripcion.isImagenActiva()){
+                    String rutaImagen = uploadPath + RUTA_IMAGENES_INSCRIPCIONES + request.getIdInscripcion() + "_" + idUsuario + FORMATO_IMAGEN_INSCRIPCION;
+                    rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
+                    inscripcionPersona.setRutaImagen(rutaImagen);
+                }
 
                 inscripcionPersonaRepository.save(inscripcionPersona);
-            } else if (request.getTipoInscripcion() == 2) {
+            }
+            else{
                 for (Integer idInscrito: request.getInscritos()){
                     validarMiembroInscripcion(idInscrito, request.getIdInscripcion());
                 }
-                String rutaImagen = uploadPath + RUTA_IMAGENES_INSCRIPCIONES + request.getIdInscripcion() + "_" + idUsuario + FORMATO_IMAGEN_INSCRIPCION;
-                rutaImagen = UploadUtil.saveFileBase64(rutaImagen, request.getImagenBase64());
+
+                String rutaImagen = "";
+
+                if(inscripcion.isImagenActiva()){
+                    String rutaImagen64 = uploadPath + RUTA_IMAGENES_INSCRIPCIONES + request.getIdInscripcion() + "_" + idUsuario + FORMATO_IMAGEN_INSCRIPCION;
+                    rutaImagen = UploadUtil.saveFileBase64(rutaImagen64, request.getImagenBase64());
+                }
+
                 for (Integer idInscrito: request.getInscritos()){
                     InscripcionPersona inscripcionPersona = new InscripcionPersona();
                     inscripcionPersona.setIdInscripcion(request.getIdInscripcion());
                     inscripcionPersona.setIdUsuario(idInscrito);
-                    inscripcionPersona.setDescripcion(request.getDescripcion());
                     inscripcionPersona.setIdLider(idUsuario);
                     inscripcionPersona.setEstadoActivo(true);
-                    inscripcionPersona.setRutaImagen(rutaImagen);
+                    if(inscripcion.isTextoActivo()){
+                        inscripcionPersona.setDescripcion(request.getDescripcion());
+                    }
+                    if(inscripcion.isImagenActiva()){
+                        inscripcionPersona.setRutaImagen(rutaImagen);
+                    }
 
                     inscripcionPersonaRepository.save(inscripcionPersona);
                 }
@@ -110,17 +146,26 @@ public class InscripcionServiceImpl implements InscripcionService {
         Inscripcion inscripcionRequerida = inscripcionRepository.findByIdInscripcion(idInscripcion);
         List<UsuariosInscritosResponseDto> usuariosInscritos;
         usuariosInscritos = inscripcionMyRepository.getUsuariosInscritos(idInscripcion);
-        if (idInscripcion == 2){
-            usuariosInscritos.replaceAll(x->{
-                if (x.getIdUsuario() == x.getIdLider()){
+        if (inscripcionRequerida.isGrupoActivo()){
+            if(inscripcionRequerida.isImagenActiva()){
+                usuariosInscritos.replaceAll(x->{
+                    if (x.getIdUsuario() == x.getIdLider()){
+                        x.setRutaImagen(UploadUtil.getFileBase64(x.getRutaImagen()));
+                    }
+                    else{
+                        x.setRutaImagen(null);
+                    }
+                    return x;
+                });
+            }
+        }
+        else{
+            if(inscripcionRequerida.isImagenActiva()){
+                usuariosInscritos.replaceAll(x->{
                     x.setRutaImagen(UploadUtil.getFileBase64(x.getRutaImagen()));
-                }
-                else{
-                    x.setRutaImagen(null);
-                }
-                return x;
-            });
-
+                    return x;
+                });
+            }
         }
         if (inscripcionRequerida.isVotacion()){
             reporte.setVotacionesResultado(inscripcionMyRepository.getVotacionesInscripcion(idInscripcion));
@@ -203,6 +248,22 @@ public class InscripcionServiceImpl implements InscripcionService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<InscripcionAsignadaResponseDto> inscripcionesAsignadas(){
+        List<Inscripcion> inscripciones = inscripcionRepository.findInscripcionesByIdResponsable(Integer.toString(authService.getIdUserSession()));
+        Collections.sort(inscripciones, Comparator.comparing(Inscripcion::getFechaCreacion).reversed());
+
+        List<InscripcionAsignadaResponseDto> list = new ArrayList<>();
+        for (Inscripcion ins : inscripciones){
+            InscripcionAsignadaResponseDto asignacion = new InscripcionAsignadaResponseDto();
+            asignacion.setIdInscripcion(ins.getIdInscripcion());
+            asignacion.setNombreInscripcion(ins.getDescripcion());
+            list.add(asignacion);
+        }
+
+        return list;
     }
 
     private void validarMiembroInscripcion(Integer idUsuario, Integer idInscripcion) {

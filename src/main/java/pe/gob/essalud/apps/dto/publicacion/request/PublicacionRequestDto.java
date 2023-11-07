@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.dto.publicacion.request;
 
 import lombok.Data;
+import pe.gob.essalud.apps.dto.inscripcion.request.CreateInscripcionRequestDto;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class PublicacionRequestDto {
     private String imagenBase64;
     private int alcance;
     private boolean anuncio;
-    private boolean votacion;
+    private CreateInscripcionRequestDto inscripcionRequest;
     private List<String> redes;
 
 }

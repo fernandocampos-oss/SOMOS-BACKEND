@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.repository.miessalud;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import pe.gob.essalud.apps.model.miessalud.Inscripcion;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Intege
     Optional<Inscripcion> findByIdPublicacion(long idPublicacion);
     List<Inscripcion> findByVotacionAndVotoActivo(boolean votacion, boolean votoActivo);
 
+    @Query("SELECT i FROM Inscripcion i WHERE i.idResponsable LIKE CONCAT('%,',:idUsuario,',%') OR i.idResponsable LIKE CONCAT(:idUsuario,',%') OR i.idResponsable LIKE CONCAT('%,',:idUsuario) OR i.idResponsable LIKE :idUsuario")
+    List<Inscripcion> findInscripcionesByIdResponsable(String idUsuario);
 }
