@@ -41,10 +41,8 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 //    @Query(value = "UPDATE requerimiento SET porcentaje_avance = ? WHERE id_requerimiento=? ", nativeQuery = true)
 //    public int actualizaPorcentajeAvanceRequerimiento(@Param("porcentajeAvance") Number porcentajeAvance, @Param("idRequerimiento") Number idRequerimiento);
 
-
 //    @Query("SELECT r FROM Indicador r WHERE r.idIndicador = :idIndicador")
 //    Indicador getByIdRequerimiento(@Param("idIndicador") Integer idIndicador);
-
 
 }
 

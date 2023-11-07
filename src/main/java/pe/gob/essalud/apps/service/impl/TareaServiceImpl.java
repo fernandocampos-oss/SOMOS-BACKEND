@@ -38,7 +38,9 @@ public class TareaServiceImpl implements TareaService {
     @Transactional
     @Override
     public Integer registrarTarea(TareaRequestDto dto) {
-        int result = tareaRepository.actualizarActividad(dto.getActividad().getIdActividad(), dto.getIndicadorUsuario().getIdIndicadorUsuario());
+        if (dto.getActividad().getIdActividad() != 0) {
+            int result = tareaRepository.actualizarActividad(dto.getActividad().getIdActividad(), dto.getIndicadorUsuario().getIdIndicadorUsuario());
+        }
         if (!dto.getListTarea().isEmpty()) {
             for (Tarea i : dto.getListTarea()) {
                 i.setIndicadorUsuario(dto.getIndicadorUsuario());
@@ -65,11 +67,11 @@ public class TareaServiceImpl implements TareaService {
 //        }
 //        tareaRepository.actualizaPorcentajeAvanceRequerimiento(nuevoPorcentajeAvance, request.getIdRequerimiento());
 
-        if(request.getExtension().equals("pdf")){
+        if (request.getExtension().equals("pdf")) {
             String rutaFile = uploadPath + RUTA_PDF_GESTION_RENDIMIENTO + request.getIdTarea() + FORMATO_PDF_EVIDENCIA;
             rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
-            tareaRepository.crearEvidencia(request.getEvidenciaDescripcion(), rutaFile, request.getExtension(), LocalDateTime.now(ZoneId.of("America/Lima")),request.getIdTarea());
-        }else{
+            tareaRepository.crearEvidencia(request.getEvidenciaDescripcion(), rutaFile, request.getExtension(), LocalDateTime.now(ZoneId.of("America/Lima")), request.getIdTarea());
+        } else {
             String rutaFile = uploadPath + RUTA_IMAGENES_GESTION_RENDIMIENTO + request.getIdTarea() + FORMATO_IMAGEN_EVIDENCIA;
             rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
             tareaRepository.crearEvidencia(request.getEvidenciaDescripcion(), rutaFile, "png", LocalDateTime.now(ZoneId.of("America/Lima")), request.getIdTarea());

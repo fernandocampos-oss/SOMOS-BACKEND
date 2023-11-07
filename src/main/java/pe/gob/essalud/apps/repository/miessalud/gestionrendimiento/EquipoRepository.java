@@ -16,9 +16,6 @@ public interface EquipoRepository extends JpaRepository<Equipo,Integer> {
     @Query("SELECT e FROM Equipo e WHERE e.usuarioCreacion = :idJefe AND e.esActivo=TRUE ORDER BY e.idEquipo DESC ")
     List<Equipo> getListTrabajadoresByIdUsuarioJefe(@Param("idJefe") Number idJefe);
 
-    @Query("SELECT v FROM Votante v WHERE v.idUsuario = :idUsuario")
-    Votante getVotanteByIdUsuario(@Param("idUsuario") Integer idUsuario);
-
     @Transactional
     @Modifying
     @Query(value = "UPDATE equipo SET es_activo = FALSE WHERE id_equipo=? ", nativeQuery = true)
@@ -27,7 +24,7 @@ public interface EquipoRepository extends JpaRepository<Equipo,Integer> {
     @Query(value = "SELECT v.nombres as nombres, v.apellidos as apellidos, v.id_votante as idVotante FROM votante v WHERE v.id_usuario !=:idJefe AND v.id_usuario IS NOT NULL ", nativeQuery = true)
     List<TrabajadorResponseDto> listAllVotante(@Param("idJefe") Number idJefe);
 
-    @Query("SELECT v FROM Votante v WHERE v.idUsuario=:idUsuario ")
-    Votante getVotanteByIdUsuario(@Param("idUsuario") String idUsuario);
+    @Query("SELECT v FROM Votante v WHERE v.idUsuario = :idUsuario")
+    Votante getVotanteByIdUsuario(@Param("idUsuario") Integer idUsuario);
 
 }

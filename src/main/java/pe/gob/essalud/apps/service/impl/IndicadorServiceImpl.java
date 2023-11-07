@@ -3,12 +3,10 @@ package pe.gob.essalud.apps.service.impl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Indicador;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.IndicadorRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.IndicadorUsuarioRepository;
