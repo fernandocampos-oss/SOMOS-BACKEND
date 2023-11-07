@@ -24,7 +24,7 @@
         INNER JOIN usuario u ON u.id_usuario = i.id_usuario
         LEFT JOIN red_personal rp ON rp.cod_red = u.cod_red
         LEFT JOIN unidad_organizativa uo ON uo.cod_unidad = u.cod_unidad
-        WHERE i.id_inscripcion = 2
+        WHERE i.id_inscripcion = #{idInscripcion}
     </select>
     <select id="getVotacionesInscripcion" resultType="ReporteInscVotacionResponseDto">
         SELECT
