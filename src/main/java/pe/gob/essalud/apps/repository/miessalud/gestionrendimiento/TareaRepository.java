@@ -15,8 +15,8 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE indicador_usuario SET id_estado_indicador=2, id_actividad = ? WHERE id_indicador_usuario=? ", nativeQuery = true)
-    public int actualizarActividad(@Param("idActividad") Number idActividad, @Param("idIndicadorUsuario") Number idIndicadorUsuario);
+    @Query(value = "UPDATE indicador_usuario SET id_estado_indicador=2, id_actividad = ?, peso_total = ? WHERE id_indicador_usuario=? ", nativeQuery = true)
+    public int actualizarActividadYpeso(@Param("idActividad") Number idActividad, @Param("pesoTotal") Number pesoTotal, @Param("idIndicadorUsuario") Number idIndicadorUsuario);
 
     @Transactional
     @Modifying
@@ -41,8 +41,8 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 //    @Query(value = "UPDATE requerimiento SET porcentaje_avance = ? WHERE id_requerimiento=? ", nativeQuery = true)
 //    public int actualizaPorcentajeAvanceRequerimiento(@Param("porcentajeAvance") Number porcentajeAvance, @Param("idRequerimiento") Number idRequerimiento);
 
-//    @Query("SELECT r FROM Indicador r WHERE r.idIndicador = :idIndicador")
-//    Indicador getByIdRequerimiento(@Param("idIndicador") Integer idIndicador);
+    @Query("SELECT t FROM Tarea t WHERE t.indicador.idIndicador = :idIndicador")
+    List<Tarea> getTareasByIdIndicador(@Param("idIndicador") int idIndicador);
 
 }
 

@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.TareaRequestDto;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
 import pe.gob.essalud.apps.service.TareaService;
 
 @RestController
@@ -45,6 +47,12 @@ public class TareaController {
     public ResponseEntity<EvidenciaResponseDto> getEvidenciaByTarea(@PathVariable("idTarea") Integer idTarea) {
         EvidenciaResponseDto evidencia = tareaService.getEvidenciaByTarea(idTarea);
         return new ResponseEntity<EvidenciaResponseDto>(evidencia, HttpStatus.OK);
+    }
+
+    @GetMapping("/listar/indicador/{idIndicador}")
+    public ResponseEntity<List<Tarea>> getTareasByIdIndicador(@PathVariable("idIndicador") int idIndicador) {
+        List<Tarea> lista = tareaService.getTareasByIdIndicador(idIndicador);
+        return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
     }
 
 }

@@ -3,6 +3,9 @@ package pe.gob.essalud.apps.service;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.TareaRequestDto;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
+
+import java.util.List;
 
 public interface TareaService {
 
@@ -14,4 +17,5 @@ public interface TareaService {
 
     EvidenciaResponseDto getEvidenciaByTarea(Integer idTarea);
 
+    List<Tarea> getTareasByIdIndicador(int idIndicador);
 }

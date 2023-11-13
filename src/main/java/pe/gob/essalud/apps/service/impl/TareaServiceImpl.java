@@ -2,6 +2,7 @@ package pe.gob.essalud.apps.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import pe.gob.essalud.apps.common.constants.gestionrendimiento.EstadoTareaConstant;
 import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaRequestDto;
@@ -38,18 +40,23 @@ public class TareaServiceImpl implements TareaService {
     @Transactional
     @Override
     public Integer registrarTarea(TareaRequestDto dto) {
-        if (dto.getActividad().getIdActividad() != 0) {
-            int result = tareaRepository.actualizarActividad(dto.getActividad().getIdActividad(), dto.getIndicadorUsuario().getIdIndicadorUsuario());
-        }
+//        if (dto.getActividad().getIdActividad() != 0) {
+////            int result = tareaRepository.actualizarActividadYpeso(dto.getActividad().getIdActividad(), dto.getIndicadorUsuario().getPesoTotal(), dto.getIndicadorUsuario().getIdIndicadorUsuario());
+//        }
         if (!dto.getListTarea().isEmpty()) {
             for (Tarea i : dto.getListTarea()) {
-                i.setIndicadorUsuario(dto.getIndicadorUsuario());
+                i.setIndicador(dto.getIndicador());
                 i.setUsuarioCreacion(authService.getIdUserSession());
+
+                EstadoTarea model = new EstadoTarea();
+                model.setIdEstadoTarea(EstadoTareaConstant.REGISTRADO);
+                i.setEstadoTarea(model);
+
                 i.setEstado(true);
                 tareaRepository.save(i);
             }
         }
-        return dto.getIndicadorUsuario().getIdIndicadorUsuario();
+        return dto.getIndicador().getIdIndicador();
     }
 
     @Override
@@ -93,6 +100,11 @@ public class TareaServiceImpl implements TareaService {
             dto.setExtension(tarea.get().getEvidenciaExtensionFile());
         }
         return dto;
+    }
+
+    @Override
+    public List<Tarea> getTareasByIdIndicador(int idIndicador) {
+        return tareaRepository.getTareasByIdIndicador(idIndicador);
     }
 
 }
