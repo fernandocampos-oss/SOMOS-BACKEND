@@ -178,8 +178,18 @@ public class EncuestaServiceImpl implements EncuestaService {
             userResponse.setNombreCompleto(userById.getNombres() + ' ' + userById.getApellidos());
             userResponse.setNumeroDocumento(userById.getNumeroDocumento());
             userResponse.setCodigoPlanilla(userById.getCodigoPlanilla());
-            userResponse.setRed(redPersonalRepository.findById(userById.getCodigoRed()).get().getDescripcion());
-            userResponse.setUnidadOrganica(unidadOrganizativaRepository.findById(userById.getCodigoUnidad()).get().getDescripcion());
+            if (redPersonalRepository.findById(userById.getCodigoRed()).isPresent()){
+                userResponse.setRed(redPersonalRepository.findById(userById.getCodigoRed()).get().getDescripcion());
+            }
+            else {
+                userResponse.setRed("Red no registrada actualmente");
+            }
+            if (unidadOrganizativaRepository.findById(userById.getCodigoUnidad()).isPresent()){
+                userResponse.setUnidadOrganica(unidadOrganizativaRepository.findById(userById.getCodigoUnidad()).get().getDescripcion());
+            }
+            else {
+                userResponse.setUnidadOrganica("Unidad orgánica no registrada actualmente");
+            }
             userResponse.setCargo(userById.getCargo());
             userResponse.setRegimen(userById.getRegimen());
             userResponse.setNumeroCelular(userById.getNumeroCelular());
