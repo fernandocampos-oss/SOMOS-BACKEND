@@ -17,9 +17,6 @@ public class Prioridad {
     @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name="peso")
-    private int peso;
-
     @Column(name = "anio_registro")
     private int  anioRegistro;
 

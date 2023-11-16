@@ -5,8 +5,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class MainPrioridadDto {
+public class ExcelPrioridadDto {
     private int idPrioridad;
     private String prioridadNombre;
-    private List<MainIndicadorDto> listIndicador;
+    private List<ExcelIndicadorDto> listIndicador;
 }

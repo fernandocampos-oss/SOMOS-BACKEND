@@ -2,6 +2,7 @@ package pe.gob.essalud.apps.controller;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -54,6 +55,16 @@ public class TareaController {
         List<Tarea> lista = tareaService.getTareasByIdIndicador(idIndicador);
         return new ResponseEntity<List<Tarea>>(lista, HttpStatus.OK);
     }
+
+////    @GetMapping("/aprobar")
+////    public int aprobarIndicador(@RequestParam("estado") Number estado, @RequestParam("idIndicadorUsuario") Number idIndicadorUsuario) {
+////        return indicadorUsuarioService.aprobarIndicador(estado, idIndicadorUsuario);
+////    }
+//
+////    @GetMapping("/rechazar")
+////    public int rechazarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("motivo") String motivo, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
+////        return requerimientoUsuarioService.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
+////    }
 
 }
 

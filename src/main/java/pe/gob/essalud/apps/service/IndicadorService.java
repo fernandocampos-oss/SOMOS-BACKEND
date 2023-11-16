@@ -16,6 +16,8 @@ public interface IndicadorService {
 
     void modificarIndicador(Integer idIndicador, Indicador request);
 
-    List<Indicador> getListIndicadoresFinalizadoByUser();
+//    List<Indicador> getListIndicadoresFinalizadoByUser();
+
+    int asignarPesoIndicador(int peso, int idIndicador);
 
 }

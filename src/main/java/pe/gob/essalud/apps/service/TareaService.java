@@ -6,6 +6,7 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.request.TareaRequestDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TareaService {
 
@@ -18,4 +19,9 @@ public interface TareaService {
     EvidenciaResponseDto getEvidenciaByTarea(Integer idTarea);
 
     List<Tarea> getTareasByIdIndicador(int idIndicador);
+
+    ////    int aprobarIndicador(Number estado, Number idIndicadorUsuario);
+
+////    int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario);
+
 }

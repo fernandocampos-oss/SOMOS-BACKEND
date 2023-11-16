@@ -25,6 +25,9 @@ public class Indicador {
     @Column(name="descripcion")
     private String descripcion;
 
+    @Column(name="peso")
+    private int peso;
+
     @ManyToOne
     @JoinColumn(name="id_usuario", nullable = false, foreignKey = @ForeignKey(name="fk_indicador_usuario"))
     private Usuario usuario;

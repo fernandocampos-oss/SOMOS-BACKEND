@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class MainTareaDto {
+public class ExcelTareaDto {
     private int idTarea;
     private String nombre;
     private LocalDateTime plazo;

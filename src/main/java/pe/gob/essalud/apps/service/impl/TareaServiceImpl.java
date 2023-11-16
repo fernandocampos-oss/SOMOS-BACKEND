@@ -40,9 +40,6 @@ public class TareaServiceImpl implements TareaService {
     @Transactional
     @Override
     public Integer registrarTarea(TareaRequestDto dto) {
-//        if (dto.getActividad().getIdActividad() != 0) {
-////            int result = tareaRepository.actualizarActividadYpeso(dto.getActividad().getIdActividad(), dto.getIndicadorUsuario().getPesoTotal(), dto.getIndicadorUsuario().getIdIndicadorUsuario());
-//        }
         if (!dto.getListTarea().isEmpty()) {
             for (Tarea i : dto.getListTarea()) {
                 i.setIndicador(dto.getIndicador());
@@ -67,13 +64,6 @@ public class TareaServiceImpl implements TareaService {
     @Transactional
     @Override
     public long crearEvidenciaTarea(EvidenciaRequestDto request) {
-//        Indicador requerimiento = tareaRepository.getByIdRequerimiento(request.getIdRequerimiento());
-//        int nuevoPorcentajeAvance = (requerimiento.getPorcentajeAvance() + request.getPorcentajeAvance());
-//        if(nuevoPorcentajeAvance > 100){
-//            throw new ValidationException("El porcentaje ingresado excede el 100%");
-//        }
-//        tareaRepository.actualizaPorcentajeAvanceRequerimiento(nuevoPorcentajeAvance, request.getIdRequerimiento());
-
         if (request.getExtension().equals("pdf")) {
             String rutaFile = uploadPath + RUTA_PDF_GESTION_RENDIMIENTO + request.getIdTarea() + FORMATO_PDF_EVIDENCIA;
             rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
@@ -106,5 +96,15 @@ public class TareaServiceImpl implements TareaService {
     public List<Tarea> getTareasByIdIndicador(int idIndicador) {
         return tareaRepository.getTareasByIdIndicador(idIndicador);
     }
+
+    ////    @Override
+////    public int aprobarIndicador(Number estado, Number idIndicadorUsuario) {
+////        return requerimientoUsuarioRepository.aprobarIndicador(estado, idIndicadorUsuario);
+////    }
+//
+////    @Override
+////    public int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario) {
+////        return requerimientoUsuarioRepository.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
+////    }
 
 }

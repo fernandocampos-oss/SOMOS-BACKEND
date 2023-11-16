@@ -95,9 +95,14 @@ public class IndicadorServiceImpl implements IndicadorService {
     }
 
 
+//    @Override
+//    public List<Indicador> getListIndicadoresFinalizadoByUser() {
+//        return indicadorRepository.getListIndicadoresFinalizadoByUser(authService.getIdUserSession());
+//    }
+
     @Override
-    public List<Indicador> getListIndicadoresFinalizadoByUser() {
-        return indicadorRepository.getListIndicadoresFinalizadoByUser(authService.getIdUserSession());
+    public int asignarPesoIndicador(int peso, int idIndicador) {
+        return indicadorRepository.asignarPesoIndicador(peso, idIndicador);
     }
 
 }

@@ -50,11 +50,17 @@ public class IndicadorController {
         indicadorService.modificarIndicador(idIndicador, request);
     }
 
+//    @GetMapping("/listar/finalizado")
+//    public ResponseEntity<List<Indicador>> getListIndicadoresFinalizadoByUser() {
+//        List<Indicador> lista = indicadorService.getListIndicadoresFinalizadoByUser();
+//        return new ResponseEntity<List<Indicador>>(lista, HttpStatus.OK);
+//    }
 
-    @GetMapping("/listar/finalizado")
-    public ResponseEntity<List<Indicador>> getListIndicadoresFinalizadoByUser() {
-        List<Indicador> lista = indicadorService.getListIndicadoresFinalizadoByUser();
-        return new ResponseEntity<List<Indicador>>(lista, HttpStatus.OK);
+    @GetMapping("/asignar/peso/{peso}/indicador/{idIndicador}")
+    public int asignarPesoIndicador(@PathVariable int peso, @PathVariable int idIndicador) {
+        return indicadorService.asignarPesoIndicador(peso, idIndicador);
     }
+
+
 
 }
