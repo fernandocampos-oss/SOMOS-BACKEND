@@ -9,6 +9,7 @@
                 u.numero_documento 				numeroDocumento,
                 u.codigo_planilla				codigoPlanilla,
                 u.apellidos || ' ' || u.nombres nombreCompleto,
+                u.fecha_nacimiento              fechaNacimiento,
                 rp.descripcion					red,
                 uo.descripcion					unidadOrganica,
                 u.cargo,
