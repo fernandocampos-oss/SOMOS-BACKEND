@@ -6,6 +6,7 @@ import java.util.List;
 
 @Data
 public class MainDto {
+    private int idVotante;
     private String trabajadorNombre;
     private String trabajadorApellido;
     private List<MainPrioridadDto> listPrioridad;

@@ -13,16 +13,16 @@ import java.util.List;
 
 public interface PrioridadRepository extends JpaRepository<Prioridad, Integer> {
 
-    @Query("SELECT i from Indicador i WHERE i.esAsignado=false ")
-    List<Indicador> getAllIndicadorOrganizar();
+//    @Query("SELECT i from Indicador i WHERE i.esAsignado=false ")
+//    List<Indicador> getAllIndicadorOrganizar();
 
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE indicador SET id_prioridad=:idPrioridad, es_asignado=TRUE WHERE id_indicador IN :listIdIndicadores ", nativeQuery = true)
-    public void actualizarPrioridadEnListaIndicadores(@Param("idPrioridad") Number idPrioridad, @Param("listIdIndicadores") int[] listIdIndicadores);
+    //    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE indicador SET id_prioridad=:idPrioridad, es_asignado=TRUE WHERE id_indicador IN :listIdIndicadores ", nativeQuery = true)
+//    public void actualizarPrioridadEnListaIndicadores(@Param("idPrioridad") Number idPrioridad, @Param("listIdIndicadores") int[] listIdIndicadores);
 
-    @Query(value = "SELECT * from prioridad p WHERE p.id_prioridad IN (SELECT DISTINCT id_prioridad from indicador i WHERE i.id_usuario=?) ", nativeQuery = true)
-    List<Prioridad> getListIdPrioridadesByTrabajador(@Param("idTrabajador") Number idTrabajador);
+    @Query(value = "SELECT * from prioridad p WHERE p.anio=? and p.id_prioridad IN (SELECT DISTINCT id_prioridad from indicador i WHERE i.id_votante=?) ", nativeQuery = true)
+    List<Prioridad> getListIdPrioridadesByTrabajador(@Param("anioActual") Number anioActual, @Param("idTrabajador") Number idTrabajador);
 
     @Query(value = "SELECT u.id_usuario as idUsuario, u.nombres as nombres, u.apellidos as apellidos, u.cargo as puesto, u.cod_unidad as unidad, u.numero_documento as numeroDocumento FROM usuario u WHERE u.id_usuario=:idUsuario ", nativeQuery = true)
     EvaluadorResponseDto findUsuarioById(@Param("idUsuario") Number idUsuario);

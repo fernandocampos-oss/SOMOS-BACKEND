@@ -2,7 +2,6 @@ package pe.gob.essalud.apps.repository.miessalud.gestionrendimiento;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 
-public interface TareaRepository extends JpaRepository<Tarea, Integer> {
+public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
 
     @Transactional
     @Modifying
@@ -24,15 +23,15 @@ public interface TareaRepository extends JpaRepository<Tarea, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE tarea SET evidencia_descripcion=?, evidencia_ruta_file=?, evidencia_extension_file=?, evidencia_fecha_registro=? WHERE id_tarea=?", nativeQuery = true)
-    Integer crearEvidencia(@Param("evidenciaDescripcion") String evidenciaDescripcion,
+    @Query(value = "UPDATE evidencia SET sustento_descripcion=?, sustento_ruta_file=?, sustento_extension_file=?, sustento_fecha_registro=? WHERE id_evidencia=?", nativeQuery = true)
+    Integer crearEvidencia(@Param("sustentoDescripcion") String sustentoDescripcion,
                            @Param("rutaFile") String rutaFile,
                            @Param("extension") String extension,
-                           @Param("evidenciaFechaRegistro") LocalDateTime evidenciaFechaRegistro,
-                           @Param("idTarea") Number idTarea);
+                           @Param("sustentoFechaRegistro") LocalDateTime sustentoFechaRegistro,
+                           @Param("idEvidencia") Number idEvidencia);
 
-    @Query("SELECT t FROM Tarea t WHERE t.indicador.idIndicador = :idIndicador")
-    List<Tarea> getTareasByIdIndicador(@Param("idIndicador") int idIndicador);
+    @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador")
+    List<Evidencia> listEvidenciaByIdIndicador(@Param("idIndicador") int idIndicador);
 
 
 ////    @Transactional

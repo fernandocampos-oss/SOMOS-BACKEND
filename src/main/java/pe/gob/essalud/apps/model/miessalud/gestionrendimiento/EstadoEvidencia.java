@@ -6,12 +6,12 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "estado_tarea")
-public class EstadoTarea {
+@Table(name = "estado_evidencia")
+public class EstadoEvidencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_estado_tarea")
-    private Integer idEstadoTarea;
+    @Column(name = "id_estado_evidencia")
+    private Integer idEstadoEvidencia;
 
     @Column(name="codigo")
     private String codigo;

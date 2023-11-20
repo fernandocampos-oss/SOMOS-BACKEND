@@ -1,23 +1,23 @@
 package pe.gob.essalud.apps.service;
 
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 
 import java.util.List;
 
 public interface IndicadorService {
 
-    Indicador registrarIndicador(Indicador indicador);
+    void registrarIndicador(IndicadorRequestDto requestDto);
 
-    List<Indicador> getListIndicadoresPendientesByUser();
-
-    List<TipoIngreso> getAllTipoIngreso();
+    List<PendienteDto> listPendientesTrabajadorByUser();
 
     List<TipoValorMeta> getAllTipoValorMeta();
 
     void modificarIndicador(Integer idIndicador, Indicador request);
 
-//    List<Indicador> getListIndicadoresFinalizadoByUser();
-
     int asignarPesoIndicador(int peso, int idIndicador);
+
+    //    List<Indicador> getListIndicadoresFinalizadoByUser();
 
 }

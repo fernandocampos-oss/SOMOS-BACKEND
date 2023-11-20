@@ -3,6 +3,8 @@ package pe.gob.essalud.apps.model.miessalud.gestionrendimiento;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Data
@@ -17,8 +19,8 @@ public class Prioridad {
     @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name = "anio_registro")
-    private int  anioRegistro;
+    @Column(name = "anio")
+    private int anio;
 
     @ManyToOne
     @JoinColumn(name="id_actividad", nullable = false, foreignKey = @ForeignKey(name="fk_prioridad_actividad"))
@@ -26,5 +28,13 @@ public class Prioridad {
 
     @OneToMany(mappedBy = "prioridad", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Indicador> listIndicador;
+
+    @Column(name = "fecha_asignacion")
+    private LocalDateTime fechaAsignacion;
+
+    @PrePersist
+    private void prePersist() {
+        this.fechaAsignacion = LocalDateTime.now(ZoneId.of("America/Lima"));
+    }
 
 }

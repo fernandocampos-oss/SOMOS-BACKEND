@@ -5,11 +5,11 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ExcelIndicadorDto {
+public class PendienteIndicadorDto {
     private int idIndicador;
     private String nombreIndicador;
     private String codTipoValorMeta;
     private int valorMeta;
     private int peso;
-    private List<ExcelEvidenciaDto> listTarea;
+    private List<PendienteEvidenciaDto> listEvidencia;
 }

@@ -12,19 +12,19 @@ import java.util.List;
 
 public interface IndicadorRepository extends JpaRepository<Indicador, Integer> {
 
-//    @Query(value = "SELECT * from indicador i WHERE i.id_usuario=? AND iu.id_estado_indicador in (1,2)  ORDER BY iu.id_indicador_usuario ASC ", nativeQuery = true)
-    @Query(value = "SELECT * from indicador i WHERE i.id_usuario=? ORDER BY i.id_indicador ASC ", nativeQuery = true)
-    List<Indicador> getListIndicadoresPendientesByUser(@Param("idUsuario") Number idUsuario);
+//    //    @Query(value = "SELECT * from indicador i WHERE i.id_usuario=? AND iu.id_estado_indicador in (1,2)  ORDER BY iu.id_indicador_usuario ASC ", nativeQuery = true)
+//    @Query(value = "SELECT * from indicador i WHERE i.id_usuario=? ORDER BY i.id_indicador ASC ", nativeQuery = true)
+//    List<Indicador> getListIndicadoresPendientesByUser(@Param("idUsuario") Number idUsuario);
 
-    @Query(value = "SELECT * from indicador i WHERE i.id_usuario=? AND i.id_prioridad=? ORDER BY i.id_indicador ASC ", nativeQuery = true)
-    List<Indicador> getListIndicadoresByUsuarioAndPrioridad(@Param("idUsuario") int idUsuario, @Param("idPrioridad") int idPrioridad);
+    @Query(value = "SELECT * from indicador i WHERE i.id_votante=? AND i.id_prioridad=? ORDER BY i.id_indicador ASC ", nativeQuery = true)
+    List<Indicador> getListIndicadoresByUsuarioAndPrioridad(@Param("idVotante") int idVotante, @Param("idPrioridad") int idPrioridad);
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE indicador SET nombre=?, descripcion=?, id_tipo_ingreso=?, id_tipo_valor_meta=?, valor_meta=?, fecha_modificacion=?, usuario_modificacion=? WHERE id_indicador=? ", nativeQuery = true)
-    public void modificarIndicador(@Param("nombre") String estado,
-                                   @Param("descripcion") String descripcion,
-                                   @Param("idTipoIngreso") Number idTipoIngreso,
+    @Query(value = "UPDATE indicador SET descripcion=?, detalle=?, id_tipo_valor_meta=?, valor_meta=?, fecha_modificacion=?, usuario_modificacion=? WHERE id_indicador=? ", nativeQuery = true)
+    public void modificarIndicador(@Param("descripcion") String descripcion,
+                                   @Param("detalle") String detalle,
+//                                   @Param("idTipoIngreso") Number idTipoIngreso,
                                    @Param("idTipoValorMeta") Number idTipoValorMeta,
                                    @Param("valorMeta") int valorMeta,
                                    @Param("fechaModificacion") LocalDateTime fechaModificacion,
@@ -32,13 +32,13 @@ public interface IndicadorRepository extends JpaRepository<Indicador, Integer> {
                                    @Param("idIndicador") Number idIndicador);
 
 
-//    @Query(value = "SELECT * from indicador i WHERE i.id_usuario=? AND i.id_estado_indicador =1 ORDER BY i.id_indicador ASC ", nativeQuery = true)
-//    List<Indicador> getListIndicadoresFinalizadoByUser(@Param("idUsuario") Number idUsuario);
-
     @Transactional
     @Modifying
     @Query(value = "UPDATE indicador SET peso=? WHERE id_indicador=? ", nativeQuery = true)
     public int asignarPesoIndicador(@Param("peso") Number peso, @Param("idIndicador") Number idIndicador);
+
+    //    @Query(value = "SELECT * from indicador i WHERE i.id_usuario=? AND i.id_estado_indicador =1 ORDER BY i.id_indicador ASC ", nativeQuery = true)
+//    List<Indicador> getListIndicadoresFinalizadoByUser(@Param("idUsuario") Number idUsuario);
 
 
 }

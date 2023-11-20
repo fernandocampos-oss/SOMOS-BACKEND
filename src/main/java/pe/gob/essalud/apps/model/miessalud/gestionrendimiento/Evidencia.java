@@ -11,36 +11,36 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name="tarea")
-public class Tarea {
+@Table(name="evidencia")
+public class Evidencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_tarea")
-    private Integer idTarea;
+    @Column(name = "id_evidencia")
+    private Integer idEvidencia;
 
-    @Column(name="nombre")
-    private String nombre;
+    @Column(name="descripcion")
+    private String descripcion;
 
     @Column(name = "plazo")
     private LocalDateTime plazo;
 
-    @Column(name="motivo_rechazo")
-    private String motivoRechazo;
+    @Column(name="comentario")
+    private String comentario;
 
-    @Column(name="evidencia_descripcion")
-    private String evidenciaDescripcion;
+    @Column(name="sustento_descripcion")
+    private String sustentoDescripcion;
 
-    @Column(name = "evidencia_extension_file")
-    private String evidenciaExtensionFile;
+    @Column(name = "sustento_extension_file")
+    private String sustentoExtensionFile;
 
-    @Column(name = "evidencia_ruta_file")
-    private String evidenciaRutaFile;
+    @Column(name = "sustento_ruta_file")
+    private String sustentoRutaFile;
 
-    @Column(name = "evidencia_fecha_registro")
-    private LocalDateTime evidenciaFechaRegistro;
+    @Column(name = "sustento_fecha_registro")
+    private LocalDateTime sustentoFechaRegistro;
 
-    @Column(name="evaluacion_comentario")
-    private String evaluacionComentario;
+    @Column(name="sustento_comentario")
+    private String sustentoComentario;
 
     @JsonIgnore
     @ManyToOne
@@ -49,8 +49,8 @@ public class Tarea {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="id_estado_tarea", nullable = false, foreignKey = @ForeignKey(name="fk_tarea_estadotarea"))
-    private EstadoTarea estadoTarea;
+    @JoinColumn(name="id_estado_evidencia", nullable = false, foreignKey = @ForeignKey(name="fk_evidencia_estadoevidencia"))
+    private EstadoEvidencia estadoEvidencia;
 
     @Column(name = "estado")
     private boolean estado;

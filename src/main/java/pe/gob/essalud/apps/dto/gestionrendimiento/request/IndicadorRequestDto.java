@@ -1,16 +1,17 @@
 package pe.gob.essalud.apps.dto.gestionrendimiento.request;
 
 import lombok.Data;
+import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Indicador;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Tarea;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 
 import java.util.List;
 
 @Data
-public class TareaRequestDto {
+public class IndicadorRequestDto {
     private Actividad actividad;
-    //    private IndicadorUsuario indicadorUsuario;
+    private Votante votante;
     private Indicador indicador;
-    private List<Tarea> listTarea;
+    private List<Evidencia> listEvidencia;
 }
