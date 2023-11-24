@@ -41,25 +41,6 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     @Value("${upload-path}")
     private String uploadPath;
 
-//    @Transactional
-//    @Override
-//    public Integer registrarTarea(TareaRequestDto dto) {
-//        if (!dto.getListTarea().isEmpty()) {
-//            for (Tarea i : dto.getListTarea()) {
-//                i.setIndicador(dto.getIndicador());
-//                i.setUsuarioCreacion(authService.getIdUserSession());
-//
-//                EstadoTarea model = new EstadoTarea();
-//                model.setIdEstadoTarea(EstadoTareaConstant.REGISTRADO);
-//                i.setEstadoTarea(model);
-//
-//                i.setEstado(true);
-//                tareaRepository.save(i);
-//            }
-//        }
-//        return dto.getIndicador().getIdIndicador();
-//    }
-
     @Transactional
     @Override
     public void registrarEvidenciaExistIndicador(IndicadorExistRequestDto dto) {
@@ -109,8 +90,8 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     }
 
     @Override
-    public int actualizarTareaAdministrador(String nombre, String plazo, Number idTarea) {
-        return evidenciaRepository.actualizarTareaAdministrador(nombre, plazo, authService.getIdUserSession(), LocalDateTime.now(ZoneId.of("America/Lima")), idTarea);
+    public int actualizarTareaAdministrador(String nombre, String plazo, Number idEvidencia) {
+        return evidenciaRepository.actualizarTareaAdministrador(nombre, plazo, authService.getIdUserSession(), LocalDateTime.now(ZoneId.of("America/Lima")), idEvidencia);
     }
 
     @Transactional
@@ -129,9 +110,9 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     }
 
     @Override
-    public EvidenciaResponseDto getEvidenciaByTarea(Integer idTarea) {
-        Optional<Evidencia> tarea = evidenciaRepository.findById(idTarea);
-        log.info("idTarea [{}]", tarea.get().getIdEvidencia());
+    public EvidenciaResponseDto getEvidenciaByTarea(Integer idEvidencia) {
+        Optional<Evidencia> tarea = evidenciaRepository.findById(idEvidencia);
+        log.info("idEvidencia [{}]", tarea.get().getIdEvidencia());
         EvidenciaResponseDto dto = new EvidenciaResponseDto();
         if (tarea.isPresent()) {
             String baseImagen = UploadUtil.getFileBase64(tarea.get().getSustentoRutaFile());
@@ -149,14 +130,14 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         return evidenciaRepository.listEvidenciaByIdIndicador(idIndicador);
     }
 
-    ////    @Override
-////    public int aprobarIndicador(Number estado, Number idIndicadorUsuario) {
-////        return requerimientoUsuarioRepository.aprobarIndicador(estado, idIndicadorUsuario);
-////    }
+//    @Override
+//    public int aprobarIndicador(Number estado, Number idIndicadorUsuario) {
+//        return requerimientoUsuarioRepository.aprobarIndicador(estado, idIndicadorUsuario);
+//    }
 //
-////    @Override
-////    public int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario) {
-////        return requerimientoUsuarioRepository.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
-////    }
+//    @Override
+//    public int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario) {
+//        return requerimientoUsuarioRepository.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
+//    }
 
 }

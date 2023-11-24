@@ -10,22 +10,20 @@ import java.util.List;
 
 public interface EvidenciaService {
 
-//    Integer registrarTarea(TareaRequestDto dto);
-
     void registrarEvidenciaExistIndicador(IndicadorExistRequestDto dto);
 
     void registrarIndicadorExistPrioridad(PrioridadExistRequestDto dto);
 
-    int actualizarTareaAdministrador(String nombre, String plazo, Number idTarea);
+    int actualizarTareaAdministrador(String nombre, String plazo, Number idEvidencia);
 
     long crearSustentoEvidencia(EvidenciaSustentoRequestDto request);
 
-    EvidenciaResponseDto getEvidenciaByTarea(Integer idTarea);
+    EvidenciaResponseDto getEvidenciaByTarea(Integer idEvidencia);
 
     List<Evidencia> listEvidenciaByIdIndicador(int idIndicador);
 
-    ////    int aprobarIndicador(Number estado, Number idIndicadorUsuario);
-
-////    int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario);
+//    int aprobarIndicador(Number estado, Number idIndicadorUsuario);
+//
+//    int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario);
 
 }

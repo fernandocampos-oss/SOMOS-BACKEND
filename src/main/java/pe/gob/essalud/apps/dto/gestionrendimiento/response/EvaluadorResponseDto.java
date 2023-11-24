@@ -7,4 +7,5 @@ public interface EvaluadorResponseDto {
     String getPuesto();
     String getUnidad();
     String getNumeroDocumento();
+    String getEmail();
 }

@@ -9,5 +9,6 @@ public class MainDto {
     private int idVotante;
     private String trabajadorNombre;
     private String trabajadorApellido;
+    private String email;
     private List<MainPrioridadDto> listPrioridad;
 }

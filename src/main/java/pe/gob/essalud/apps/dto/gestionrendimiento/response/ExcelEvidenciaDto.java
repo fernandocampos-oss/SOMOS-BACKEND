@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class ExcelEvidenciaDto {
-    private int idTarea;
+    private int idEvidencia;
     private String nombre;
     private LocalDateTime plazo;
 

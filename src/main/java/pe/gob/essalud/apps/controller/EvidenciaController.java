@@ -43,8 +43,8 @@ public class EvidenciaController {
     }
 
     @GetMapping("/modificar")
-    public int actualizarTareaAdministrador(@RequestParam("nombre") String nombre, @RequestParam("plazo") String plazo, @RequestParam("idTarea") Number idTarea) {
-        return evidenciaService.actualizarTareaAdministrador(nombre, plazo, idTarea);
+    public int actualizarTareaAdministrador(@RequestParam("nombre") String nombre, @RequestParam("plazo") String plazo, @RequestParam("idEvidencia") Number idEvidencia) {
+        return evidenciaService.actualizarTareaAdministrador(nombre, plazo, idEvidencia);
     }
 
     @PostMapping("/registrar/sustento")
@@ -54,9 +54,9 @@ public class EvidenciaController {
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/obtener/evidencia/{idTarea}")
-    public ResponseEntity<EvidenciaResponseDto> getEvidenciaByTarea(@PathVariable("idTarea") Integer idTarea) {
-        EvidenciaResponseDto evidencia = evidenciaService.getEvidenciaByTarea(idTarea);
+    @GetMapping("/obtener/evidencia/{idEvidencia}")
+    public ResponseEntity<EvidenciaResponseDto> getEvidenciaByTarea(@PathVariable("idEvidencia") Integer idEvidencia) {
+        EvidenciaResponseDto evidencia = evidenciaService.getEvidenciaByTarea(idEvidencia);
         return new ResponseEntity<EvidenciaResponseDto>(evidencia, HttpStatus.OK);
     }
 

@@ -14,12 +14,12 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE tarea SET nombre = ? , plazo= ? , usuario_modificacion=?, fecha_modificacion=? WHERE id_tarea=? ", nativeQuery = true)
+    @Query(value = "UPDATE evidencia SET nombre = ? , plazo= ? , usuario_modificacion=?, fecha_modificacion=? WHERE id_evidencia=? ", nativeQuery = true)
     public int actualizarTareaAdministrador(@Param("nombre") String nombre,
                                             @Param("plazo") String plazo,
                                             @Param("usuarioModificacion") Number usuarioModificacion,
                                             @Param("fechaModificaion") LocalDateTime fechaModificaion,
-                                            @Param("idTarea") Number idTarea);
+                                            @Param("idEvidencia") Number idEvidencia);
 
     @Transactional
     @Modifying
@@ -32,17 +32,6 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
 
     @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador")
     List<Evidencia> listEvidenciaByIdIndicador(@Param("idIndicador") int idIndicador);
-
-
-////    @Transactional
-////    @Modifying
-////    @Query(value = "UPDATE indicador_usuario SET id_estado_indicador = ? WHERE id_indicador_usuario=? ", nativeQuery = true)
-////    public int aprobarIndicador(@Param("estado") Number estado, @Param("idIndicadorUsuario") Number idIndicadorUsuario);
-//
-////    @Transactional
-////    @Modifying
-////    @Query(value = "UPDATE indicador_usuario SET id_estado_requerimiento = ? , motivo= ? WHERE id_indicador_usuario=? ", nativeQuery = true)
-////    public int rechazarRequerimiento(@Param("estado") Number estado, @Param("motivo") String motivo, @Param("idRequerimientoUsuario") Number idRequerimientoUsuario);
 
 }
 

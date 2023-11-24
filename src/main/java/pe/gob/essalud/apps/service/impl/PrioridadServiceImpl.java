@@ -2,14 +2,20 @@ package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import pe.gob.essalud.apps.client.EmailServiceClient;
+import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
+import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PrioridadService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +31,7 @@ public class PrioridadServiceImpl implements PrioridadService {
     private final EquipoRepository equipoRepository;
     private final IndicadorRepository indicadorRepository;
     private final EvidenciaRepository evidenciaRepository;
+    private final EmailServiceClient _emailServiceClient;
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
@@ -41,6 +48,8 @@ public class PrioridadServiceImpl implements PrioridadService {
             modelMainDto.setIdVotante(e.getIntegrante().getIdVotante());
             modelMainDto.setTrabajadorNombre(e.getIntegrante().getNombres());
             modelMainDto.setTrabajadorApellido(e.getIntegrante().getApellidos());
+            EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
+            modelMainDto.setEmail(usuario.getEmail());
 
             List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(anioActual, e.getIntegrante().getIdVotante());
             log.info("cantidad de prioridades [{}]", prioridades.size());
@@ -73,7 +82,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                     for (Evidencia t : listEvidencia) {
                         log.info("[{}]", t.getDescripcion());
                         MainEvidenciaDto modelEvidenciaDto = new MainEvidenciaDto();
-                        modelEvidenciaDto.setIdTarea(t.getIdEvidencia());
+                        modelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
                         modelEvidenciaDto.setDescripcion(t.getDescripcion());
                         modelEvidenciaDto.setPlazo(t.getPlazo());
 
@@ -106,37 +115,39 @@ public class PrioridadServiceImpl implements PrioridadService {
         LocalDate fechaActual = LocalDate.now();
         int anioActual = fechaActual.getYear();
 
-        int idUserSession = authService.getIdUserSession();
-        EvaluadorResponseDto evaluador = prioridadRepository.findUsuarioById(idUserSession);
-
-        Votante votanteJefe = equipoRepository.getVotanteByIdUsuario(idUserSession);
+        EvaluadorResponseDto evaluador = prioridadRepository.findUsuarioById(authService.getIdUserSession());
+        Votante votanteJefe = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
 
         List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
         log.info("cantidad de trabajadores [{}]", trabajadoresPorJefe.size());
 
         List<ExcelDto> listExcelDto = new ArrayList<>();
         for (Equipo e : trabajadoresPorJefe) {
-            log.info("[{}-{}]", e.getIntegrante().getIdUsuario(), e.getIntegrante().getNombres());
+            log.info("usuario-nombre  [{}-{}]", e.getIntegrante().getIdUsuario(), e.getIntegrante().getNombres());
             ExcelDto modelExcelDto = new ExcelDto();
             modelExcelDto.setEvaluadorNombreCompleto(evaluador.getApellidos() + " " + evaluador.getNombres());
             modelExcelDto.setEvaluadorPuesto(evaluador.getPuesto());
-            modelExcelDto.setEvaluadorCodUnidad(evaluador.getUnidad());
+            UnidadOrganizativa unidadEvaluador = prioridadRepository.getUnidadByCod(evaluador.getUnidad());
+            modelExcelDto.setEvaluadorCodUnidad(unidadEvaluador.getDescripcion());
             modelExcelDto.setEvaluadorNumeroDocumento(evaluador.getNumeroDocumento());
             if (votanteJefe.getIdSegmento() == 1) {
                 modelExcelDto.setEvaluadorSegmento("DIRECTIVO");
             }
             EvaluadorResponseDto evaluado = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
-            modelExcelDto.setEvaluadoNombreCompleto(e.getIntegrante().getApellidos() + " " + e.getIntegrante().getNombres() );
+            modelExcelDto.setEvaluadoNombreCompleto(e.getIntegrante().getApellidos() + " " + e.getIntegrante().getNombres());
             modelExcelDto.setEvaluadoPuesto(evaluado.getPuesto());
-            modelExcelDto.setEvaluadoCodUnidad(evaluado.getUnidad());
-            if (e.getIntegrante().getIdSegmento() == 1) {
-                modelExcelDto.setEvaluadoSegmento("EJECUTOR");
-            }
+            UnidadOrganizativa unidadEvaluado = prioridadRepository.getUnidadByCod(evaluado.getUnidad());
+            modelExcelDto.setEvaluadoCodUnidad(unidadEvaluado.getDescripcion());
+//            if (e.getIntegrante().getIdSegmento() == 1) {
+//                modelExcelDto.setEvaluadoSegmento("EJECUTOR");
+//            }
             if (e.getIntegrante().getIdSegmento() == 3) {
                 modelExcelDto.setEvaluadoSegmento("EJECUTOR");
+            } else {
+                modelExcelDto.setEvaluadoSegmento("");
             }
 
-            List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(anioActual, e.getIntegrante().getIdUsuario());
+            List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(anioActual, e.getIntegrante().getIdVotante());
             List<ExcelPrioridadDto> listExcelPrioridadDto = new ArrayList<>();
             for (Prioridad p : prioridades) {
                 log.info("actividad prioridad [{}]", p.getActividad().getDescripcion());
@@ -144,7 +155,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                 modelExcelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
                 modelExcelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
 
-                List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(e.getIntegrante().getIdUsuario(), p.getIdPrioridad());
+                List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(e.getIntegrante().getIdVotante(), p.getIdPrioridad());
                 log.info("indicadores por trabajador [{}]", indicadoresPorTrabajadorYPrioridad.size());
 
                 List<ExcelIndicadorDto> listExcelIndicadorDto = new ArrayList<>();
@@ -157,14 +168,14 @@ public class PrioridadServiceImpl implements PrioridadService {
                     modelExcelIndicadorDto.setValorMeta(i.getValorMeta());
                     modelExcelIndicadorDto.setPeso(i.getPeso());
 
-                    List<Evidencia>  listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
+                    List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
                     log.info("cantidad de tareas por indicador [{}]", listEvidencia.size());
 
                     List<ExcelEvidenciaDto> listExcelTareaDto = new ArrayList<>();
                     for (Evidencia t : listEvidencia) {
                         log.info("[{}]", t.getDescripcion());
                         ExcelEvidenciaDto modelExcelTareaDto = new ExcelEvidenciaDto();
-                        modelExcelTareaDto.setIdTarea(t.getIdEvidencia());
+                        modelExcelTareaDto.setIdEvidencia(t.getIdEvidencia());
                         modelExcelTareaDto.setNombre(t.getDescripcion());
                         modelExcelTareaDto.setPlazo(t.getPlazo());
 
@@ -188,10 +199,19 @@ public class PrioridadServiceImpl implements PrioridadService {
         return listExcelDto;
     }
 
+    @Override
+    public void sendCorreoNotificacion(EmailNotificacionRequestDto requestDto) {
+        String correo = requestDto.getEmail();
+        String url = requestDto.getUrl();
+        _sendMailRecuperarClave(correo, url);
+    }
 
-//    @Override
-//    public int finalizarTareaAdministrador(Number idRequerimientoUsuario) {
-//        return indicadorUsuarioRepository.finalizarTareaAdministrador(LocalDateTime.now(ZoneId.of("America/Lima")), idRequerimientoUsuario);
-//    }
+    @Async
+    protected void _sendMailRecuperarClave(String correo, String url) {
+        RecuperarClaveWebRequestDto requestRecuperarClave = new RecuperarClaveWebRequestDto();
+        requestRecuperarClave.setEmail(correo);
+        requestRecuperarClave.setUrl(url);
+        _emailServiceClient.recuperarClave(requestRecuperarClave);
+    }
 
 }

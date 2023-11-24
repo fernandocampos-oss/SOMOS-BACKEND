@@ -8,10 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Prioridad;
 
 import java.util.List;
 
-public interface EquipoRepository extends JpaRepository<Equipo,Integer> {
+public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
 
     @Query("SELECT e FROM Equipo e WHERE e.usuarioCreacion = :idJefe AND e.esActivo=TRUE ORDER BY e.idEquipo DESC ")
     List<Equipo> getListTrabajadoresByIdUsuarioJefe(@Param("idJefe") Number idJefe);
@@ -27,4 +28,6 @@ public interface EquipoRepository extends JpaRepository<Equipo,Integer> {
     @Query("SELECT v FROM Votante v WHERE v.idUsuario = :idUsuario")
     Votante getVotanteByIdUsuario(@Param("idUsuario") Integer idUsuario);
 
+    @Query(value = "SELECT * from equipo e WHERE e.id_integrante=?  LIMIT 1", nativeQuery = true)
+    Equipo getJefeByIdIntegrante(@Param("idVotante") Integer idVotante);
 }

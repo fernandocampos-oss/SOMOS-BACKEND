@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelTrabajadorDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.IndicadorService;
@@ -47,10 +49,10 @@ public class IndicadorController {
         return indicadorService.asignarPesoIndicador(peso, idIndicador);
     }
 
-//    @GetMapping("/listar/finalizado")
-//    public ResponseEntity<List<Indicador>> getListIndicadoresFinalizadoByUser() {
-//        List<Indicador> lista = indicadorService.getListIndicadoresFinalizadoByUser();
-//        return new ResponseEntity<List<Indicador>>(lista, HttpStatus.OK);
-//    }
+    @GetMapping("/excel/trabajador")
+    public ResponseEntity<ExcelTrabajadorDto> generarExcelTrabajador() {
+        ExcelTrabajadorDto model = indicadorService.generarExcelTrabajador();
+        return new ResponseEntity<ExcelTrabajadorDto>(model, HttpStatus.OK);
+    }
 
 }
