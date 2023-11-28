@@ -7,12 +7,11 @@ import java.time.LocalDateTime;
 @Data
 public class ExcelEvidenciaDto {
     private int idEvidencia;
-    private String nombre;
+    private String descripcion;
     private LocalDateTime plazo;
 
     private LocalDateTime fechaCreacion;
-    private String motivoRechazo;
-    private String evidenciaDescripcion;
-    private LocalDateTime evidenciaFechaRegistro;
-    private String evidenciaExtensionFile;
+    private String sustentoDescripcion;
+    private LocalDateTime sustentoFechaRegistro;
+    private String sustentoExtensionFile;
 }

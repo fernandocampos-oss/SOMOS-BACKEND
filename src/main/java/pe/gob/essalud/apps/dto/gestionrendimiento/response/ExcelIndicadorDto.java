@@ -11,5 +11,5 @@ public class ExcelIndicadorDto {
     private String codTipoValorMeta;
     private int valorMeta;
     private int peso;
-    private List<ExcelEvidenciaDto> listTarea;
+    private List<ExcelEvidenciaDto> listEvidencia;
 }

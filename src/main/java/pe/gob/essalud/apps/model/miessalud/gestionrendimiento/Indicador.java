@@ -22,22 +22,12 @@ public class Indicador {
     @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name="detalle")
-    private String detalle;
-
     @Column(name="peso")
     private int peso;
 
     @ManyToOne
     @JoinColumn(name="id_votante", nullable = false, foreignKey = @ForeignKey(name="fk_indicador_votante"))
     private Votante votante;
-
-//    @Column(name = "es_asignado")
-//    private boolean esAsignado;
-
-//    @ManyToOne
-//    @JoinColumn(name="id_tipo_ingreso", nullable = false, foreignKey = @ForeignKey(name="fk_indicador_tipoingreso"))
-//    private TipoIngreso tipoIngreso;
 
     @ManyToOne
     @JoinColumn(name="id_tipo_valor_meta", nullable = false, foreignKey = @ForeignKey(name="fk_indicador_tipovalormeta"))

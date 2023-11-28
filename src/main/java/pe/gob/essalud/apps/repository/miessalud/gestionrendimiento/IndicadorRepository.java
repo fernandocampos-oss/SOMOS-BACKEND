@@ -17,9 +17,8 @@ public interface IndicadorRepository extends JpaRepository<Indicador, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE indicador SET descripcion=?, detalle=?, id_tipo_valor_meta=?, valor_meta=?, fecha_modificacion=?, usuario_modificacion=? WHERE id_indicador=? ", nativeQuery = true)
+    @Query(value = "UPDATE indicador SET descripcion=?, id_tipo_valor_meta=?, valor_meta=?, fecha_modificacion=?, usuario_modificacion=? WHERE id_indicador=? ", nativeQuery = true)
     public void modificarIndicador(@Param("descripcion") String descripcion,
-                                   @Param("detalle") String detalle,
                                    @Param("idTipoValorMeta") Number idTipoValorMeta,
                                    @Param("valorMeta") int valorMeta,
                                    @Param("fechaModificacion") LocalDateTime fechaModificacion,

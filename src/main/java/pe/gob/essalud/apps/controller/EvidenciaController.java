@@ -25,13 +25,6 @@ public class EvidenciaController {
     static final String TAREA = "evidencias";
     private final EvidenciaService evidenciaService;
 
-//    @PostMapping("/registrar")
-//    public ResponseEntity<Integer> registrarTarea(@Valid @RequestBody TareaRequestDto dto) {
-//        int result = tareaService.registrarTarea(dto);
-//        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result).toUri();
-//        return ResponseEntity.created(location).build();
-//    }
-
     @PostMapping("/registrar/exist-indicador")
     public void registrarEvidenciaExistIndicador(@Valid @RequestBody IndicadorExistRequestDto dto) {
         evidenciaService.registrarEvidenciaExistIndicador(dto);

@@ -15,7 +15,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class EquipoServiceImpl implements EquipoService {
 
     private final EquipoRepository equipoRepository;
@@ -25,7 +24,7 @@ public class EquipoServiceImpl implements EquipoService {
     public void registrarTrabajador(Equipo equipo) {
         if (equipo != null) {
             Votante getJefeVotante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
-            log.info("JefeVotante [{}]", getJefeVotante);
+
             if(getJefeVotante != null){
                 Votante votante = new Votante();
                 votante.setIdVotante(getJefeVotante.getIdVotante());

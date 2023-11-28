@@ -35,7 +35,6 @@ public class IndicadorServiceImpl implements IndicadorService {
     @Override
     @Transactional
     public void registrarIndicador(IndicadorRequestDto requestDto) {
-        log.info("trabajador [{}]", requestDto.getVotante().getIdVotante());
         LocalDate fechaActualTmp = LocalDate.now();
         int anioRegistro = fechaActualTmp.getYear();
 
@@ -74,21 +73,16 @@ public class IndicadorServiceImpl implements IndicadorService {
         int anioActual = fechaActual.getYear();
 
         Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
-        log.info("votante [{}]", votante.getIdVotante());
 
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(anioActual, votante.getIdVotante());
-        log.info("cantidad de prioridades [{}]", prioridades.size());
 
         List<PendienteDto> listPrioridadDto = new ArrayList<>();
         for (Prioridad p : prioridades) {
-            log.info("prioridad [{}]", p.getActividad().getDescripcion());
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
             modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
 
-            log.info("param indicadores [{}-{}]", votante.getIdVotante(), p.getIdPrioridad());
             List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(votante.getIdVotante(), p.getIdPrioridad());
-            log.info("indicadores del votante [{}]", indicadoresPorTrabajadorYPrioridad.size());
 
             List<PendienteIndicadorDto> listIndicadorDto = new ArrayList<>();
             for (Indicador i : indicadoresPorTrabajadorYPrioridad) {
@@ -101,11 +95,9 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setPeso(i.getPeso());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
-                log.info("cantidad de tareas por indicador [{}]", listEvidencia.size());
 
                 List<PendienteEvidenciaDto> listEvidenciaDto = new ArrayList<>();
                 for (Evidencia t : listEvidencia) {
-                    log.info("[{}]", t.getDescripcion());
                     PendienteEvidenciaDto modelEvidenciaDto = new PendienteEvidenciaDto();
                     modelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
                     modelEvidenciaDto.setDescripcion(t.getDescripcion());
@@ -135,8 +127,6 @@ public class IndicadorServiceImpl implements IndicadorService {
     @Override
     public void modificarIndicador(Integer idIndicador, Indicador request) {
         indicadorRepository.modificarIndicador(request.getDescripcion(),
-                request.getDescripcion(),
-//                request.getTipoIngreso().getIdTipoIngreso(),
                 request.getTipoValorMeta().getIdTipoValorMeta(),
                 request.getValorMeta(),
                 LocalDateTime.now(ZoneId.of("America/Lima")),
@@ -157,46 +147,38 @@ public class IndicadorServiceImpl implements IndicadorService {
         ExcelTrabajadorDto mainDto = new ExcelTrabajadorDto();
 
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(authService.getIdUserSession());
-        log.info("usuario trabajador [{}]", trabajadorUsuario);
         Votante votanteTrabajador = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
-        log.info("votante trabajador [{}]", votanteTrabajador.getIdVotante());
         mainDto.setEvaluadoNombreCompleto(votanteTrabajador.getApellidos() + " " + votanteTrabajador.getNombres());
         mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
         UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
         mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
+        if (votanteTrabajador.getIdSegmento() == 1) {
+            mainDto.setEvaluadoSegmento("DIRECTIVO");
+        }
         if (votanteTrabajador.getIdSegmento() == 3) {
             mainDto.setEvaluadoSegmento("EJECUTOR");
-        } else {
-            mainDto.setEvaluadoSegmento("");
         }
         Equipo JefeEquipo = equipoRepository.getJefeByIdIntegrante(votanteTrabajador.getIdVotante());
-        log.info("usuario-jefe [{}-{}]", JefeEquipo.getJefe().getIdUsuario(), JefeEquipo.getJefe().getNombres());
         EvaluadorResponseDto jefe = prioridadRepository.findUsuarioById(JefeEquipo.getJefe().getIdUsuario());
-        log.info("data-jefe [{}]", jefe.getEmail());
         UnidadOrganizativa unidadJefe = prioridadRepository.getUnidadByCod(jefe.getUnidad());
         mainDto.setEvaluadorCodUnidad(unidadJefe.getDescripcion());
         mainDto.setEvaluadorNombreCompleto(JefeEquipo.getJefe().getApellidos() + " " + JefeEquipo.getJefe().getNombres());
         mainDto.setEvaluadorPuesto(jefe.getPuesto());
         if (JefeEquipo.getJefe().getIdSegmento() == 1) {
             mainDto.setEvaluadorSegmento("DIRECTIVO");
-        } else {
-            mainDto.setEvaluadorSegmento("");
         }
         mainDto.setEvaluadorNumeroDocumento(jefe.getNumeroDocumento());
 
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(anioActual, votanteTrabajador.getIdVotante());
-        log.info("cantidad de prioridades [{}]", prioridades.size());
 
         List<PendienteDto> listPrioridadDto = new ArrayList<>();
         for (Prioridad p : prioridades) {
-            log.info("prioridad [{}]", p.getActividad().getDescripcion());
             PendienteDto modelPrioridadDto = new PendienteDto();
+            modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
             modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
 
-            log.info("param indicadores [{}-{}]", votanteTrabajador.getIdVotante(), p.getIdPrioridad());
             List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(votanteTrabajador.getIdVotante(), p.getIdPrioridad());
-            log.info("indicadores del votante [{}]", indicadoresPorTrabajadorYPrioridad.size());
 
             List<PendienteIndicadorDto> listIndicadorDto = new ArrayList<>();
             for (Indicador i : indicadoresPorTrabajadorYPrioridad) {
@@ -209,11 +191,9 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setPeso(i.getPeso());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
-                log.info("cantidad de tareas por indicador [{}]", listEvidencia.size());
 
                 List<PendienteEvidenciaDto> listEvidenciaDto = new ArrayList<>();
                 for (Evidencia t : listEvidencia) {
-                    log.info("[{}]", t.getDescripcion());
                     PendienteEvidenciaDto modelEvidenciaDto = new PendienteEvidenciaDto();
                     modelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
                     modelEvidenciaDto.setDescripcion(t.getDescripcion());

@@ -26,7 +26,6 @@ import pe.gob.essalud.apps.service.EvidenciaService;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class EvidenciaServiceImpl implements EvidenciaService {
 
     private static final String RUTA_IMAGENES_GESTION_RENDIMIENTO = "/imagenes/gestion-rendimiento/";
@@ -72,7 +71,6 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         model.setVotante(dto.getVotante());
         model.setPrioridad(dto.getPrioridad());
         Indicador indicadorGuardado = indicadorRepository.save(model);
-        log.info("indicadorGuardado [{}]", indicadorGuardado.getIdIndicador());
 
         if (!dto.getListEvidencia().isEmpty()) {
             for (Evidencia e : dto.getListEvidencia()) {
@@ -112,7 +110,7 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     @Override
     public EvidenciaResponseDto getEvidenciaByTarea(Integer idEvidencia) {
         Optional<Evidencia> tarea = evidenciaRepository.findById(idEvidencia);
-        log.info("idEvidencia [{}]", tarea.get().getIdEvidencia());
+
         EvidenciaResponseDto dto = new EvidenciaResponseDto();
         if (tarea.isPresent()) {
             String baseImagen = UploadUtil.getFileBase64(tarea.get().getSustentoRutaFile());
