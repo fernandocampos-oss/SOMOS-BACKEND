@@ -12,6 +12,7 @@ public class UsuariosInscritosResponseDto {
     private String numeroDocumento;
     private String codigoPlanilla;
     private String nombreCompleto;
+    private LocalDateTime fechaNacimiento;
     private String red;
     private String unidadOrganica;
     private String cargo;
