@@ -148,6 +148,7 @@ public class PrioridadServiceImpl implements PrioridadService {
             List<ExcelPrioridadDto> listExcelPrioridadDto = new ArrayList<>();
             for (Prioridad p : prioridades) {
                 ExcelPrioridadDto modelExcelPrioridadDto = new ExcelPrioridadDto();
+                modelExcelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
                 modelExcelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
                 modelExcelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
 
