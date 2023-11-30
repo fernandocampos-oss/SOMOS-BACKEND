@@ -7,6 +7,7 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IndicadorService {
 
@@ -21,5 +22,7 @@ public interface IndicadorService {
     int asignarPesoIndicador(int peso, int idIndicador);
 
     ExcelTrabajadorDto generarExcelTrabajador();
+
+    Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(int idVotante);
 
 }

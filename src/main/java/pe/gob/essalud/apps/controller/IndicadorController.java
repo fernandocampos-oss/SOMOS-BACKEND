@@ -13,6 +13,7 @@ import pe.gob.essalud.apps.service.IndicadorService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(IndicadorController.INDICADOR)
@@ -53,6 +54,11 @@ public class IndicadorController {
     public ResponseEntity<ExcelTrabajadorDto> generarExcelTrabajador() {
         ExcelTrabajadorDto model = indicadorService.generarExcelTrabajador();
         return new ResponseEntity<ExcelTrabajadorDto>(model, HttpStatus.OK);
+    }
+
+    @GetMapping("/peso-total/{idVotante}")
+    public Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(@PathVariable int idVotante) {
+        return indicadorService.sumaTotalPesoAllIndicadorByTrabajador(idVotante);
     }
 
 }

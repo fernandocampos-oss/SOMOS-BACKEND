@@ -9,6 +9,7 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Indicador;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface IndicadorRepository extends JpaRepository<Indicador, Integer> {
 
@@ -29,5 +30,8 @@ public interface IndicadorRepository extends JpaRepository<Indicador, Integer> {
     @Modifying
     @Query(value = "UPDATE indicador SET peso=? WHERE id_indicador=? ", nativeQuery = true)
     public int asignarPesoIndicador(@Param("peso") Number peso, @Param("idIndicador") Number idIndicador);
+
+    @Query(value = "SELECT SUM(i.peso) FROM indicador i WHERE i.anio=? and i.id_votante=? ", nativeQuery = true)
+    Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(@Param("anioActual") int anioActual, @Param("idVotante") int idVotante);
 
 }

@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -141,9 +142,9 @@ public class IndicadorServiceImpl implements IndicadorService {
 
     @Override
     public ExcelTrabajadorDto generarExcelTrabajador() {
+
         LocalDate fechaActual = LocalDate.now();
         int anioActual = fechaActual.getYear();
-
         ExcelTrabajadorDto mainDto = new ExcelTrabajadorDto();
 
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(authService.getIdUserSession());
@@ -214,6 +215,14 @@ public class IndicadorServiceImpl implements IndicadorService {
         }
         mainDto.setListPrioridad(listPrioridadDto);
         return mainDto;
+    }
+
+    @Override
+    public Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(int idVotante) {
+        LocalDate fechaActual = LocalDate.now();
+        int anioActual = fechaActual.getYear();
+        log.info("[{}-{}]", anioActual, idVotante);
+        return indicadorRepository.sumaTotalPesoAllIndicadorByTrabajador(anioActual, idVotante);
     }
 
 }

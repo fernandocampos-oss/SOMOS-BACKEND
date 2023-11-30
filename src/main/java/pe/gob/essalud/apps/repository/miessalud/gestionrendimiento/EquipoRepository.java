@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
-import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Prioridad;
 
 import java.util.List;
 

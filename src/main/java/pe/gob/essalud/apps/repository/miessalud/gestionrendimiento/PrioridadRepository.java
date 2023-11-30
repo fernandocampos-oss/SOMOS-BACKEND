@@ -12,16 +12,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PrioridadRepository extends JpaRepository<Prioridad, Integer> {
-
-//    @Query("SELECT i from Indicador i WHERE i.esAsignado=false ")
-//    List<Indicador> getAllIndicadorOrganizar();
-
-    //    @Transactional
-//    @Modifying
-//    @Query(value = "UPDATE indicador SET id_prioridad=:idPrioridad, es_asignado=TRUE WHERE id_indicador IN :listIdIndicadores ", nativeQuery = true)
-//    public void actualizarPrioridadEnListaIndicadores(@Param("idPrioridad") Number idPrioridad, @Param("listIdIndicadores") int[] listIdIndicadores);
 
     @Query(value = "SELECT * from prioridad p WHERE p.anio=? and p.id_prioridad IN (SELECT DISTINCT id_prioridad from indicador i WHERE i.id_votante=?) ", nativeQuery = true)
     List<Prioridad> getListIdPrioridadesByTrabajador(@Param("anioActual") Number anioActual, @Param("idTrabajador") Number idTrabajador);
