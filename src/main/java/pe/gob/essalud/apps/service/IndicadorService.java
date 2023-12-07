@@ -15,11 +15,11 @@ public interface IndicadorService {
 
     List<PendienteDto> listPendientesTrabajadorByUser();
 
+    List<PendienteDto> listPendientesTrabajadorByVotanteAdmin(int idVotante);
+
     List<TipoValorMeta> getAllTipoValorMeta();
 
-    void modificarIndicador(Integer idIndicador, Indicador request);
-
-    int asignarPesoIndicador(int peso, int idIndicador);
+    void modificarIndicador(int idIndicador, Indicador request);
 
     ExcelTrabajadorDto generarExcelTrabajador();
 

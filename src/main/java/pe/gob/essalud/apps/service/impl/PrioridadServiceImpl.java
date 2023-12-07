@@ -5,21 +5,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.client.EmailServiceClient;
+import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteMatrizRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteSeguimientoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteMatrizResponseDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteSeguimientoResponseDto;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
+import pe.gob.essalud.apps.repository.miessalud.UnidadOrganizativaRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PrioridadService;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +36,11 @@ public class PrioridadServiceImpl implements PrioridadService {
     private final EquipoRepository equipoRepository;
     private final IndicadorRepository indicadorRepository;
     private final EvidenciaRepository evidenciaRepository;
+    private final UnidadOrganizativaRepository unidadOrganizativaRepository;
     private final EmailServiceClient _emailServiceClient;
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
-        LocalDate fechaActual = LocalDate.now();
-        int anioActual = fechaActual.getYear();
 
         List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
 
@@ -52,7 +55,7 @@ public class PrioridadServiceImpl implements PrioridadService {
             modelMainDto.setEmail(usuario.getEmail());
             int porcentajeTotal = 0;
 
-            List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(anioActual, e.getIntegrante().getIdVotante());
+            List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), e.getIntegrante().getIdVotante());
 
             List<MainPrioridadDto> listPrioridadDto = new ArrayList<>();
             for (Prioridad p : prioridades) {
@@ -113,8 +116,6 @@ public class PrioridadServiceImpl implements PrioridadService {
 
     @Override
     public List<ExcelDto> generarExcelDirectivo() {
-        LocalDate fechaActual = LocalDate.now();
-        int anioActual = fechaActual.getYear();
 
         EvaluadorResponseDto evaluador = prioridadRepository.findUsuarioById(authService.getIdUserSession());
         Votante votanteJefe = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
@@ -145,7 +146,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                 modelExcelDto.setEvaluadoSegmento("EJECUTOR");
             }
 
-            List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(anioActual, e.getIntegrante().getIdVotante());
+            List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), e.getIntegrante().getIdVotante());
             List<ExcelPrioridadDto> listExcelPrioridadDto = new ArrayList<>();
             for (Prioridad p : prioridades) {
                 ExcelPrioridadDto modelExcelPrioridadDto = new ExcelPrioridadDto();
@@ -206,6 +207,86 @@ public class PrioridadServiceImpl implements PrioridadService {
         requestRecuperarClave.setEmail(correo);
         requestRecuperarClave.setUrl(url);
         _emailServiceClient.recuperarClave(requestRecuperarClave);
+    }
+
+    @Override
+    public List<UnidadOrganizativa> getAllUnidadesOrganizativas() {
+        return unidadOrganizativaRepository.findAll();
+    }
+
+    @Override
+    public List<ReporteSeguimientoResponseDto> reporteSeguimientoGdr(ReporteSeguimientoRequestDto requestDto) {
+        log.info("param reporte seguimiento [{}-{}-{}]", requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
+        List<Indicador> listIndicador = prioridadRepository.reporteSeguimientoGdr(requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
+
+        List<ReporteSeguimientoResponseDto> listSeguimiento = new ArrayList<>();
+        for (Indicador i : listIndicador) {
+            ReporteSeguimientoResponseDto reporteSeguimientoResponseDto = new ReporteSeguimientoResponseDto();
+
+            List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
+            for (Evidencia e : listEvidencia) {
+                reporteSeguimientoResponseDto.setNumeroDocumento(i.getVotante().getNumeroDocumento());
+                reporteSeguimientoResponseDto.setNombreCompleto(i.getVotante().getApellidos() + " " + i.getVotante().getNombres());
+                UnidadOrganizativa unidadVotante = prioridadRepository.getUnidadByCod(i.getCodUnidad());
+                reporteSeguimientoResponseDto.setUnidad(unidadVotante.getDescripcion());
+                EvaluadorResponseDto getUsuario = prioridadRepository.findUsuarioById(i.getVotante().getIdUsuario());
+
+                reporteSeguimientoResponseDto.setPuesto(getUsuario.getPuesto());
+                if (i.getVotante().getIdSegmento() == 1) {
+                    reporteSeguimientoResponseDto.setRol("Evaluador/a");
+                }
+                if (i.getVotante().getIdSegmento() == 3) {
+                    reporteSeguimientoResponseDto.setRol("Evaluado/a");
+                }
+                reporteSeguimientoResponseDto.setMeta(e.getDescripcion());
+                reporteSeguimientoResponseDto.setMes(DateUtil.getMonthString(e.getPlazo()));
+                reporteSeguimientoResponseDto.setPlazo(DateUtil.format(e.getPlazo()));
+            }
+            listSeguimiento.add(reporteSeguimientoResponseDto);
+        }
+
+        return listSeguimiento;
+    }
+
+    @Override
+    public List<ReporteMatrizResponseDto> reporteMatrizGdr(ReporteMatrizRequestDto requestDto) {
+        log.info("param reporte matriz [{}-{}-{}]", requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
+        List<Indicador> listIndicador = prioridadRepository.reporteSeguimientoGdr(requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
+
+        List<ReporteMatrizResponseDto> listMatriz = new ArrayList<>();
+        for (Indicador i : listIndicador) {
+            ReporteMatrizResponseDto reporteMatrizResponseDto = new ReporteMatrizResponseDto();
+
+            List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
+            for (Evidencia e : listEvidencia) {
+                reporteMatrizResponseDto.setNumeroDocumento(i.getVotante().getNumeroDocumento());
+                reporteMatrizResponseDto.setNombreCompleto(i.getVotante().getApellidos() + " " + i.getVotante().getNombres());
+
+                EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(i.getVotante().getIdUsuario());
+                reporteMatrizResponseDto.setGenero(usuario.getGenero());
+                reporteMatrizResponseDto.setFechaNacimiento(usuario.getFechaNacimiento());
+                reporteMatrizResponseDto.setRegimenLaboral(usuario.getRegimen());
+                reporteMatrizResponseDto.setCorreo(usuario.getEmail());
+
+                UnidadOrganizativa unidadVotante = prioridadRepository.getUnidadByCod(i.getCodUnidad());
+                reporteMatrizResponseDto.setOrgano(unidadVotante.getDescripcion());
+                reporteMatrizResponseDto.setUnidad("");
+                reporteMatrizResponseDto.setPuesto(usuario.getPuesto());
+
+                if (i.getVotante().getIdSegmento() == 1) {
+                    reporteMatrizResponseDto.setSegmento("Directivo");
+                    reporteMatrizResponseDto.setRol("Evaluador/a");
+                }
+                if (i.getVotante().getIdSegmento() == 3) {
+                    reporteMatrizResponseDto.setSegmento("Ejecutor");
+                    reporteMatrizResponseDto.setRol("Evaluado/a");
+                }
+                reporteMatrizResponseDto.setIndicador(i.getDescripcion());
+            }
+            listMatriz.add(reporteMatrizResponseDto);
+        }
+
+        return listMatriz;
     }
 
 }

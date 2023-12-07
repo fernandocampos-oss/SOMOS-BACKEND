@@ -8,4 +8,8 @@ public interface EvaluadorResponseDto {
     String getUnidad();
     String getNumeroDocumento();
     String getEmail();
+
+    String getGenero();
+    String getFechaNacimiento();
+    String getRegimen();
 }

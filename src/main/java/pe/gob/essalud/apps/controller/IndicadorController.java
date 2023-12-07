@@ -34,20 +34,21 @@ public class IndicadorController {
         return new ResponseEntity<List<PendienteDto>>(lista, HttpStatus.OK);
     }
 
+    @GetMapping("/listar/pendientes/admin/{idVotante}")
+    public ResponseEntity<List<PendienteDto>> listPendientesTrabajadorByVotanteAdmin(@PathVariable int idVotante) {
+        List<PendienteDto> lista = indicadorService.listPendientesTrabajadorByVotanteAdmin(idVotante);
+        return new ResponseEntity<List<PendienteDto>>(lista, HttpStatus.OK);
+    }
+
     @GetMapping("/listar/tipoValorMeta")
     public ResponseEntity<List<TipoValorMeta>> getAllTipoValorMeta() {
         List<TipoValorMeta> list = indicadorService.getAllTipoValorMeta();
         return new ResponseEntity<List<TipoValorMeta>>(list, HttpStatus.OK);
     }
 
-    @PutMapping("modificar/indicador/{idIndicador}")
+    @PutMapping("modificar/{idIndicador}")
     public void modificarIndicador(@PathVariable Integer idIndicador, @RequestBody Indicador request) {
         indicadorService.modificarIndicador(idIndicador, request);
-    }
-
-    @GetMapping("/asignar/peso/{peso}/indicador/{idIndicador}")
-    public int asignarPesoIndicador(@PathVariable int peso, @PathVariable int idIndicador) {
-        return indicadorService.asignarPesoIndicador(peso, idIndicador);
     }
 
     @GetMapping("/excel/trabajador")

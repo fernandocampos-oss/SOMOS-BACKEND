@@ -41,15 +41,17 @@ public class Indicador {
     @JoinColumn(name="id_prioridad", nullable = true, foreignKey = @ForeignKey(name="fk_indicador_prioridad"))
     private Prioridad prioridad;
 
+    @Column(name="cod_red")
+    private String codRed;
+
+    @Column(name="cod_unidad")
+    private String codUnidad;
+
     @Column(name="anio")
     private int anio;
 
     @Column(name = "estado")
     private boolean estado;
-
-//    @ManyToOne
-//    @JoinColumn(name="id_estado_indicador", nullable = false, foreignKey = @ForeignKey(name="fk_indicador_estadoindicador"))
-//    private EstadoIndicador estadoIndicador;
 
     @Column(name = "usuario_creacion")
     private Integer usuarioCreacion;
@@ -66,4 +68,8 @@ public class Indicador {
         this.fechaCreacion = LocalDateTime.now(ZoneId.of("America/Lima"));
     }
 
+    @PreUpdate
+    private void preUpdate() {
+        this.fechaModificacion = LocalDateTime.now(ZoneId.of("America/Lima"));
+    }
 }

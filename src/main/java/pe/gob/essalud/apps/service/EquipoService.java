@@ -18,4 +18,6 @@ public interface EquipoService {
 
     Votante getVotanteByIdUsuario();
 
+    List<Votante> findVotanteByNombre(String nombre);
+
 }

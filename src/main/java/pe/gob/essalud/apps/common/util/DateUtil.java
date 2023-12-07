@@ -3,8 +3,10 @@ package pe.gob.essalud.apps.common.util;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class DateUtil {
 
@@ -30,6 +32,7 @@ public class DateUtil {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return date.format(formatter);
     }
+
     public static String format(LocalDateTime date) {
         if (date == null)
             return "";
@@ -62,6 +65,7 @@ public class DateUtil {
         calendar.add(Calendar.MINUTE, minutes);
         return calendar.getTime();
     }
+
     public static String formatDateTime(LocalDateTime date) {
         if (date == null)
             return "";
@@ -75,18 +79,28 @@ public class DateUtil {
             localDateTime = localTime.atDate(LocalDate.now());
         return localDateTime;
     }
-    
-    public static LocalDate StringToLocalDateTime(String fecha) {     
-        if (fecha == null && fecha.trim().length()==0)
-        	return null;
-         try
-         {
-         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-          return  LocalDate.parse(fecha, formatter);
-         
-         }catch (Exception e) {        	
-		 }
-         
-         return null;
+
+    public static LocalDate StringToLocalDateTime(String fecha) {
+        if (fecha == null && fecha.trim().length() == 0)
+            return null;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return LocalDate.parse(fecha, formatter);
+
+        } catch (Exception e) {
+        }
+
+        return null;
     }
+
+    public static int getYearCurrent() {
+        LocalDate fechaActualTmp = LocalDate.now();
+        return fechaActualTmp.getYear();
+    }
+
+    public static String getMonthString(LocalDateTime date) {
+        Month mes = date.now().getMonth();
+        return  mes.getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+    }
+
 }

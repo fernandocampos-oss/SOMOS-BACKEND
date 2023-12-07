@@ -47,4 +47,9 @@ public class EquipoController {
         return new ResponseEntity<Votante>(usuario, HttpStatus.OK);
     }
 
+    @GetMapping("/buscar/nombre")
+    public List<Votante> findVotanteByNombre(@RequestParam("nombre") String nombre) {
+        return equipoService.findVotanteByNombre(nombre);
+    }
+
 }

@@ -5,14 +5,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteMatrizRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteSeguimientoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.MainDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteMatrizResponseDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteSeguimientoResponseDto;
+import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Actividad;
 import pe.gob.essalud.apps.service.PrioridadService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(PrioridadController.PRIORIDAD)
@@ -43,6 +47,21 @@ public class PrioridadController {
     @PostMapping("/correo-notificar")
     public void sendCorreoNotificacion(@Valid @RequestBody EmailNotificacionRequestDto requestDto) {
         prioridadService.sendCorreoNotificacion(requestDto);
+    }
+
+    @GetMapping("/listar/unidades")
+    public List<UnidadOrganizativa> getAllUnidadesOrganizativas() {
+        return prioridadService.getAllUnidadesOrganizativas();
+    }
+
+    @PostMapping("/reporte-seguimiento")
+    public List<ReporteSeguimientoResponseDto> reporteSeguimientoGdr(@Valid @RequestBody ReporteSeguimientoRequestDto requestDto) {
+        return prioridadService.reporteSeguimientoGdr(requestDto);
+    }
+
+    @PostMapping("/reporte-matriz")
+    public List<ReporteMatrizResponseDto> reporteMatrizGdr(@Valid @RequestBody ReporteMatrizRequestDto requestDto) {
+        return prioridadService.reporteMatrizGdr(requestDto);
     }
 
 }

@@ -14,15 +14,6 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE evidencia SET nombre = ? , plazo= ? , usuario_modificacion=?, fecha_modificacion=? WHERE id_evidencia=? ", nativeQuery = true)
-    public int actualizarTareaAdministrador(@Param("nombre") String nombre,
-                                            @Param("plazo") String plazo,
-                                            @Param("usuarioModificacion") Number usuarioModificacion,
-                                            @Param("fechaModificaion") LocalDateTime fechaModificaion,
-                                            @Param("idEvidencia") Number idEvidencia);
-
-    @Transactional
-    @Modifying
     @Query(value = "UPDATE evidencia SET sustento_descripcion=?, sustento_ruta_file=?, sustento_extension_file=?, sustento_fecha_registro=? WHERE id_evidencia=?", nativeQuery = true)
     Integer crearEvidencia(@Param("sustentoDescripcion") String sustentoDescripcion,
                            @Param("rutaFile") String rutaFile,
@@ -32,6 +23,15 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
 
     @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador")
     List<Evidencia> listEvidenciaByIdIndicador(@Param("idIndicador") int idIndicador);
+
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE evidencia SET nombre = ? , plazo= ? , usuario_modificacion=?, fecha_modificacion=? WHERE id_evidencia=? ", nativeQuery = true)
+//    public int modificarEvidencia(@Param("nombre") String nombre,
+//                                   @Param("plazo") String plazo,
+//                                   @Param("usuarioModificacion") Number usuarioModificacion,
+//                                   @Param("fechaModificaion") LocalDateTime fechaModificaion,
+//                                   @Param("idEvidencia") Number idEvidencia);
 
 }
 

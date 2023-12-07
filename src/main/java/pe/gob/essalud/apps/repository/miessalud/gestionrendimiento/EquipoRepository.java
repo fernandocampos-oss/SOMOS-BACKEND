@@ -29,4 +29,8 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
 
     @Query(value = "SELECT * from equipo e WHERE e.id_integrante=?  LIMIT 1", nativeQuery = true)
     Equipo getJefeByIdIntegrante(@Param("idVotante") Integer idVotante);
+
+    @Query("SELECT v FROM Votante v WHERE v.nombres LIKE %:nombre% ")
+    List<Votante> findVotanteByNombre(@Param("nombre") String nombre);
+
 }

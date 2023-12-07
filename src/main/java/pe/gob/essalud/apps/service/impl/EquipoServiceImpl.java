@@ -58,4 +58,10 @@ public class EquipoServiceImpl implements EquipoService {
         return equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
     }
 
+    @Override
+    public List<Votante> findVotanteByNombre(String nombre) {
+        return equipoRepository.findVotanteByNombre(nombre);
+    }
+
+
 }

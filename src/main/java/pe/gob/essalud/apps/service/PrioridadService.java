@@ -1,13 +1,16 @@
 package pe.gob.essalud.apps.service;
 
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteMatrizRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteSeguimientoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.MainDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteMatrizResponseDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteSeguimientoResponseDto;
+import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PrioridadService {
 
@@ -18,5 +21,11 @@ public interface PrioridadService {
     List<ExcelDto> generarExcelDirectivo();
 
     void sendCorreoNotificacion(EmailNotificacionRequestDto requestDto);
+
+    List<UnidadOrganizativa> getAllUnidadesOrganizativas();
+
+    List<ReporteSeguimientoResponseDto> reporteSeguimientoGdr(ReporteSeguimientoRequestDto requestDto);
+
+    List<ReporteMatrizResponseDto> reporteMatrizGdr(ReporteMatrizRequestDto requestDto);
 
 }

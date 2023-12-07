@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.PrioridadExistRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaSustentoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorExistRequestDto;
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 import pe.gob.essalud.apps.service.EvidenciaService;
 
@@ -35,11 +37,6 @@ public class EvidenciaController {
         evidenciaService.registrarIndicadorExistPrioridad(dto);
     }
 
-    @GetMapping("/modificar")
-    public int actualizarTareaAdministrador(@RequestParam("nombre") String nombre, @RequestParam("plazo") String plazo, @RequestParam("idEvidencia") Number idEvidencia) {
-        return evidenciaService.actualizarTareaAdministrador(nombre, plazo, idEvidencia);
-    }
-
     @PostMapping("/registrar/sustento")
     public ResponseEntity<Integer> crearSustentoEvidencia(@Valid @RequestBody EvidenciaSustentoRequestDto request) {
         long result = evidenciaService.crearSustentoEvidencia(request);
@@ -59,15 +56,15 @@ public class EvidenciaController {
         return new ResponseEntity<List<Evidencia>>(lista, HttpStatus.OK);
     }
 
-////    @GetMapping("/aprobar")
-////    public int aprobarIndicador(@RequestParam("estado") Number estado, @RequestParam("idIndicadorUsuario") Number idIndicadorUsuario) {
-////        return indicadorUsuarioService.aprobarIndicador(estado, idIndicadorUsuario);
-////    }
-//
-////    @GetMapping("/rechazar")
-////    public int rechazarRequerimiento(@RequestParam("estado") Number estado, @RequestParam("motivo") String motivo, @RequestParam("idRequerimientoUsuario") Number idRequerimientoUsuario) {
-////        return requerimientoUsuarioService.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
-////    }
+//    @GetMapping("/modificar")
+//    public int modificarEvidencia(@RequestParam("nombre") String nombre, @RequestParam("plazo") String plazo, @RequestParam("idEvidencia") Number idEvidencia) {
+//        return evidenciaService.modificarEvidencia(nombre, plazo, idEvidencia);
+//    }
+
+    @PutMapping("/modificar/{id}")
+    public void modificarEvidencia(@PathVariable int id, @RequestBody UpdateEvidenciaDto request) {
+        evidenciaService.modificarEvidencia(id, request);
+    }
 
 }
 

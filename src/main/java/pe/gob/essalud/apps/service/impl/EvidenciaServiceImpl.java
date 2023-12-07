@@ -13,11 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import pe.gob.essalud.apps.common.constants.gestionrendimiento.EstadoEvidenciaConstant;
+import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.common.util.UploadUtil;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.PrioridadExistRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaSustentoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorExistRequestDto;
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
+import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EvidenciaRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.IndicadorRepository;
@@ -26,6 +30,7 @@ import pe.gob.essalud.apps.service.EvidenciaService;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EvidenciaServiceImpl implements EvidenciaService {
 
     private static final String RUTA_IMAGENES_GESTION_RENDIMIENTO = "/imagenes/gestion-rendimiento/";
@@ -61,15 +66,14 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     @Transactional
     @Override
     public void registrarIndicadorExistPrioridad(PrioridadExistRequestDto dto) {
-        LocalDate fechaActualTmp = LocalDate.now();
-        int anioRegistro = fechaActualTmp.getYear();
-
         Indicador model = dto.getIndicador();
-        model.setAnio(anioRegistro);
+        model.setAnio(DateUtil.getYearCurrent());
         model.setEstado(true);
         model.setUsuarioCreacion(authService.getIdUserSession());
         model.setVotante(dto.getVotante());
         model.setPrioridad(dto.getPrioridad());
+        model.setCodRed(authService.getCodRedSession());
+        model.setCodUnidad(authService.getCodUnidadSession());
         Indicador indicadorGuardado = indicadorRepository.save(model);
 
         if (!dto.getListEvidencia().isEmpty()) {
@@ -85,11 +89,6 @@ public class EvidenciaServiceImpl implements EvidenciaService {
                 evidenciaRepository.save(e);
             }
         }
-    }
-
-    @Override
-    public int actualizarTareaAdministrador(String nombre, String plazo, Number idEvidencia) {
-        return evidenciaRepository.actualizarTareaAdministrador(nombre, plazo, authService.getIdUserSession(), LocalDateTime.now(ZoneId.of("America/Lima")), idEvidencia);
     }
 
     @Transactional
@@ -128,14 +127,19 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         return evidenciaRepository.listEvidenciaByIdIndicador(idIndicador);
     }
 
-//    @Override
-//    public int aprobarIndicador(Number estado, Number idIndicadorUsuario) {
-//        return requerimientoUsuarioRepository.aprobarIndicador(estado, idIndicadorUsuario);
-//    }
-//
-//    @Override
-//    public int rechazarRequerimiento(Number estado, String motivo, Number idRequerimientoUsuario) {
-//        return requerimientoUsuarioRepository.rechazarRequerimiento(estado, motivo, idRequerimientoUsuario);
+    //    @Override
+//    public int modificarEvidencia(String nombre, String plazo, Number idEvidencia) {
+//        return evidenciaRepository.modificarEvidencia(nombre, plazo, authService.getIdUserSession(), LocalDateTime.now(ZoneId.of("America/Lima")), idEvidencia);
 //    }
 
+    @Override
+    public void modificarEvidencia(int id, UpdateEvidenciaDto request) {
+        Evidencia evidencia = evidenciaRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("La evidencia no se encuentra"));
+
+        evidencia.setDescripcion(request.getDescripcion());
+        evidencia.setPlazo(request.getPlazo());
+        evidencia.setUsuarioModificacion(authService.getIdUserSession());
+        evidenciaRepository.save(evidencia);
+    }
 }
