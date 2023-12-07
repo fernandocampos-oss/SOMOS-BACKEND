@@ -5,6 +5,7 @@ import feign.RequestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import pe.gob.essalud.apps.common.interfaces.BasicAuthForBoletaSapUtilService;
 import pe.gob.essalud.apps.common.interfaces.BasicAuthForMarcacionConsService;
 import pe.gob.essalud.apps.common.interfaces.BasicAuthForPersonalSapUtilService;
 
@@ -20,6 +21,9 @@ public class FeignClientConfiguration {
     @Value("${feign-clients.personal-sap-util-service.key}")
     private String personalSapUtilServiceKey;
 
+    @Value("${feign-clients.boleta-sap-service.key}")
+    private String boletaSapServiceKey;
+
 
     private void _addHeader(RequestTemplate template, Class<? extends java.lang.annotation.Annotation> interfaceClass, String key) {
         if (template.feignTarget() != null && template.feignTarget().type().isAnnotationPresent(interfaceClass)) {
@@ -33,6 +37,7 @@ public class FeignClientConfiguration {
         return template -> {
             _addHeader(template, BasicAuthForMarcacionConsService.class, marcacionConsServiceKey);
             _addHeader(template, BasicAuthForPersonalSapUtilService.class, personalSapUtilServiceKey);
+            _addHeader(template, BasicAuthForBoletaSapUtilService.class, boletaSapServiceKey);
         };
     }
 }

@@ -1,6 +1,8 @@
 package pe.gob.essalud.apps.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.pago.request.PagoBoletaRequestDto;
@@ -21,7 +23,17 @@ public class PagoController {
 
     @GetMapping("/busqueda/anio/{anio}/mes/{mes}")
     public List<PagoBoletaResponseDto> listarPagosBoletasBusqueda(@PathVariable int anio, @PathVariable int mes) {
-        return pagoService.listarPagosBoletasBusqueda();
+        return pagoService.listarPagosBoletasBusqueda(anio, mes);
+    }
+
+    @GetMapping("/descargar-pdf/{idBoleta}")
+    public ResponseEntity<Resource> descargarPdfBoleta(@PathVariable int idBoleta) {
+        return pagoService.descargarPdfBoleta(idBoleta);
+    }
+
+    @GetMapping("/visualizar-pdf/{idBoleta}")
+    public String visualizarPdfBoleta(@PathVariable int idBoleta) {
+        return pagoService.visualizarPdfBoleta(idBoleta);
     }
 
     @GetMapping("/historial/actividades")

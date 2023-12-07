@@ -1,18 +1,24 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import pe.gob.essalud.apps.client.BoletaSapServiceClient;
 import pe.gob.essalud.apps.dto.pago.request.PagoBoletaRequestDto;
 import pe.gob.essalud.apps.dto.pago.response.PagoBoletaResponseDto;
 import pe.gob.essalud.apps.dto.pago.response.PagoHistorialActividadResponseDto;
+import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.PagoHistorialActividad;
 import pe.gob.essalud.apps.repository.miessalud.PagoHistorialActividadRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PagoService;
+import pe.gob.essalud.apps.service.UsuarioService;
 
-import java.util.Collections;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,13 +32,33 @@ public class PagoServiceImpl implements PagoService {
     private static final int TIPO_ACCION_DESCARGA_BOLETA = 3;
 
     private final PagoHistorialActividadRepository pagoHistorialActividadRepository;
-
     private final AuthService authService;
+    private final UsuarioService usuarioService;
     private final ModelMapper modelMapper;
+    private final BoletaSapServiceClient boletaSapServiceClient;
 
     @Override
-    public List<PagoBoletaResponseDto> listarPagosBoletasBusqueda() {
-        return Collections.emptyList();
+    public List<PagoBoletaResponseDto> listarPagosBoletasBusqueda(int anio, int mes) {
+        UsuarioResponseDto usuario = usuarioService.get(authService.getIdUserSession());
+        return boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes);
+    }
+
+    @Override
+    public ResponseEntity<Resource> descargarPdfBoleta(int idBoleta) {
+        return boletaSapServiceClient.getPdf(idBoleta);
+    }
+
+    @Override
+    public String visualizarPdfBoleta(int idBoleta) {
+        String pdfBase64 = "";
+        ResponseEntity<Resource> response = boletaSapServiceClient.getPdf(idBoleta);
+        try {
+            byte[] pdfBytes = IOUtils.toByteArray(response.getBody().getInputStream());
+            pdfBase64 = java.util.Base64.getEncoder().encodeToString(pdfBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return pdfBase64;
     }
 
     @Override
