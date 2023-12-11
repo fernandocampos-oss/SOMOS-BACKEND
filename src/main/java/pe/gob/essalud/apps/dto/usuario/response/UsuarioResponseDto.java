@@ -1,5 +1,6 @@
 package pe.gob.essalud.apps.dto.usuario.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -21,5 +22,11 @@ public class UsuarioResponseDto {
     private String estado;
     private String red;
     private String unidad;
+    @JsonIgnore
+    private String rutaImagenPerfil;
+    @JsonIgnore
+    private String rutaImagenFirma;
+    private String imagenPerfilBase64;
+    private String imagenFirmaBase64;
 
 }
