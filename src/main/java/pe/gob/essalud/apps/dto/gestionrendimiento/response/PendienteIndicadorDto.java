@@ -9,6 +9,7 @@ public class PendienteIndicadorDto {
     private int idIndicador;
     private String nombreIndicador;
     private String codTipoValorMeta;
+    private int idTipoValorMeta;
     private int valorMeta;
     private int peso;
     private List<PendienteEvidenciaDto> listEvidencia;

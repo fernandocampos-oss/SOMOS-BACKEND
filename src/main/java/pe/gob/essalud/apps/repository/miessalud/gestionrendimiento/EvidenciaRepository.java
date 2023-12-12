@@ -21,17 +21,8 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
                            @Param("sustentoFechaRegistro") LocalDateTime sustentoFechaRegistro,
                            @Param("idEvidencia") Number idEvidencia);
 
-    @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador")
+    @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador ORDER BY t.idEvidencia ASC ")
     List<Evidencia> listEvidenciaByIdIndicador(@Param("idIndicador") int idIndicador);
-
-//    @Transactional
-//    @Modifying
-//    @Query(value = "UPDATE evidencia SET nombre = ? , plazo= ? , usuario_modificacion=?, fecha_modificacion=? WHERE id_evidencia=? ", nativeQuery = true)
-//    public int modificarEvidencia(@Param("nombre") String nombre,
-//                                   @Param("plazo") String plazo,
-//                                   @Param("usuarioModificacion") Number usuarioModificacion,
-//                                   @Param("fechaModificaion") LocalDateTime fechaModificaion,
-//                                   @Param("idEvidencia") Number idEvidencia);
 
 }
 

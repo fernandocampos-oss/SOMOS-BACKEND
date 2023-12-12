@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class UpdateEvidenciaDto {
-//    private int idEvidencia;
     private String descripcion;
     private LocalDateTime plazo;
 }

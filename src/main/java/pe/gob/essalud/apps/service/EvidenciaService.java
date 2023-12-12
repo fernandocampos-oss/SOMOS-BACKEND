@@ -22,7 +22,5 @@ public interface EvidenciaService {
 
     List<Evidencia> listEvidenciaByIdIndicador(int idIndicador);
 
-//    int modificarEvidencia(String nombre, String plazo, Number idEvidencia);
-
     void modificarEvidencia(int id, UpdateEvidenciaDto request);
 }

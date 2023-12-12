@@ -120,7 +120,6 @@ public class IndicadorServiceImpl implements IndicadorService {
 
     @Override
     public List<PendienteDto> listPendientesTrabajadorByVotanteAdmin(int idVotante) {
-
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), idVotante);
 
         List<PendienteDto> listPrioridadDto = new ArrayList<>();
@@ -128,6 +127,9 @@ public class IndicadorServiceImpl implements IndicadorService {
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
             modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+            modelPrioridadDto.setIdActividad(p.getActividad().getIdActividad());
+            modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
+            int porcentajeTotal = 0;
 
             List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(idVotante, p.getIdPrioridad());
 
@@ -137,9 +139,13 @@ public class IndicadorServiceImpl implements IndicadorService {
                 PendienteIndicadorDto modelIndicadorDto = new PendienteIndicadorDto();
                 modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
+                modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
+                int numero = 0;
+                numero = i.getPeso();
+                porcentajeTotal += numero;
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
 
@@ -159,6 +165,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     listEvidenciaDto.add(modelEvidenciaDto);
                 }
                 modelIndicadorDto.setListEvidencia(listEvidenciaDto);
+                modelPrioridadDto.setPeso(porcentajeTotal);
                 listIndicadorDto.add(modelIndicadorDto);
             }
             modelPrioridadDto.setListIndicador(listIndicadorDto);
@@ -170,18 +177,6 @@ public class IndicadorServiceImpl implements IndicadorService {
     @Override
     public List<TipoValorMeta> getAllTipoValorMeta() {
         return tipoValorMetaRepository.findAll();
-    }
-
-    @Override
-    public void modificarIndicador(int idIndicador, Indicador request) {
-        Indicador indicador = indicadorRepository.findById(request.getIdIndicador())
-                .orElseThrow(() -> new ValidationException("El indicador no se encuentra"));
-
-        indicador.setDescripcion(request.getDescripcion());
-        indicador.setTipoValorMeta(request.getTipoValorMeta());
-        indicador.setValorMeta(request.getValorMeta());
-        indicador.setUsuarioModificacion(authService.getIdUserSession());
-        indicadorRepository.save(indicador);
     }
 
     @Override
@@ -263,6 +258,19 @@ public class IndicadorServiceImpl implements IndicadorService {
     public Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(int idVotante) {
         log.info("[{}-{}]", DateUtil.getYearCurrent(), idVotante);
         return indicadorRepository.sumaTotalPesoAllIndicadorByTrabajador(DateUtil.getYearCurrent(), idVotante);
+    }
+
+    @Override
+    public void modificarIndicador(int id, Indicador request) {
+        Indicador indicador = indicadorRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("El indicador no se encuentra"));
+
+        indicador.setDescripcion(request.getDescripcion());
+        indicador.setTipoValorMeta(request.getTipoValorMeta());
+        indicador.setValorMeta(request.getValorMeta());
+        indicador.setPeso(request.getPeso());
+        indicador.setUsuarioModificacion(authService.getIdUserSession());
+        indicadorRepository.save(indicador);
     }
 
 }

@@ -56,11 +56,6 @@ public class EvidenciaController {
         return new ResponseEntity<List<Evidencia>>(lista, HttpStatus.OK);
     }
 
-//    @GetMapping("/modificar")
-//    public int modificarEvidencia(@RequestParam("nombre") String nombre, @RequestParam("plazo") String plazo, @RequestParam("idEvidencia") Number idEvidencia) {
-//        return evidenciaService.modificarEvidencia(nombre, plazo, idEvidencia);
-//    }
-
     @PutMapping("/modificar/{id}")
     public void modificarEvidencia(@PathVariable int id, @RequestBody UpdateEvidenciaDto request) {
         evidenciaService.modificarEvidencia(id, request);

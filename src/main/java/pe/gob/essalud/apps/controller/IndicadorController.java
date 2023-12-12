@@ -46,11 +46,6 @@ public class IndicadorController {
         return new ResponseEntity<List<TipoValorMeta>>(list, HttpStatus.OK);
     }
 
-    @PutMapping("modificar/{idIndicador}")
-    public void modificarIndicador(@PathVariable Integer idIndicador, @RequestBody Indicador request) {
-        indicadorService.modificarIndicador(idIndicador, request);
-    }
-
     @GetMapping("/excel/trabajador")
     public ResponseEntity<ExcelTrabajadorDto> generarExcelTrabajador() {
         ExcelTrabajadorDto model = indicadorService.generarExcelTrabajador();
@@ -60,6 +55,11 @@ public class IndicadorController {
     @GetMapping("/peso-total/{idVotante}")
     public Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(@PathVariable int idVotante) {
         return indicadorService.sumaTotalPesoAllIndicadorByTrabajador(idVotante);
+    }
+
+    @PutMapping("modificar/{id}")
+    public void modificarIndicador(@PathVariable Integer id, @RequestBody Indicador request) {
+        indicadorService.modificarIndicador(id, request);
     }
 
 }

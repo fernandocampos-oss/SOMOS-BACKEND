@@ -9,6 +9,8 @@ import java.util.List;
 public class PendienteDto {
     private int idPrioridad;
     private String prioridadNombre;
+    private int idActividad;
     private LocalDateTime fechaAsignacionPrioridad;
+    private int peso;
     private List<PendienteIndicadorDto> listIndicador;
 }

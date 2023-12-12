@@ -127,11 +127,6 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         return evidenciaRepository.listEvidenciaByIdIndicador(idIndicador);
     }
 
-    //    @Override
-//    public int modificarEvidencia(String nombre, String plazo, Number idEvidencia) {
-//        return evidenciaRepository.modificarEvidencia(nombre, plazo, authService.getIdUserSession(), LocalDateTime.now(ZoneId.of("America/Lima")), idEvidencia);
-//    }
-
     @Override
     public void modificarEvidencia(int id, UpdateEvidenciaDto request) {
         Evidencia evidencia = evidenciaRepository.findById(id)
@@ -142,4 +137,5 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         evidencia.setUsuarioModificacion(authService.getIdUserSession());
         evidenciaRepository.save(evidencia);
     }
+
 }

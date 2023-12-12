@@ -19,10 +19,10 @@ public interface IndicadorService {
 
     List<TipoValorMeta> getAllTipoValorMeta();
 
-    void modificarIndicador(int idIndicador, Indicador request);
-
     ExcelTrabajadorDto generarExcelTrabajador();
 
     Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(int idVotante);
+
+    void modificarIndicador(int id, Indicador request);
 
 }

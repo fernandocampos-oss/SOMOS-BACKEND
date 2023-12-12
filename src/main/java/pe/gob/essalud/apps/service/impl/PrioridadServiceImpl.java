@@ -8,11 +8,14 @@ import pe.gob.essalud.apps.client.EmailServiceClient;
 import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdatePrioridadDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteMatrizRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteSeguimientoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteMatrizResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteSeguimientoResponseDto;
+import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
@@ -41,7 +44,6 @@ public class PrioridadServiceImpl implements PrioridadService {
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
-
         List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
 
         List<MainDto> listMainDto = new ArrayList<>();
@@ -62,6 +64,8 @@ public class PrioridadServiceImpl implements PrioridadService {
                 MainPrioridadDto modelPrioridadDto = new MainPrioridadDto();
                 modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
                 modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+                modelPrioridadDto.setIdActividad(p.getActividad().getIdActividad());
+                modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
 
                 List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(e.getIntegrante().getIdVotante(), p.getIdPrioridad());
 
@@ -72,6 +76,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                     modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                     modelIndicadorDto.setNombreIndicador(i.getDescripcion());
                     modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
+                    modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
                     modelIndicadorDto.setValorMeta(i.getValorMeta());
                     modelIndicadorDto.setPeso(i.getPeso());
                     int numero = 0;
@@ -287,6 +292,18 @@ public class PrioridadServiceImpl implements PrioridadService {
         }
 
         return listMatriz;
+    }
+
+    @Override
+    public void modificarPrioridad(int id, UpdatePrioridadDto requestDto) {
+        if (requestDto != null) {
+            Prioridad prioridad = prioridadRepository.findById(id)
+                    .orElseThrow(() -> new ValidationException("No se encontro prioridad"));
+
+            prioridad.setActividad(requestDto.getActividad());
+            prioridad.setFechaAsignacion(requestDto.getFechaAsignacion());
+            prioridadRepository.save(prioridad);
+        }
     }
 
 }
