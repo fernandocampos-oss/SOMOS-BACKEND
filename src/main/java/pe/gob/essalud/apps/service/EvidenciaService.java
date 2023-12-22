@@ -18,9 +18,9 @@ public interface EvidenciaService {
 
     long crearSustentoEvidencia(EvidenciaSustentoRequestDto request);
 
-    EvidenciaResponseDto getEvidenciaByTarea(Integer idEvidencia);
+    EvidenciaResponseDto getEvidenciaById(Integer idEvidencia);
 
-    List<Evidencia> listEvidenciaByIdIndicador(int idIndicador);
+//    List<Evidencia> listEvidenciaByIdIndicador(int idIndicador);
 
     void modificarEvidencia(int id, UpdateEvidenciaDto request);
 }

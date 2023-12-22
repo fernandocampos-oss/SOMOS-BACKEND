@@ -45,16 +45,16 @@ public class EvidenciaController {
     }
 
     @GetMapping("/obtener/evidencia/{idEvidencia}")
-    public ResponseEntity<EvidenciaResponseDto> getEvidenciaByTarea(@PathVariable("idEvidencia") Integer idEvidencia) {
-        EvidenciaResponseDto evidencia = evidenciaService.getEvidenciaByTarea(idEvidencia);
+    public ResponseEntity<EvidenciaResponseDto> getEvidenciaById(@PathVariable("idEvidencia") Integer idEvidencia) {
+        EvidenciaResponseDto evidencia = evidenciaService.getEvidenciaById(idEvidencia);
         return new ResponseEntity<EvidenciaResponseDto>(evidencia, HttpStatus.OK);
     }
 
-    @GetMapping("/listar/indicador/{idIndicador}")
-    public ResponseEntity<List<Evidencia>> listEvidenciaByIdIndicador(@PathVariable("idIndicador") int idIndicador) {
-        List<Evidencia> lista = evidenciaService.listEvidenciaByIdIndicador(idIndicador);
-        return new ResponseEntity<List<Evidencia>>(lista, HttpStatus.OK);
-    }
+//    @GetMapping("/listar/indicador/{idIndicador}")
+//    public ResponseEntity<List<Evidencia>> listEvidenciaByIdIndicador(@PathVariable("idIndicador") int idIndicador) {
+//        List<Evidencia> lista = evidenciaService.listEvidenciaByIdIndicador(idIndicador);
+//        return new ResponseEntity<List<Evidencia>>(lista, HttpStatus.OK);
+//    }
 
     @PutMapping("/modificar/{id}")
     public void modificarEvidencia(@PathVariable int id, @RequestBody UpdateEvidenciaDto request) {

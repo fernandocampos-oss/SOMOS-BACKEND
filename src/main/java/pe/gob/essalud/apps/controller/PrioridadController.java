@@ -5,9 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdatePrioridadDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteMatrizRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteSeguimientoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.MainDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
@@ -62,7 +60,7 @@ public class PrioridadController {
     }
 
     @PostMapping("/reporte-matriz")
-    public List<ReporteMatrizResponseDto> reporteMatrizGdr(@Valid @RequestBody ReporteMatrizRequestDto requestDto) {
+    public List<ReporteMatrizResponseDto> reporteMatrizGdr(@Valid @RequestBody ReporteSeguimientoRequestDto requestDto) {
         return prioridadService.reporteMatrizGdr(requestDto);
     }
 

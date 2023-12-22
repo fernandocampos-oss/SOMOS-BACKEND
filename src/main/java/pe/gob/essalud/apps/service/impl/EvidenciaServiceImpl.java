@@ -107,7 +107,7 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     }
 
     @Override
-    public EvidenciaResponseDto getEvidenciaByTarea(Integer idEvidencia) {
+    public EvidenciaResponseDto getEvidenciaById(Integer idEvidencia) {
         Optional<Evidencia> tarea = evidenciaRepository.findById(idEvidencia);
 
         EvidenciaResponseDto dto = new EvidenciaResponseDto();
@@ -122,10 +122,10 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         return dto;
     }
 
-    @Override
-    public List<Evidencia> listEvidenciaByIdIndicador(int idIndicador) {
-        return evidenciaRepository.listEvidenciaByIdIndicador(idIndicador);
-    }
+//    @Override
+//    public List<Evidencia> listEvidenciaByIdIndicador(int idIndicador) {
+//        return evidenciaRepository.listEvidenciaByIdIndicador(idIndicador);
+//    }
 
     @Override
     public void modificarEvidencia(int id, UpdateEvidenciaDto request) {

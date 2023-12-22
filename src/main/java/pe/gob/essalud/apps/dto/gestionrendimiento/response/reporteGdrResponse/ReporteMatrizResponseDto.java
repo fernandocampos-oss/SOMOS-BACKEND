@@ -2,6 +2,8 @@ package pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+
 @Data
 public class ReporteMatrizResponseDto {
     private String numeroDocumento;
@@ -10,10 +12,10 @@ public class ReporteMatrizResponseDto {
     private String fechaNacimiento;
     private String regimenLaboral;
     private String correo;
-    private String organo;  //unidad
-    private String unidad;  //vacio
+    private String organo;
+    private String unidad;
     private String puesto;
     private String segmento;
     private String rol;
-    private String indicador;
+    private ArrayList<String> listDescripcionIndicador;
 }

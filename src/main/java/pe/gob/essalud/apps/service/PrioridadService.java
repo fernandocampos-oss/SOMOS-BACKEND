@@ -1,9 +1,7 @@
 package pe.gob.essalud.apps.service;
 
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdatePrioridadDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteMatrizRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteSeguimientoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.MainDto;
@@ -28,7 +26,7 @@ public interface PrioridadService {
 
     List<ReporteSeguimientoResponseDto> reporteSeguimientoGdr(ReporteSeguimientoRequestDto requestDto);
 
-    List<ReporteMatrizResponseDto> reporteMatrizGdr(ReporteMatrizRequestDto requestDto);
+    List<ReporteMatrizResponseDto> reporteMatrizGdr(ReporteSeguimientoRequestDto requestDto);
 
     void modificarPrioridad(int id, UpdatePrioridadDto requestDto);
 

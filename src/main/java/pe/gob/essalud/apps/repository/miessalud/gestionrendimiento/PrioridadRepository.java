@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,12 +25,7 @@ public interface PrioridadRepository extends JpaRepository<Prioridad, Integer> {
     @Query("SELECT uo FROM UnidadOrganizativa uo WHERE uo.codUnidad = :cod")
     UnidadOrganizativa getUnidadByCod(@Param("cod") String cod);
 
-    @Query("SELECT i FROM Indicador i WHERE i.anio =:anio AND i.codRed =:codRed AND i.codUnidad =:codUnidad")
-    List<Indicador> reporteSeguimientoGdr(@Param("anio") int anio, @Param("codRed") String codRed, @Param("codUnidad") String codUnidad);
-
-//    @Transactional
-//    @Modifying
-//    @Query(value = "UPDATE indicador_usuario SET id_estado_requerimiento =6, fecha_finalizacion=? WHERE id_indicador_usuario =? ", nativeQuery = true)
-//    public int finalizarTareaAdministrador(@Param("fechaFinalizacion") LocalDateTime fechaFinalizacion, @Param("idRequerimientoUsuario") Number idRequerimientoUsuario);
+    @Query("SELECT i FROM Indicador i WHERE i.anio =:anio AND i.codRed IN (:listCodRed) AND i.codUnidad =:codUnidad")
+    List<Indicador> reporteSeguimientoGdr(@Param("anio") int anio, @Param("listCodRed") ArrayList<String> listCodRed, @Param("codUnidad") String codUnidad);
 
 }

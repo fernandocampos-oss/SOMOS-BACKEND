@@ -8,25 +8,26 @@ import pe.gob.essalud.apps.client.EmailServiceClient;
 import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.EmailNotificacionRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdatePrioridadDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteMatrizRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.reporteGdrRequest.ReporteSeguimientoRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteMatrizResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.ReporteSeguimientoResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
+import pe.gob.essalud.apps.model.miessalud.RedPersonal;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
+import pe.gob.essalud.apps.repository.miessalud.RedPersonalRepository;
 import pe.gob.essalud.apps.repository.miessalud.UnidadOrganizativaRepository;
+import pe.gob.essalud.apps.repository.miessalud.VotanteRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PrioridadService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,8 @@ public class PrioridadServiceImpl implements PrioridadService {
     private final IndicadorRepository indicadorRepository;
     private final EvidenciaRepository evidenciaRepository;
     private final UnidadOrganizativaRepository unidadOrganizativaRepository;
+    private final RedPersonalRepository redPersonalRepository;
+    private final VotanteRepository votanteRepository;
     private final EmailServiceClient _emailServiceClient;
 
     @Override
@@ -221,8 +224,19 @@ public class PrioridadServiceImpl implements PrioridadService {
 
     @Override
     public List<ReporteSeguimientoResponseDto> reporteSeguimientoGdr(ReporteSeguimientoRequestDto requestDto) {
-        log.info("param reporte seguimiento [{}-{}-{}]", requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
-        List<Indicador> listIndicador = prioridadRepository.reporteSeguimientoGdr(requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
+        List<Indicador> listIndicador = new ArrayList<>();
+        if (requestDto.getAllRed().equals(true)) {
+            List<RedPersonal> listRed = redPersonalRepository.findAll();
+            ArrayList<String> listAllRed = new ArrayList<>();
+            for (RedPersonal red : listRed) {
+                listAllRed.add(red.getCodRed());
+            }
+            log.info("param reporte todas las redes [{}-{}-{}]", requestDto.getAnio(), listAllRed, requestDto.getCodUnidad());
+            listIndicador = prioridadRepository.reporteSeguimientoGdr(requestDto.getAnio(), listAllRed, requestDto.getCodUnidad());
+        } else {
+            log.info("param reporte seguimiento [{}-{}-{}]", requestDto.getAnio(), requestDto.getListCodRed(), requestDto.getCodUnidad());
+            listIndicador = prioridadRepository.reporteSeguimientoGdr(requestDto.getAnio(), requestDto.getListCodRed(), requestDto.getCodUnidad());
+        }
 
         List<ReporteSeguimientoResponseDto> listSeguimiento = new ArrayList<>();
         for (Indicador i : listIndicador) {
@@ -254,40 +268,59 @@ public class PrioridadServiceImpl implements PrioridadService {
     }
 
     @Override
-    public List<ReporteMatrizResponseDto> reporteMatrizGdr(ReporteMatrizRequestDto requestDto) {
-        log.info("param reporte matriz [{}-{}-{}]", requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
-        List<Indicador> listIndicador = prioridadRepository.reporteSeguimientoGdr(requestDto.getAnio(), requestDto.getCodRed(), requestDto.getCodUnidad());
+    public List<ReporteMatrizResponseDto> reporteMatrizGdr(ReporteSeguimientoRequestDto requestDto) {
+        List<Integer> listIdsVotantes = new ArrayList<>();
+        if (requestDto.getAllRed().equals(true)) {
+            List<RedPersonal> listRed = redPersonalRepository.findAll();
+            ArrayList<String> listAllRed = new ArrayList<>();
+            for (RedPersonal red : listRed) {
+                listAllRed.add(red.getCodRed());
+            }
+            log.info("votantes por todas las redes [{}-{}-{}]", requestDto.getAnio(), listAllRed, requestDto.getCodUnidad());
+            listIdsVotantes = indicadorRepository.reporteMatrizGdrFindVontates(requestDto.getAnio(), listAllRed, requestDto.getCodUnidad());
+        } else {
+            log.info("votantes por red [{}-{}-{}]", requestDto.getAnio(), requestDto.getListCodRed(), requestDto.getCodUnidad());
+            listIdsVotantes = indicadorRepository.reporteMatrizGdrFindVontates(requestDto.getAnio(), requestDto.getListCodRed(), requestDto.getCodUnidad());
+        }
 
         List<ReporteMatrizResponseDto> listMatriz = new ArrayList<>();
-        for (Indicador i : listIndicador) {
+        for (int idVotante : listIdsVotantes) {
             ReporteMatrizResponseDto reporteMatrizResponseDto = new ReporteMatrizResponseDto();
+            Indicador indicador = indicadorRepository.getIndicadorByVotante(idVotante);
 
-            List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
-            for (Evidencia e : listEvidencia) {
-                reporteMatrizResponseDto.setNumeroDocumento(i.getVotante().getNumeroDocumento());
-                reporteMatrizResponseDto.setNombreCompleto(i.getVotante().getApellidos() + " " + i.getVotante().getNombres());
+            Optional<Votante> votante = votanteRepository.findById(idVotante);
+            reporteMatrizResponseDto.setNumeroDocumento(votante.get().getNumeroDocumento());
+            reporteMatrizResponseDto.setNombreCompleto(votante.get().getApellidos() + " " + votante.get().getNombres());
 
-                EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(i.getVotante().getIdUsuario());
-                reporteMatrizResponseDto.setGenero(usuario.getGenero());
-                reporteMatrizResponseDto.setFechaNacimiento(usuario.getFechaNacimiento());
-                reporteMatrizResponseDto.setRegimenLaboral(usuario.getRegimen());
-                reporteMatrizResponseDto.setCorreo(usuario.getEmail());
-
-                UnidadOrganizativa unidadVotante = prioridadRepository.getUnidadByCod(i.getCodUnidad());
-                reporteMatrizResponseDto.setOrgano(unidadVotante.getDescripcion());
-                reporteMatrizResponseDto.setUnidad("");
-                reporteMatrizResponseDto.setPuesto(usuario.getPuesto());
-
-                if (i.getVotante().getIdSegmento() == 1) {
-                    reporteMatrizResponseDto.setSegmento("Directivo");
-                    reporteMatrizResponseDto.setRol("Evaluador/a");
-                }
-                if (i.getVotante().getIdSegmento() == 3) {
-                    reporteMatrizResponseDto.setSegmento("Ejecutor");
-                    reporteMatrizResponseDto.setRol("Evaluado/a");
-                }
-                reporteMatrizResponseDto.setIndicador(i.getDescripcion());
+            EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(votante.get().getIdUsuario());
+            reporteMatrizResponseDto.setFechaNacimiento(usuario.getFechaNacimiento());
+            reporteMatrizResponseDto.setRegimenLaboral(usuario.getRegimen());
+            reporteMatrizResponseDto.setCorreo(usuario.getEmail());
+            if (!usuario.getGenero().isEmpty()) {
+                reporteMatrizResponseDto.setGenero(usuario.getGenero().substring(0, 1));
+            } else {
+                reporteMatrizResponseDto.setGenero("");
             }
+
+            UnidadOrganizativa unidadVotante = prioridadRepository.getUnidadByCod(indicador.getCodUnidad());
+            reporteMatrizResponseDto.setOrgano(unidadVotante.getDescripcion());
+            reporteMatrizResponseDto.setUnidad("");
+            reporteMatrizResponseDto.setPuesto(usuario.getPuesto());
+            if (votante.get().getIdSegmento() == 1) {
+                reporteMatrizResponseDto.setSegmento("Directivo");
+                reporteMatrizResponseDto.setRol("Evaluador/a");
+            }
+            if (votante.get().getIdSegmento() == 3) {
+                reporteMatrizResponseDto.setSegmento("Ejecutor");
+                reporteMatrizResponseDto.setRol("Evaluado/a");
+            }
+
+            List<String> listDescripcionIndicador = indicadorRepository.listIndicadorDescripcionByVotante(idVotante);
+            ArrayList<String> listIndicadorNombres = new ArrayList<String>();
+            for (String descripcion : listDescripcionIndicador) {
+                listIndicadorNombres.add(descripcion);
+            }
+            reporteMatrizResponseDto.setListDescripcionIndicador(listIndicadorNombres);
             listMatriz.add(reporteMatrizResponseDto);
         }
 
