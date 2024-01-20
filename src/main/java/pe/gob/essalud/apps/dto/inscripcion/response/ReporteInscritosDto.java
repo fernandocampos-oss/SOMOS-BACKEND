@@ -9,5 +9,8 @@ public class ReporteInscritosDto {
 
     private int idInscripcion;
     private String descripcion;
+    private boolean votacion;
+    private boolean votoActivo;
     private List<UsuariosInscritosResponseDto> inscritos;
+    private List<ReporteInscVotacionResponseDto> votacionesResultado;
 }

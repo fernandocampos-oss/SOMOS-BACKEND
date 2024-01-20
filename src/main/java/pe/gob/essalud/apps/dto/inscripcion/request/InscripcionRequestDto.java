@@ -7,7 +7,6 @@ import java.util.List;
 @Data
 public class InscripcionRequestDto {
     private int idInscripcion;
-    private int tipoInscripcion;
     private List<Integer> inscritos;
     private String descripcion;
     private String imagenBase64;

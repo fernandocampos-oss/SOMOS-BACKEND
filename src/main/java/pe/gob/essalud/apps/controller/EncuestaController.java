@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.encuesta.request.UsuarioEncuestaRequestDto;
 import pe.gob.essalud.apps.dto.encuesta.response.EncuestaResponseDto;
+import pe.gob.essalud.apps.dto.encuesta.response.ReporteEncuestaResponseDto;
 import pe.gob.essalud.apps.service.EncuestaService;
 
 @RestController
@@ -25,6 +26,11 @@ public class EncuestaController {
     public void guardarRespuestaEncuesta(@PathVariable Integer idEncuesta,
              @RequestBody UsuarioEncuestaRequestDto request) {
         encuestaService.guardarRespuesta(idEncuesta, request);
+    }
+
+    @GetMapping("/{idEncuesta}/resultado-encuesta")
+    public ReporteEncuestaResponseDto obtenerResultadosEncuesta(@PathVariable Integer idEncuesta) {
+        return encuestaService.obtenerResultadosEncuesta(idEncuesta);
     }
 
 }

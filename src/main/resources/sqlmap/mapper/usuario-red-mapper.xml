@@ -10,6 +10,8 @@
                U.nombres,
                U.apellidos,
                U.fecha_creacion     fechaCreacion,
+               U.correo,
+               U.numero_celular		numeroCelular,
                U.regimen,
                U.cargo,
                U.cod_red            codRed,

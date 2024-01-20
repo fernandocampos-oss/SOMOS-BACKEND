@@ -11,6 +11,8 @@ public class UsuarioInformacionResponseDto {
     private String nombres;
     private String apellidos;
     private LocalDateTime fechaCreacion;
+    private String correo;
+    private String numeroCelular;
     private String regimen;
     private String cargo;
     private String codRed;

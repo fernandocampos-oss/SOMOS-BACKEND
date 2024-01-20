@@ -25,7 +25,6 @@ public class ProyectoController {
         return proyectoService.listarProyectos();
     }
 
-    @PreAuthorizeAdminCentral
     @GetMapping("/bandeja")
     public BandejaProyectosResponse obtenerBandejaProyectos() {
         return proyectoService.obtenerBandejaProyectos();

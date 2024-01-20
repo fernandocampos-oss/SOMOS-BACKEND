@@ -26,7 +26,7 @@ public class UsuarioRedController {
     static final String USUARIO_RED = "usuarios-redes";
     private final UsuarioRedService usuarioRedService;
 
-    @PreAuthorizeAdminCentral
+    @PreAuthorizeAdmin
     @GetMapping("/administradores-red")
     public List<UsuarioNombresResponse> listarAministradoresRed() {
         return usuarioRedService.listarAministradoresRed();
