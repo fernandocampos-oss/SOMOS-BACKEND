@@ -7,7 +7,11 @@ import java.time.LocalDateTime;
 @Data
 public class PagoBoletaResponseDto {
 
-    private BoletaSAP boleta;
-    private PdfSAP pdf;
+    private String codigoPlanilla;
+    private String regimen;
+    private String red;
+    private String unidad;
+    private String tipoBoleta;
+    private String pdfBase64;
 
 }

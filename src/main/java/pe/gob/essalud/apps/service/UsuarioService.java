@@ -15,6 +15,8 @@ public interface UsuarioService {
 
     UsuarioResponseDto get(long id);
 
+    UsuarioResponseDto find(long id);
+
     void update(long id, UsuarioRegisterUpdateRequestDto model);
 
     void delete(long id);

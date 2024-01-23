@@ -11,6 +11,6 @@ import javax.xml.bind.annotation.XmlElement;
 public class PdfSAP {
 
     @XmlElement(name = "Line", required = true)
-    protected String lineaBinario;
+    protected String lineaPdfBase64;
 
 }

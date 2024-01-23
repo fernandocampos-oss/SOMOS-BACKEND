@@ -13,13 +13,13 @@ public class BoletaSAP {
     @XmlElement(name = "Pernr", required = true)
     protected String codigoPlanilla;
     @XmlElement(name = "Femis", required = true)
-    protected String fechaCreacion;
+    protected String fechaConsulta;
     @XmlElement(name = "Ptext", required = true)
-    protected String grupo;
+    protected String regimen;
     @XmlElement(name = "Name1", required = true)
-    protected String division;
+    protected String red;
     @XmlElement(name = "Orgtx", required = true)
-    protected String objeto;
+    protected String unidad;
     @XmlElement(name = "Tipbo", required = true)
     protected String tipoBoleta;
 

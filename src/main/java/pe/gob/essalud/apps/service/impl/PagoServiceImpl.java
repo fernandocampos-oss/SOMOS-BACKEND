@@ -41,19 +41,17 @@ public class PagoServiceImpl implements PagoService {
     @Override
     public PagoBoletaResponseDto buscarPagosBoleta(String anio, String mes) {
         PagoBoletaResponseDto pagoBoletaResponseDto = new PagoBoletaResponseDto();
-        UsuarioResponseDto usuario = usuarioService.get(authService.getIdUserSession());
+        UsuarioResponseDto usuario = usuarioService.find(authService.getIdUserSession());
         BoletaPdfSAP boletaPdfSAP = boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes);
         if (boletaPdfSAP != null) {
             if (boletaPdfSAP.getBoleta() != null) {
                 BoletaSAP boletaSAP = boletaPdfSAP.getBoleta().stream()
                         .filter(b -> b.getCodigoPlanilla().equals(usuario.getCodigoPlanilla())).findFirst().orElse(null);
-                pagoBoletaResponseDto.setBoleta(boletaSAP);
+                pagoBoletaResponseDto = modelMapper.map(boletaSAP, PagoBoletaResponseDto.class);
             }
             if (boletaPdfSAP.getPdf() != null) {
-                String lineaBinario = boletaPdfSAP.getPdf().stream().map(PdfSAP::getLineaBinario).collect(Collectors.joining());
-                PdfSAP pdfSAP = new PdfSAP();
-                pdfSAP.setLineaBinario(lineaBinario);
-                pagoBoletaResponseDto.setPdf(pdfSAP);
+                String pdfBase64 = boletaPdfSAP.getPdf().stream().map(PdfSAP::getLineaPdfBase64).collect(Collectors.joining());
+                pagoBoletaResponseDto.setPdfBase64(pdfBase64);
             }
         }
         return pagoBoletaResponseDto;

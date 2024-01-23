@@ -79,6 +79,11 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     }
 
     @Override
+    public UsuarioResponseDto find(long id) {
+        return usuarioMyRepository.findById(id);
+    }
+
+    @Override
     public void update(long id, UsuarioRegisterUpdateRequestDto model) {
         boolean alreadyExists = usuarioRepository.existsByNumeroDocumentoOrCodigoPlanillaAndIdUsuarioNot(
                 model.getNumeroDocumento(),
