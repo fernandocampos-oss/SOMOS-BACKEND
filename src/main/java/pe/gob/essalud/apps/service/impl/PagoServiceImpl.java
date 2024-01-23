@@ -1,10 +1,7 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.IOUtils;
 import org.modelmapper.ModelMapper;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.client.BoletaSapServiceClient;
 import pe.gob.essalud.apps.dto.pago.request.PagoBoletaRequestDto;
@@ -17,9 +14,6 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PagoService;
 import pe.gob.essalud.apps.service.UsuarioService;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,22 +33,9 @@ public class PagoServiceImpl implements PagoService {
     private final BoletaSapServiceClient boletaSapServiceClient;
 
     @Override
-    public PagoBoletaResponseDto buscarPagosBoleta(String anio, String mes) {
-        PagoBoletaResponseDto pagoBoletaResponseDto = new PagoBoletaResponseDto();
+    public BoletaPagoResponseDto buscarBoletaPago(String anio, String mes) {
         UsuarioResponseDto usuario = usuarioService.find(authService.getIdUserSession());
-        BoletaPdfSAP boletaPdfSAP = boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes);
-        if (boletaPdfSAP != null) {
-            if (boletaPdfSAP.getBoleta() != null) {
-                BoletaSAP boletaSAP = boletaPdfSAP.getBoleta().stream()
-                        .filter(b -> b.getCodigoPlanilla().equals(usuario.getCodigoPlanilla())).findFirst().orElse(null);
-                pagoBoletaResponseDto = modelMapper.map(boletaSAP, PagoBoletaResponseDto.class);
-            }
-            if (boletaPdfSAP.getPdf() != null) {
-                String pdfBase64 = boletaPdfSAP.getPdf().stream().map(PdfSAP::getLineaPdfBase64).collect(Collectors.joining());
-                pagoBoletaResponseDto.setPdfBase64(pdfBase64);
-            }
-        }
-        return pagoBoletaResponseDto;
+        return boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes);
     }
 
     @Override

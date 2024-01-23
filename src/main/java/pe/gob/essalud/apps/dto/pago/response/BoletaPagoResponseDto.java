@@ -2,12 +2,11 @@ package pe.gob.essalud.apps.dto.pago.response;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
-public class PagoBoletaResponseDto {
+public class BoletaPagoResponseDto {
 
     private String codigoPlanilla;
+    private String fechaConsulta;
     private String regimen;
     private String red;
     private String unidad;
