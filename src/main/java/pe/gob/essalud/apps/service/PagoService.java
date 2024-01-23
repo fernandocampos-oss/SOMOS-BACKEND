@@ -10,9 +10,7 @@ import java.util.List;
 
 public interface PagoService {
 
-    List<PagoBoletaResponseDto> listarPagosBoletasBusqueda(int anio, int mes);
-    ResponseEntity<Resource> descargarPdfBoleta(int idBoleta);
-    String visualizarPdfBoleta(int idBoleta);
+    PagoBoletaResponseDto buscarPagosBoleta(String anio, String mes);
     List<PagoHistorialActividadResponseDto> listarPagosHistorialActividades();
     void aceptarTerminos();
     void registrarAccion(int tipoAccion, PagoBoletaRequestDto pagoBoletaRequestDto);

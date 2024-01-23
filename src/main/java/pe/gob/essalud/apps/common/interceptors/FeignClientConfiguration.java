@@ -5,7 +5,7 @@ import feign.RequestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pe.gob.essalud.apps.common.interfaces.BasicAuthForBoletaSapUtilService;
+import pe.gob.essalud.apps.common.interfaces.BasicAuthForBoletaSapService;
 import pe.gob.essalud.apps.common.interfaces.BasicAuthForMarcacionConsService;
 import pe.gob.essalud.apps.common.interfaces.BasicAuthForPersonalSapUtilService;
 
@@ -37,7 +37,7 @@ public class FeignClientConfiguration {
         return template -> {
             _addHeader(template, BasicAuthForMarcacionConsService.class, marcacionConsServiceKey);
             _addHeader(template, BasicAuthForPersonalSapUtilService.class, personalSapUtilServiceKey);
-            _addHeader(template, BasicAuthForBoletaSapUtilService.class, boletaSapServiceKey);
+            _addHeader(template, BasicAuthForBoletaSapService.class, boletaSapServiceKey);
         };
     }
 }

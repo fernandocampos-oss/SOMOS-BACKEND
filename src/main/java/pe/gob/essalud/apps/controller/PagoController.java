@@ -22,18 +22,8 @@ public class PagoController {
     private final PagoService pagoService;
 
     @GetMapping("/busqueda/anio/{anio}/mes/{mes}")
-    public List<PagoBoletaResponseDto> listarPagosBoletasBusqueda(@PathVariable int anio, @PathVariable int mes) {
-        return pagoService.listarPagosBoletasBusqueda(anio, mes);
-    }
-
-    @GetMapping("/descargar-pdf/{idBoleta}")
-    public ResponseEntity<Resource> descargarPdfBoleta(@PathVariable int idBoleta) {
-        return pagoService.descargarPdfBoleta(idBoleta);
-    }
-
-    @GetMapping("/visualizar-pdf/{idBoleta}")
-    public String visualizarPdfBoleta(@PathVariable int idBoleta) {
-        return pagoService.visualizarPdfBoleta(idBoleta);
+    public PagoBoletaResponseDto buscarPagosBoleta(@PathVariable String anio, @PathVariable String mes) {
+        return pagoService.buscarPagosBoleta(anio, mes);
     }
 
     @GetMapping("/historial/actividades")

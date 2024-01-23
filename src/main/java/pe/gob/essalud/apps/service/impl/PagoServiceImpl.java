@@ -8,8 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.client.BoletaSapServiceClient;
 import pe.gob.essalud.apps.dto.pago.request.PagoBoletaRequestDto;
-import pe.gob.essalud.apps.dto.pago.response.PagoBoletaResponseDto;
-import pe.gob.essalud.apps.dto.pago.response.PagoHistorialActividadResponseDto;
+import pe.gob.essalud.apps.dto.pago.response.*;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.PagoHistorialActividad;
@@ -19,6 +18,8 @@ import pe.gob.essalud.apps.service.PagoService;
 import pe.gob.essalud.apps.service.UsuarioService;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,27 +39,24 @@ public class PagoServiceImpl implements PagoService {
     private final BoletaSapServiceClient boletaSapServiceClient;
 
     @Override
-    public List<PagoBoletaResponseDto> listarPagosBoletasBusqueda(int anio, int mes) {
+    public PagoBoletaResponseDto buscarPagosBoleta(String anio, String mes) {
+        PagoBoletaResponseDto pagoBoletaResponseDto = new PagoBoletaResponseDto();
         UsuarioResponseDto usuario = usuarioService.get(authService.getIdUserSession());
-        return boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes);
-    }
-
-    @Override
-    public ResponseEntity<Resource> descargarPdfBoleta(int idBoleta) {
-        return boletaSapServiceClient.getPdf(idBoleta);
-    }
-
-    @Override
-    public String visualizarPdfBoleta(int idBoleta) {
-        String pdfBase64 = "";
-        ResponseEntity<Resource> response = boletaSapServiceClient.getPdf(idBoleta);
-        try {
-            byte[] pdfBytes = IOUtils.toByteArray(response.getBody().getInputStream());
-            pdfBase64 = java.util.Base64.getEncoder().encodeToString(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
+        BoletaPdfSAP boletaPdfSAP = boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes);
+        if (boletaPdfSAP != null) {
+            if (boletaPdfSAP.getBoleta() != null) {
+                BoletaSAP boletaSAP = boletaPdfSAP.getBoleta().stream()
+                        .filter(b -> b.getCodigoPlanilla().equals(usuario.getCodigoPlanilla())).findFirst().orElse(null);
+                pagoBoletaResponseDto.setBoleta(boletaSAP);
+            }
+            if (boletaPdfSAP.getPdf() != null) {
+                String lineaBinario = boletaPdfSAP.getPdf().stream().map(PdfSAP::getLineaBinario).collect(Collectors.joining());
+                PdfSAP pdfSAP = new PdfSAP();
+                pdfSAP.setLineaBinario(lineaBinario);
+                pagoBoletaResponseDto.setPdf(pdfSAP);
+            }
         }
-        return pdfBase64;
+        return pagoBoletaResponseDto;
     }
 
     @Override
