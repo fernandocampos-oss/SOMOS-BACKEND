@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface PagoHistorialActividadRepository extends JpaRepository<PagoHistorialActividad, Integer> {
 
     Optional<PagoHistorialActividad> findByTipoAccionAndUsuarioCreacion(int tipoAccion, int usuarioCreacion);
-    List<PagoHistorialActividad> findByUsuarioCreacionOrderByIdPagoHistorial(int usuarioCreacion);
+    List<PagoHistorialActividad> findByUsuarioCreacionOrderByIdPagoHistorialDesc(int usuarioCreacion);
 
 }

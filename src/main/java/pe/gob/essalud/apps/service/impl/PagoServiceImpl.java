@@ -40,7 +40,7 @@ public class PagoServiceImpl implements PagoService {
 
     @Override
     public List<PagoHistorialActividadResponseDto> listarPagosHistorialActividades() {
-        return pagoHistorialActividadRepository.findByUsuarioCreacionOrderByIdPagoHistorial(authService.getIdUserSession())
+        return pagoHistorialActividadRepository.findByUsuarioCreacionOrderByIdPagoHistorialDesc(authService.getIdUserSession())
                 .stream()
                 .map(p -> modelMapper.map(p, PagoHistorialActividadResponseDto.class))
                 .collect(Collectors.toList());
