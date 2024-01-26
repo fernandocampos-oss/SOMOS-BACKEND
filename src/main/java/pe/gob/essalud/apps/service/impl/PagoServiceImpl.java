@@ -10,6 +10,7 @@ import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.PagoHistorialActividad;
 import pe.gob.essalud.apps.repository.miessalud.PagoHistorialActividadRepository;
+import pe.gob.essalud.apps.repository.miessalud.TipoBoletaRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PagoService;
 import pe.gob.essalud.apps.service.UsuarioService;
@@ -27,15 +28,16 @@ public class PagoServiceImpl implements PagoService {
     private static final int TIPO_ACCION_DESCARGA_BOLETA = 3;
 
     private final PagoHistorialActividadRepository pagoHistorialActividadRepository;
+    private final TipoBoletaRepository tipoBoletaRepository;
     private final AuthService authService;
     private final UsuarioService usuarioService;
     private final ModelMapper modelMapper;
     private final BoletaSapServiceClient boletaSapServiceClient;
 
     @Override
-    public BoletaPagoResponseDto buscarBoletaPago(String anio, String mes) {
+    public BoletaPagoResponseDto buscarBoletaPago(String anio, String mes, String tipo) {
         UsuarioResponseDto usuario = usuarioService.find(authService.getIdUserSession());
-        return boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes);
+        return boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes, tipo);
     }
 
     @Override
@@ -84,6 +86,14 @@ public class PagoServiceImpl implements PagoService {
         Optional<PagoHistorialActividad> pagoHistorialActividad =
                 pagoHistorialActividadRepository.findByTipoAccionAndUsuarioCreacion(TIPO_ACCION_APROBACION_TERMINOS, authService.getIdUserSession());
         return pagoHistorialActividad.isPresent();
+    }
+
+    @Override
+    public List<TipoBoletaResponseDto> listarTiposBoletas() {
+        return tipoBoletaRepository.findAll()
+                .stream()
+                .map(t -> modelMapper.map(t, TipoBoletaResponseDto.class))
+                .collect(Collectors.toList());
     }
 
 }

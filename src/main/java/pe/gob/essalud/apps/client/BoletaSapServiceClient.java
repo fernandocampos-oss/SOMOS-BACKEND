@@ -10,7 +10,8 @@ import pe.gob.essalud.apps.dto.pago.response.BoletaPagoResponseDto;
 @FeignClient(name = "boletasapserviceclient", url = "${feign-clients.boleta-sap-service.url}")
 public interface BoletaSapServiceClient {
 
-    @GetMapping("boleta/getByCodigoPlanillaAndMesAndAnio")
-    BoletaPagoResponseDto getBoletaPago(@RequestParam String codigoPlanilla, @RequestParam String anio, @RequestParam String mes);
+    @GetMapping("boleta/getBoletaPagoSAP")
+    BoletaPagoResponseDto getBoletaPago(@RequestParam String codigoPlanilla, @RequestParam String anio,
+                                        @RequestParam String mes, @RequestParam String tipo);
 
 }

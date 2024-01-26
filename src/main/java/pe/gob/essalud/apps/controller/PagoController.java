@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.pago.request.PagoBoletaRequestDto;
 import pe.gob.essalud.apps.dto.pago.response.BoletaPagoResponseDto;
 import pe.gob.essalud.apps.dto.pago.response.PagoHistorialActividadResponseDto;
+import pe.gob.essalud.apps.dto.pago.response.TipoBoletaResponseDto;
 import pe.gob.essalud.apps.service.PagoService;
 
 import java.util.List;
@@ -19,9 +20,10 @@ public class PagoController {
     static final String PAGO = "pagos";
     private final PagoService pagoService;
 
-    @GetMapping("/busqueda/anio/{anio}/mes/{mes}")
-    public BoletaPagoResponseDto buscarBoletaPago(@PathVariable String anio, @PathVariable String mes) {
-        return pagoService.buscarBoletaPago(anio, mes);
+    @GetMapping("/busqueda")
+    public BoletaPagoResponseDto buscarBoletaPago(@RequestParam String anio, @RequestParam String mes,
+                                                  @RequestParam String tipo) {
+        return pagoService.buscarBoletaPago(anio, mes, tipo);
     }
 
     @GetMapping("/historial/actividades")
@@ -42,6 +44,11 @@ public class PagoController {
     @GetMapping("/verificar-terminos")
     public boolean verificarAceptacionTerminos() {
         return pagoService.verificarAceptacionTerminos();
+    }
+
+    @GetMapping("/tipos")
+    public List<TipoBoletaResponseDto> listarTiposBoletas() {
+        return pagoService.listarTiposBoletas();
     }
 
 }
