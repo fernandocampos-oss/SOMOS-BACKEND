@@ -22,7 +22,6 @@ import java.util.List;
 @RequestMapping(PrioridadController.PRIORIDAD)
 @RequiredArgsConstructor
 public class PrioridadController {
-
     static final String PRIORIDAD = "prioridades";
     private final PrioridadService prioridadService;
 
