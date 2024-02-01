@@ -4,14 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.base.BaseController;
-import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdmin;
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioActualizarDatosRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
-import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
-import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
+import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarCorreoRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
 import pe.gob.essalud.apps.service.UsuarioService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(UsuarioController.USERS)
@@ -63,6 +60,16 @@ public class UsuarioController extends BaseController {
     @PutMapping("{id}/cambiar-clave")
     public void cambiarClave(@PathVariable long id, @RequestBody UsuarioCambiarClaveRequestDto request) {
         usuarioService.cambiarClave(id, request);
+    }
+
+    @PutMapping("{id}/actualizar-datos")
+    public void actualizarDatos(@PathVariable long id, @RequestBody UsuarioActualizarDatosRequestDto request) {
+        usuarioService.actualizarDatos(id, request);
+    }
+
+    @PutMapping("{id}/cambiar-correo")
+    public void cambiarCorreo(@PathVariable long id, @RequestBody UsuarioCambiarCorreoRequestDto request) {
+        usuarioService.cambiarCorreo(id, request);
     }
 
 }

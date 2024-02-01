@@ -62,6 +62,10 @@ public class Usuario {
     private String idEstadoUsuario;
     @Column(name = "id_rol_adicional")
     private Integer idRolAdicional;
+    @Column(name = "ruta_imagen_perfil")
+    private String rutaImagenPerfil;
+    @Column(name = "ruta_imagen_firma")
+    private String rutaImagenFirma;
 
     @PrePersist
     private void prePersist() {
