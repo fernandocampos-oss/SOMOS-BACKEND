@@ -97,11 +97,11 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         if (request.getExtension().equals("pdf")) {
             String rutaFile = uploadPath + RUTA_PDF_GESTION_RENDIMIENTO + request.getIdEvidencia() + FORMATO_PDF_EVIDENCIA;
             rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
-            evidenciaRepository.crearEvidencia(request.getSustentoDescripcion(), rutaFile, request.getExtension(), LocalDateTime.now(ZoneId.of("America/Lima")), request.getIdEvidencia());
+            evidenciaRepository.crearEvidencia(request.getSustentoDescripcion(), rutaFile, request.getExtension(), LocalDateTime.now(ZoneId.of("America/Lima")), request.getCalificacion(), request.getIdEvidencia());
         } else {
             String rutaFile = uploadPath + RUTA_IMAGENES_GESTION_RENDIMIENTO + request.getIdEvidencia() + FORMATO_IMAGEN_EVIDENCIA;
             rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
-            evidenciaRepository.crearEvidencia(request.getSustentoDescripcion(), rutaFile, "png", LocalDateTime.now(ZoneId.of("America/Lima")), request.getIdEvidencia());
+            evidenciaRepository.crearEvidencia(request.getSustentoDescripcion(), rutaFile, "png", LocalDateTime.now(ZoneId.of("America/Lima")), request.getCalificacion(), request.getIdEvidencia());
         }
         return request.getIdEvidencia();
     }
