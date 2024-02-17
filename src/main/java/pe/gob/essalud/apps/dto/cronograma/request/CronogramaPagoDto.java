@@ -12,5 +12,7 @@ public class CronogramaPagoDto {
     private String descripcionPeriodo;
     private LocalDate fecha;
     private int[] tipoPagoAsociados;
+    private LocalDate fechaMinima;
+    private LocalDate fechaMaxima;
 
 }

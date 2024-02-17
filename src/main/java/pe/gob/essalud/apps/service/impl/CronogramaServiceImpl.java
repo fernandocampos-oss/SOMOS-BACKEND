@@ -11,6 +11,7 @@ import pe.gob.essalud.apps.repository.miessalud.TipoContratoRepository;
 import pe.gob.essalud.apps.service.CronogramaService;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,12 +41,16 @@ public class CronogramaServiceImpl implements CronogramaService {
                     int[] tipoPagoAsociados = Arrays.stream(c.getTipoPagoAsociado().split(","))
                             .mapToInt(Integer::parseInt)
                             .toArray();
+                    YearMonth mesAnio = YearMonth.from(fecha);
+                    LocalDate fechaMaxima = mesAnio.atEndOfMonth();
                     CronogramaPagoDto pagoDto = new CronogramaPagoDto();
                     pagoDto.setIdCronogramaPago(c.getIdCronogramaPago());
                     pagoDto.setIdTipoContrato(c.getTipoContrato().getIdTipoContrato());
                     pagoDto.setDescripcionPeriodo(c.getPeriodoPago().getDescripcion());
                     pagoDto.setFecha(fecha);
                     pagoDto.setTipoPagoAsociados(tipoPagoAsociados);
+                    pagoDto.setFechaMinima(fecha.withDayOfMonth(1));
+                    pagoDto.setFechaMaxima(fechaMaxima);
                     return pagoDto;
                 })
                 .collect(Collectors.toList());
