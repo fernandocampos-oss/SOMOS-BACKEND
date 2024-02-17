@@ -4,4 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import pe.gob.essalud.apps.model.miessalud.TipoBoleta;
 
 public interface TipoBoletaRepository extends JpaRepository<TipoBoleta, Integer> {
+
+    TipoBoleta findFirstByTipo(String tipo);
+
 }

@@ -6,15 +6,15 @@ import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.client.BoletaSapServiceClient;
 import pe.gob.essalud.apps.dto.pago.request.PagoBoletaRequestDto;
 import pe.gob.essalud.apps.dto.pago.response.*;
-import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
-import pe.gob.essalud.apps.model.miessalud.PagoHistorialActividad;
-import pe.gob.essalud.apps.repository.miessalud.PagoHistorialActividadRepository;
-import pe.gob.essalud.apps.repository.miessalud.TipoBoletaRepository;
+import pe.gob.essalud.apps.model.miessalud.*;
+import pe.gob.essalud.apps.repository.miessalud.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PagoService;
-import pe.gob.essalud.apps.service.UsuarioService;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,15 +29,20 @@ public class PagoServiceImpl implements PagoService {
 
     private final PagoHistorialActividadRepository pagoHistorialActividadRepository;
     private final TipoBoletaRepository tipoBoletaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final TipoContratoRepository tipoContratoRepository;
+    private final CronogramaPagoRepository cronogramaPagoRepository;
     private final AuthService authService;
-    private final UsuarioService usuarioService;
     private final ModelMapper modelMapper;
     private final BoletaSapServiceClient boletaSapServiceClient;
 
     @Override
     public BoletaPagoResponseDto buscarBoletaPago(String anio, String mes, String tipo) {
-        UsuarioResponseDto usuario = usuarioService.find(authService.getIdUserSession());
-        return boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes, tipo);
+        Usuario usuario = usuarioRepository.findById((long) authService.getIdUserSession()).orElseThrow(() -> new ValidationException("El usuario no existe"));
+        if (validarConsultaSegunCronograma(usuario, anio, mes, tipo)) {
+            return boletaSapServiceClient.getBoletaPago(usuario.getCodigoPlanilla(), anio, mes, tipo);
+        }
+        return new BoletaPagoResponseDto();
     }
 
     @Override
@@ -94,6 +99,47 @@ public class PagoServiceImpl implements PagoService {
                 .stream()
                 .map(t -> modelMapper.map(t, TipoBoletaResponseDto.class))
                 .collect(Collectors.toList());
+    }
+
+    private boolean validarConsultaSegunCronograma(Usuario usuario, String anio, String mes, String tipo) {
+        boolean consultaPermitida = true;
+        LocalDate fechaActual = LocalDate.now(ZoneId.of("America/Lima"));
+        int anioConsulta = Integer.parseInt(anio);
+        if (anioConsulta == fechaActual.getYear() && usuario.getRegimen() != null) {
+            List<TipoContrato> tipoContratos = tipoContratoRepository.findAllByOrderByIdTipoContratoAsc();
+            TipoContrato tipoContratoEncontrado = null;
+
+            bucleExterior:
+            for (TipoContrato tipoContrato: tipoContratos) {
+                for (String codigo: tipoContrato.getCodigo().split(",")) {
+                    if (usuario.getRegimen().toUpperCase().contains(codigo.toUpperCase())) {
+                        tipoContratoEncontrado = tipoContrato;
+                        break bucleExterior;
+                    }
+                }
+            }
+
+            if (tipoContratoEncontrado != null) {
+                TipoBoleta tipoBoleta = tipoBoletaRepository.findFirstByTipo(tipo);
+                if (tipoBoleta != null) {
+                    Integer idTipoContrato = tipoContratoEncontrado.getIdTipoContrato();
+                    int mesConsulta = Integer.parseInt(mes);
+                    List<CronogramaPago> cronogramaPagos = cronogramaPagoRepository.findAllByOrderByTipoContratoIdTipoContratoAscPeriodoPagoIdPeriodoPagoAsc()
+                            .stream()
+                            .filter(c -> c.getTipoContrato().getIdTipoContrato().equals(idTipoContrato))
+                            .collect(Collectors.toList());
+                    for (CronogramaPago cronogramaPago: cronogramaPagos) {
+                        List<String> tiposPagosList = Arrays.asList(cronogramaPago.getTipoPagoAsociado().split(","));
+                        if (mesConsulta == cronogramaPago.getMes() && fechaActual.getDayOfMonth() < cronogramaPago.getDia() &&
+                                tiposPagosList.contains(String.valueOf(tipoBoleta.getIdTipoBoleta()))) {
+                            consultaPermitida = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return consultaPermitida;
     }
 
 }

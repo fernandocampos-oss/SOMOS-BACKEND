@@ -18,5 +18,6 @@ public class TipoContrato {
     @Column(name = "id_tipo_contrato")
     private Integer idTipoContrato;
     private String descripcion;
+    private String codigo;
 
 }
