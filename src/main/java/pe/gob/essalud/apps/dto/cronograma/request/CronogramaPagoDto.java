@@ -14,5 +14,6 @@ public class CronogramaPagoDto {
     private int[] tipoPagoAsociados;
     private LocalDate fechaMinima;
     private LocalDate fechaMaxima;
+    private boolean requerido;
 
 }

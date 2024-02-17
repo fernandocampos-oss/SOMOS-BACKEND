@@ -20,9 +20,10 @@ public class CronogramaPago {
     @ManyToOne
     @JoinColumn(name = "id_periodo_pago")
     private PeriodoPago periodoPago;
-    private int dia;
-    private int mes;
+    private Integer dia;
+    private Integer mes;
     @Column(name = "tipo_pago_asociado")
     private String tipoPagoAsociado;
+    private boolean requerido;
 
 }

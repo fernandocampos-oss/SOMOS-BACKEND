@@ -37,20 +37,26 @@ public class CronogramaServiceImpl implements CronogramaService {
         List<CronogramaPago> cronogramaPagos = cronogramaPagoRepository.findAllByOrderByTipoContratoIdTipoContratoAscPeriodoPagoIdPeriodoPagoAsc();
         List<CronogramaPagoDto> cronogramaPagoDtos = cronogramaPagos.stream()
                 .map(c -> {
-                    LocalDate fecha = LocalDate.of(LocalDate.now().getYear(), c.getMes(), c.getDia());
-                    int[] tipoPagoAsociados = Arrays.stream(c.getTipoPagoAsociado().split(","))
-                            .mapToInt(Integer::parseInt)
-                            .toArray();
-                    YearMonth mesAnio = YearMonth.from(fecha);
-                    LocalDate fechaMaxima = mesAnio.atEndOfMonth();
+                    int[] tipoPagoAsociados = null;
+                    LocalDate fecha = null, fechaMinima = null, fechaMaxima = null;
+                    if (c.isRequerido()) {
+                        fecha = LocalDate.of(LocalDate.now().getYear(), c.getMes(), c.getDia());
+                        tipoPagoAsociados = Arrays.stream(c.getTipoPagoAsociado().split(","))
+                                .mapToInt(Integer::parseInt)
+                                .toArray();
+                        YearMonth mesAnio = YearMonth.from(fecha);
+                        fechaMinima = fecha.withDayOfMonth(1);
+                        fechaMaxima = mesAnio.atEndOfMonth();
+                    }
                     CronogramaPagoDto pagoDto = new CronogramaPagoDto();
                     pagoDto.setIdCronogramaPago(c.getIdCronogramaPago());
                     pagoDto.setIdTipoContrato(c.getTipoContrato().getIdTipoContrato());
                     pagoDto.setDescripcionPeriodo(c.getPeriodoPago().getDescripcion());
                     pagoDto.setFecha(fecha);
                     pagoDto.setTipoPagoAsociados(tipoPagoAsociados);
-                    pagoDto.setFechaMinima(fecha.withDayOfMonth(1));
+                    pagoDto.setFechaMinima(fechaMinima);
                     pagoDto.setFechaMaxima(fechaMaxima);
+                    pagoDto.setRequerido(c.isRequerido());
                     return pagoDto;
                 })
                 .collect(Collectors.toList());
@@ -61,7 +67,7 @@ public class CronogramaServiceImpl implements CronogramaService {
     public void actualizarCronogramaPago(List<CronogramaPagoDto> cronogramaPagoDtos) {
         for (CronogramaPagoDto cronogramaPagoDto: cronogramaPagoDtos) {
             CronogramaPago cronogramaPago = cronogramaPagoRepository.findById(cronogramaPagoDto.getIdCronogramaPago()).orElse(null);
-            if (cronogramaPago != null) {
+            if (cronogramaPago != null && cronogramaPago.isRequerido()) {
                 String tipoPagoAsociado = String.join(",", Arrays.stream(cronogramaPagoDto.getTipoPagoAsociados()).mapToObj(String::valueOf).toArray(String[]::new));
                 cronogramaPago.setDia(cronogramaPagoDto.getFecha().getDayOfMonth());
                 cronogramaPago.setMes(cronogramaPagoDto.getFecha().getMonth().getValue());
