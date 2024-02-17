@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class TipoBoletaResponseDto {
 
+    private int idTipoBoleta;
     private String tipo;
     private String descripcion;
 
