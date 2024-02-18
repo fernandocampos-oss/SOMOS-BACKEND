@@ -37,6 +37,11 @@ public class UsuarioController extends BaseController {
         return usuarioService.get(id);
     }
 
+    @GetMapping("find/{id}")
+    public UsuarioResponseDto find(@PathVariable long id) {
+        return usuarioService.find(id);
+    }
+
     /*
     @PreAuthorizeAdmin
     @PostMapping
