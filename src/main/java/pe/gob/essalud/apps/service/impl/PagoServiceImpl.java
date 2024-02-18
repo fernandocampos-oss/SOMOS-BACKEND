@@ -105,7 +105,8 @@ public class PagoServiceImpl implements PagoService {
         boolean consultaPermitida = true;
         LocalDate fechaActual = LocalDate.now(ZoneId.of("America/Lima"));
         int anioConsulta = Integer.parseInt(anio);
-        if (anioConsulta == fechaActual.getYear() && usuario.getRegimen() != null) {
+        int mesConsulta = Integer.parseInt(mes);
+        if (anioConsulta == fechaActual.getYear() && mesConsulta == fechaActual.getMonth().getValue() && usuario.getRegimen() != null) {
             List<TipoContrato> tipoContratos = tipoContratoRepository.findAllByOrderByIdTipoContratoAsc();
             TipoContrato tipoContratoEncontrado = null;
 
@@ -123,21 +124,21 @@ public class PagoServiceImpl implements PagoService {
                 TipoBoleta tipoBoleta = tipoBoletaRepository.findFirstByTipo(tipo);
                 if (tipoBoleta != null) {
                     Integer idTipoContrato = tipoContratoEncontrado.getIdTipoContrato();
-                    int mesConsulta = Integer.parseInt(mes);
                     List<CronogramaPago> cronogramaPagos = cronogramaPagoRepository.findAllByOrderByTipoContratoIdTipoContratoAscPeriodoPagoIdPeriodoPagoAsc()
                             .stream()
-                            .filter(c -> c.getTipoContrato().getIdTipoContrato().equals(idTipoContrato))
+                            .filter(c -> c.getTipoContrato().getIdTipoContrato().equals(idTipoContrato) && c.isRequerido() && c.getMes() == mesConsulta)
                             .collect(Collectors.toList());
                     for (CronogramaPago cronogramaPago: cronogramaPagos) {
                         List<String> tiposPagosList = Arrays.asList(cronogramaPago.getTipoPagoAsociado().split(","));
-                        if (mesConsulta == cronogramaPago.getMes() && fechaActual.getDayOfMonth() < cronogramaPago.getDia() &&
-                                tiposPagosList.contains(String.valueOf(tipoBoleta.getIdTipoBoleta()))) {
+                        if (fechaActual.getDayOfMonth() < cronogramaPago.getDia() && tiposPagosList.contains(String.valueOf(tipoBoleta.getIdTipoBoleta()))) {
                             consultaPermitida = false;
                             break;
                         }
                     }
                 }
             }
+        } else if (anioConsulta > fechaActual.getYear() || (anioConsulta == fechaActual.getYear() && mesConsulta > fechaActual.getMonth().getValue())) {
+            consultaPermitida = false;
         }
         return consultaPermitida;
     }
