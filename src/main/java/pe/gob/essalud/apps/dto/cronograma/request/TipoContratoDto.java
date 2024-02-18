@@ -7,5 +7,6 @@ public class TipoContratoDto {
 
     private int idTipoContrato;
     private String descripcion;
+    private String codigo;
 
 }

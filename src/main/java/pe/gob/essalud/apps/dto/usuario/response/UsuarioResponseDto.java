@@ -28,5 +28,6 @@ public class UsuarioResponseDto {
     private String rutaImagenFirma;
     private String imagenPerfilBase64;
     private String imagenFirmaBase64;
+    private String regimen;
 
 }
