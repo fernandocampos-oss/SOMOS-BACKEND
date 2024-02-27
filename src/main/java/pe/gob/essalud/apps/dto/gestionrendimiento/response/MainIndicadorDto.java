@@ -13,4 +13,11 @@ public class MainIndicadorDto {
     private int valorMeta;
     private int peso;
     private List<MainEvidenciaDto> listEvidencia;
+    
+    /* Agregado de 2 columnas - Inicio */
+    
+    private String desPrioridad;
+    private String flDesPrioridad;
+    
+    /* Agregado de 2 columnas - Fin */
 }

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pe.gob.essalud.apps.repository.miessalud.sqlmap.UsuarioRedMyRepository">
+
+    <select id="getUsuariosRedActivos" resultType="UsuarioInformacionResponseDto">
+        SELECT U.numero_documento   numeroDocumento,
+               U.codigo_planilla	codigoPlanilla,
+               U.nombres,
+               U.apellidos,
+               U.fecha_creacion     fechaCreacion,
+               U.correo,
+               U.numero_celular		numeroCelular,
+               U.regimen,
+               U.cargo,
+               U.cod_red            codRed,
+               R.descripcion        descripcionRed,
+               U.cod_unidad         codUnidad,
+               UO.descripcion       descripcionUnidad,
+               U.sexo
+        FROM usuario U
+        INNER JOIN red_personal R ON U.cod_red = R.cod_red
+        LEFT JOIN unidad_organizativa UO ON U.cod_unidad = UO.cod_unidad
+        WHERE U.cod_red IN
+            <foreach collection="codRedes" item="codRed" open="(" separator="," close=")">
+                #{codRed}
+            </foreach>
+            AND U.id_estado_usuario = '02' AND U.es_activo = true
+        ORDER BY U.fecha_creacion DESC
+        LIMIT
+        <choose>
+            <when test="limite == 0">
+                NULL
+            </when>
+            <otherwise>
+                #{limite}
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getRedesAsignadasActivas" resultType="RedPersonal">
+        SELECT UR.cod_Red, R.descripcion
+        FROM usuario_Red UR
+        INNER JOIN red_personal R ON UR.cod_Red = R.cod_red
+        WHERE UR.id_usuario = #{idUsuario} AND UR.habilitado = true AND UR.es_activo = true
+    </select>
+
+    <select id="getDatosRedesAsignadas" resultType="DatoRedResponse">
+        SELECT  UR.cod_red                                                  codRed,
+                R.descripcion,
+                Count(*)                                                    cantidad,
+                SUM(CASE WHEN UR.regimen LIKE '%dmini%' THEN 1 ELSE 0 END)  personalAdministrativo,
+                SUM(CASE WHEN UR.regimen LIKE '%sisten%' THEN 1 ELSE 0 END) personalAsistencial
+        FROM usuario UR
+        INNER JOIN red_personal R ON UR.cod_Red = R.cod_red
+        WHERE es_Activo = true AND id_estado_usuario = '02' AND UR.cod_red = #{codRed} GROUP BY UR.cod_Red, R.descripcion
+    </select>
+
+</mapper>

@@ -9,4 +9,5 @@ import java.time.LocalDateTime;
 public class UpdatePrioridadDto {
     private Actividad actividad;
     private LocalDateTime fechaAsignacion;
+    private String prioridadNombre;
 }

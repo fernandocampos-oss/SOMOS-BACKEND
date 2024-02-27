@@ -62,6 +62,15 @@ public class Indicador {
     private Integer usuarioModificacion;
     @Column(name = "fecha_modificacion")
     private LocalDateTime  fechaModificacion;
+    
+    /* Agregado de 2 columnas - Inicio */
+    
+    @Column(name = "des_prioridad")
+    private String desPrioridad;
+    @Column(name = "fl_des_prioridad")
+    private String flDesPrioridad;
+    
+    /* Agregado de 2 columnas - Fin */
 
     @PrePersist
     private void prePersist() {

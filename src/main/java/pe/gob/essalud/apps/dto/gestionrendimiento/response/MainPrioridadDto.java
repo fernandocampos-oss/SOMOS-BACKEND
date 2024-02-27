@@ -5,6 +5,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.persistence.Column;
+
 @Data
 public class MainPrioridadDto {
     private int idPrioridad;

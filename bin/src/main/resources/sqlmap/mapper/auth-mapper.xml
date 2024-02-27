@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pe.gob.essalud.apps.repository.miessalud.sqlmap.AuthMyRepository">
+
+    <select id="findByUsername" resultType="UserSession">
+        SELECT us.id_usuario id,
+               us.nombres    nombres,
+               us.id_rol     idRol,
+               us.id_rol_adicional idRolAdicional,
+               us.cod_red    codRed,
+               us.cod_unidad codUnidad
+        FROM usuario us
+        WHERE us.numero_documento = #{numeroDocumento}
+          AND us.es_activo = TRUE
+          AND us.id_estado_usuario = '02'
+    </select>
+
+</mapper>

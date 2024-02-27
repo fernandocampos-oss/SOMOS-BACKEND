@@ -66,7 +66,12 @@ public class PrioridadServiceImpl implements PrioridadService {
             for (Prioridad p : prioridades) {
                 MainPrioridadDto modelPrioridadDto = new MainPrioridadDto();
                 modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-                modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+                if(p.getDescripcion() == null) {
+                	modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+                }else{
+                	modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
+                }
+                
                 modelPrioridadDto.setIdActividad(p.getActividad().getIdActividad());
                 modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
 
@@ -82,6 +87,10 @@ public class PrioridadServiceImpl implements PrioridadService {
                     modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
                     modelIndicadorDto.setValorMeta(i.getValorMeta());
                     modelIndicadorDto.setPeso(i.getPeso());
+                    /* Agregado de 2 columnas - Inicio */
+                    modelIndicadorDto.setDesPrioridad(i.getDesPrioridad());
+                    modelIndicadorDto.setFlDesPrioridad(i.getFlDesPrioridad());
+                    /* Agregado de 2 columnas - Fin */
                     int numero = 0;
                     numero = i.getPeso();
                     porcentajeTotal += numero;
@@ -335,6 +344,7 @@ public class PrioridadServiceImpl implements PrioridadService {
 
             prioridad.setActividad(requestDto.getActividad());
             prioridad.setFechaAsignacion(requestDto.getFechaAsignacion());
+            prioridad.setDescripcion(requestDto.getPrioridadNombre());
             prioridadRepository.save(prioridad);
         }
     }

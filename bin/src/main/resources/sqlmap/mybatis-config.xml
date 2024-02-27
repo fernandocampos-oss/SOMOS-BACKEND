@@ -1,0 +1,28 @@
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "HTTP://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="false" />
+        <setting name="useGeneratedKeys" value="true" />
+        <setting name="defaultExecutorType" value="REUSE" />
+        <setting name="aggressiveLazyLoading" value="false"/>
+
+        <setting name="lazyLoadingEnabled" value="false"/>
+        <setting name="lazyLoadTriggerMethods" value=""/>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="jdbcTypeForNull" value="NVARCHAR"/>
+        <setting name="logImpl" value="LOG4J2"/>
+    </settings>
+
+    <typeAliases>
+        <typeAlias type="pe.gob.essalud.apps.dto.auth.UserSessionDto" alias="UserSession"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto" alias="UsuarioResponse"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.inscripcion.response.UsuariosInscritosResponseDto" alias="UsuariosInscritosResponseDto"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.inscripcion.response.ReporteInscVotacionResponseDto" alias="ReporteInscVotacionResponseDto"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.usuario.response.UsuarioInformacionResponseDto" alias="UsuarioInformacionResponseDto"/>
+        <typeAlias type="pe.gob.essalud.apps.model.miessalud.RedPersonal" alias="RedPersonal"/>
+        <typeAlias type="pe.gob.essalud.apps.dto.usuariored.response.DatoRedResponse" alias="DatoRedResponse"/>
+    </typeAliases>
+
+    <typeHandlers>
+    </typeHandlers>
+</configuration>

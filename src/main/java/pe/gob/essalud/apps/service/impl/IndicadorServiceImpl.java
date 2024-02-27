@@ -41,6 +41,11 @@ public class IndicadorServiceImpl implements IndicadorService {
         Prioridad prioridad = new Prioridad();
         prioridad.setAnio(DateUtil.getYearCurrent());
         prioridad.setActividad(requestDto.getActividad());
+        System.out.println("Flack: " + requestDto.getIndicador().getFlDesPrioridad());
+        if(requestDto.getIndicador().getFlDesPrioridad().equalsIgnoreCase("1")) {
+        	System.out.println("Reemplaza valor.");
+        	prioridad.setDescripcion(requestDto.getIndicador().getDesPrioridad());
+        }
         Prioridad prioridadGuardado = prioridadRepository.save(prioridad);
 
         Indicador model = requestDto.getIndicador();
@@ -51,6 +56,7 @@ public class IndicadorServiceImpl implements IndicadorService {
         model.setPrioridad(prioridadGuardado);
         model.setCodRed(authService.getCodRedSession());
         model.setCodUnidad(authService.getCodUnidadSession());
+        
         Indicador indicadorGuardado = indicadorRepository.save(model);
 
         if (!requestDto.getListEvidencia().isEmpty()) {
@@ -74,12 +80,16 @@ public class IndicadorServiceImpl implements IndicadorService {
         Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
 
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), votante.getIdVotante());
-
+        String aux = "";
         List<PendienteDto> listPrioridadDto = new ArrayList<>();
         for (Prioridad p : prioridades) {
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-            modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+            if(p.getDescripcion() == null) {
+            	modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+            }else {
+            	modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
+            }
 
             List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(votante.getIdVotante(), p.getIdPrioridad());
 

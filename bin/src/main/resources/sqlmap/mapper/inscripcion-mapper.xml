@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pe.gob.essalud.apps.repository.miessalud.sqlmap.InscripcionMyRepository">
+
+    <select id="getUsuariosInscritos" resultType="UsuariosInscritosResponseDto">
+        SELECT 	i.id_usuario 					idUsuario,
+                u.numero_documento 				numeroDocumento,
+                u.codigo_planilla				codigoPlanilla,
+                u.apellidos || ' ' || u.nombres nombreCompleto,
+                u.fecha_nacimiento              fechaNacimiento,
+                rp.descripcion					red,
+                uo.descripcion					unidadOrganica,
+                u.cargo,
+                u.regimen,
+                u.numero_celular 				numeroCelular,
+                u.correo,
+                i.estado_activo					estadoActivo,
+                i.fecha_inscripcion				fechaInscripcion,
+                i.descripcion,
+                i.id_lider                      idLider,
+                i.ruta_imagen                   rutaImagen
+        FROM inscripcion_persona i
+        INNER JOIN usuario u ON u.id_usuario = i.id_usuario
+        LEFT JOIN red_personal rp ON rp.cod_red = u.cod_red
+        LEFT JOIN unidad_organizativa uo ON uo.cod_unidad = u.cod_unidad
+        WHERE i.id_inscripcion = #{idInscripcion}
+    </select>
+    <select id="getVotacionesInscripcion" resultType="ReporteInscVotacionResponseDto">
+        SELECT
+                ip.id_ins_persona               idInsPersona,
+                ip.id_lider                     idLider,
+                count(*)                        votos
+        FROM inscripcion_voto iv
+        INNER JOIN inscripcion_persona ip ON ip.id_ins_persona = iv.id_candidato
+        WHERE iv.id_inscripcion = #{idInscripcion}
+        GROUP BY ip.id_ins_persona,
+        ip.id_lider
+        ORDER BY ip.id_ins_persona
+    </select>
+</mapper>

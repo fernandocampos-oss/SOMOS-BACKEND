@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: marcaciones-service
+  profiles:
+    active: ${PROFILES:default}
+  config:
+    import: configserver:${CONFIG_SERVER_URL}
+  cloud:
+    config:
+      username: ${CONFIG_SERVER_USERNAME}
+      password: ${CONFIG_SERVER_PASSWORD}
