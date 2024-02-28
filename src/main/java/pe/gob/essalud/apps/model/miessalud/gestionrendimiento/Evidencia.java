@@ -64,14 +64,15 @@ public class Evidencia {
     @Column(name = "fecha_modificacion")
     private LocalDateTime  fechaModificacion;
 
-    @PrePersist@PreUpdate
-    private void preUpdate() {
-        this.fechaModificacion = LocalDateTime.now(ZoneId.of("America/Lima"));
-    }
+    @PrePersist
     private void prePersist() {
         this.fechaCreacion = LocalDateTime.now(ZoneId.of("America/Lima"));
     }
-
+    
+    @PreUpdate
+    private void preUpdate() {
+        this.fechaModificacion = LocalDateTime.now(ZoneId.of("America/Lima"));
+    }
 
 }
 

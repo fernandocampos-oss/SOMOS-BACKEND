@@ -8,4 +8,5 @@ public class EvidenciaSustentoRequestDto {
     private String sustentoDescripcion;
     private String extension;
     private String fileBase64;
+    private String calificacion;
 }

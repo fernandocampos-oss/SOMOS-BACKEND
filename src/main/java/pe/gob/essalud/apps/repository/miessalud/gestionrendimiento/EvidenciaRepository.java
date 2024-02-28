@@ -14,11 +14,12 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE evidencia SET sustento_descripcion=?, sustento_ruta_file=?, sustento_extension_file=?, sustento_fecha_registro=? WHERE id_evidencia=?", nativeQuery = true)
+    @Query(value = "UPDATE evidencia SET sustento_descripcion=?, sustento_ruta_file=?, sustento_extension_file=?, sustento_fecha_registro=?, sustento_comentario=? WHERE id_evidencia=?", nativeQuery = true)
     Integer crearEvidencia(@Param("sustentoDescripcion") String sustentoDescripcion,
                            @Param("rutaFile") String rutaFile,
                            @Param("extension") String extension,
                            @Param("sustentoFechaRegistro") LocalDateTime sustentoFechaRegistro,
+                           @Param("sustentoComentario") String sustentoComentario,
                            @Param("idEvidencia") Number idEvidencia);
 
     @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador ORDER BY t.idEvidencia ASC ")
