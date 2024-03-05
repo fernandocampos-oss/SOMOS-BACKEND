@@ -33,4 +33,6 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Query("SELECT v FROM Votante v WHERE v.nombres LIKE %:nombre% ")
     List<Votante> findVotanteByNombre(@Param("nombre") String nombre);
 
+    @Query(value = "SELECT MAX(id_votante) FROM Votante", nativeQuery = true)
+    int getCantidadRegistro();
 }

@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.CargaMasivaVotanteDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
@@ -50,6 +53,21 @@ public class EquipoController {
     @GetMapping("/buscar/nombre")
     public List<Votante> findVotanteByNombre(@RequestParam("nombre") String nombre) {
         return equipoService.findVotanteByNombre(nombre);
+    }
+
+    @GetMapping("/listar/perfil/votantes")
+    public List<Votante> findAllVotantePerfil() {
+        return equipoService.findAllVotantePerfil();
+    }
+
+    @PutMapping("/modificar/votante/{id}")
+    public void modificarPerfilVotante(@PathVariable int id, @RequestBody UpdateVotanteDto request) {
+        equipoService.modificarPerfilVotante(id, request);
+    }
+
+    @PostMapping("/carga/excel/votante")
+    public List<CargaMasivaVotanteDto> cargaMasivaVotante(@RequestBody List<CargaMasivaVotanteDto> listVotantes) {
+        return equipoService.cargaMasivaVotante(listVotantes);
     }
 
 }
