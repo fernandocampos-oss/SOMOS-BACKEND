@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.base.BaseController;
+import pe.gob.essalud.apps.common.annotations.PreAuthorizeAdminCentral;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioActualizarDatosRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarCorreoRequestDto;
@@ -42,6 +43,12 @@ public class UsuarioController extends BaseController {
         return usuarioService.find(id);
     }
 
+    @PreAuthorizeAdminCentral
+    @GetMapping("find/numero-documento/{numeroDocumento}")
+    public UsuarioResponseDto findByNumeroDocumento(@PathVariable String numeroDocumento) {
+        return usuarioService.findByNumeroDocumento(numeroDocumento);
+    }
+
     /*
     @PreAuthorizeAdmin
     @PostMapping
@@ -70,6 +77,12 @@ public class UsuarioController extends BaseController {
     @PutMapping("{id}/actualizar-datos")
     public void actualizarDatos(@PathVariable long id, @RequestBody UsuarioActualizarDatosRequestDto request) {
         usuarioService.actualizarDatos(id, request);
+    }
+
+    @PreAuthorizeAdminCentral
+    @PutMapping("{id}/actualizar-datos-administrador")
+    public void actualizarDatosAdministrador(@PathVariable long id, @RequestBody UsuarioActualizarDatosRequestDto request) {
+        usuarioService.actualizarDatosAdministrador(id, request);
     }
 
     @PutMapping("{id}/cambiar-correo")

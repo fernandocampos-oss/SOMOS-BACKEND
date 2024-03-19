@@ -17,6 +17,8 @@ public interface UsuarioService {
 
     UsuarioResponseDto find(long id);
 
+    UsuarioResponseDto findByNumeroDocumento(String numeroDocumento);
+
     void update(long id, UsuarioRegisterUpdateRequestDto model);
 
     void delete(long id);
@@ -30,6 +32,8 @@ public interface UsuarioService {
     void updateDatosSAP(long id);
 
     void actualizarDatos(long id, UsuarioActualizarDatosRequestDto request);
+
+    void actualizarDatosAdministrador(long id, UsuarioActualizarDatosRequestDto request);
 
     void cambiarCorreo(long id, UsuarioCambiarCorreoRequestDto request);
 
