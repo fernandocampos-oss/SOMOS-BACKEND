@@ -1,10 +1,7 @@
 package pe.gob.essalud.apps.service;
 
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.PrioridadExistRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaSustentoRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorExistRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 
@@ -23,4 +20,6 @@ public interface EvidenciaService {
 //    List<Evidencia> listEvidenciaByIdIndicador(int idIndicador);
 
     void modificarEvidencia(int id, UpdateEvidenciaDto request);
+
+    void aprobarEvidencia(ApruebaEvidenciaRequestDto request);
 }

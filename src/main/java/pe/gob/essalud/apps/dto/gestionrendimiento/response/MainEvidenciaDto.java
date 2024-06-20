@@ -14,4 +14,6 @@ public class MainEvidenciaDto {
     private String sustentoDescripcion;
     private LocalDateTime sustentoFechaRegistro;
     private String sustentoExtensionFile;
+    private String comentario;
+    private Integer calificacion;
 }
