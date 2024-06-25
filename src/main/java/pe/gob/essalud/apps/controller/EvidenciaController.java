@@ -10,11 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.PrioridadExistRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaSustentoRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorExistRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 import pe.gob.essalud.apps.service.EvidenciaService;
@@ -61,5 +58,9 @@ public class EvidenciaController {
         evidenciaService.modificarEvidencia(id, request);
     }
 
+    @PutMapping("/modificar/calificacion")
+    public void modificarCalificacion(@RequestBody ApruebaEvidenciaRequestDto request){
+        evidenciaService.aprobarEvidencia(request);
+    }
 }
 

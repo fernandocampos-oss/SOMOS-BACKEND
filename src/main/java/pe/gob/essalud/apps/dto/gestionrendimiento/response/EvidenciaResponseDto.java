@@ -10,4 +10,6 @@ public class EvidenciaResponseDto {
     private LocalDateTime evidenciaFechaRegistro;
     private String fileBase64;
     private String extension;
+    private String comentario;
+    private Integer calificacion;
 }
