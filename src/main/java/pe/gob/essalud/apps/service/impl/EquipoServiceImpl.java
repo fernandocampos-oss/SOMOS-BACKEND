@@ -129,4 +129,9 @@ public class EquipoServiceImpl implements EquipoService {
         return listObservados;
     }
 
+    @Override
+    public Usuario findUsuarioSctrByNumeroDocumento(String numDoc) {
+        return usuarioRepository.findDocumento(numDoc);
+    }
+
 }

@@ -8,6 +8,7 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.request.CargaMasivaVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 import pe.gob.essalud.apps.service.EquipoService;
@@ -68,6 +69,11 @@ public class EquipoController {
     @PostMapping("/carga/excel/votante")
     public List<CargaMasivaVotanteDto> cargaMasivaVotante(@RequestBody List<CargaMasivaVotanteDto> listVotantes) {
         return equipoService.cargaMasivaVotante(listVotantes);
+    }
+
+    @GetMapping("/buscar/usuario/num-doc")
+    public Usuario findUsuarioSctrByNumeroDocumento(@RequestParam("num-doc") String numDoc) {
+        return equipoService.findUsuarioSctrByNumeroDocumento(numDoc);
     }
 
 }

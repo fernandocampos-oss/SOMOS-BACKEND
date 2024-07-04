@@ -4,6 +4,7 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.request.CargaMasivaVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 
@@ -20,5 +21,6 @@ public interface EquipoService {
     List<Votante> findAllVotantePerfil();
     void modificarPerfilVotante(int id, UpdateVotanteDto request);
     List<CargaMasivaVotanteDto> cargaMasivaVotante(List<CargaMasivaVotanteDto> listVotantes);
+    Usuario findUsuarioSctrByNumeroDocumento(String numDoc);
 
 }
