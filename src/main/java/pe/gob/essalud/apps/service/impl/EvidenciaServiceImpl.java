@@ -15,11 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import pe.gob.essalud.apps.common.constants.gestionrendimiento.EstadoEvidenciaConstant;
 import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.common.util.UploadUtil;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.PrioridadExistRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.request.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.EvidenciaSustentoRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorExistRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
@@ -118,6 +115,8 @@ public class EvidenciaServiceImpl implements EvidenciaService {
             dto.setEvidenciaFechaRegistro(tarea.get().getSustentoFechaRegistro());
             dto.setFileBase64(baseImagen);
             dto.setExtension(tarea.get().getSustentoExtensionFile());
+            dto.setCalificacion(tarea.get().getCalificacion());
+            dto.setComentario(tarea.get().getComentario());
         }
         return dto;
     }
@@ -135,6 +134,15 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         evidencia.setDescripcion(request.getDescripcion());
         evidencia.setPlazo(request.getPlazo());
         evidencia.setUsuarioModificacion(authService.getIdUserSession());
+        evidenciaRepository.save(evidencia);
+    }
+
+    @Override
+    public void aprobarEvidencia(ApruebaEvidenciaRequestDto request) {
+        Evidencia evidencia = evidenciaRepository.findById(request.getIdEvidencia())
+                .orElseThrow(() -> new ValidationException("La evidencia no se encuentra"));
+        evidencia.setComentario(request.getComentario());
+        evidencia.setCalificacion(request.getCalificacion());
         evidenciaRepository.save(evidencia);
     }
 
