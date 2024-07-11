@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.VotantePlanillaResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 
@@ -32,6 +33,9 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
 
     @Query("SELECT v FROM Votante v WHERE v.nombres LIKE %:nombre% ")
     List<Votante> findVotanteByNombre(@Param("nombre") String nombre);
+
+    @Query("SELECT new pe.gob.essalud.apps.dto.gestionrendimiento.response.VotantePlanillaResponseDto(v.idVotante, v.numeroDocumento, v.nombres, v.apellidos, v.idSegmento, v.idUsuario, v.codCondicion, (select u.codigoPlanilla from Usuario u where u.idUsuario = v.idUsuario and u.idEstadoUsuario ='02') as codigoPlanilla) FROM Votante v WHERE v.nombres LIKE %:nombre% ")
+    List<VotantePlanillaResponseDto> findVotanteByNombre2(@Param("nombre") String nombre);
 
     @Query(value = "SELECT MAX(id_votante) FROM Votante", nativeQuery = true)
     int getCantidadRegistro();
