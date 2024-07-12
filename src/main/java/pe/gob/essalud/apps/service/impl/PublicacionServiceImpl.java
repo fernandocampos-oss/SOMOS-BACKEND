@@ -173,6 +173,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         publicacion.setUsuarioModificacion(authService.getIdUserSession());
         publicacion.setEsActivo(false);
         publicacionRepository.save(publicacion);
+        eliminarInscripcionAsociadaPublicacion(idPublicacion);
     }
 
     private void validarRedesAsignadas(Publicacion publicacion, List<String> redesAsignadas) {
@@ -256,6 +257,14 @@ public class PublicacionServiceImpl implements PublicacionService {
         inscripcion.setGrupoActivo(inscripcionRequest.isGrupoActivo());
         inscripcion.setGrupoLongitud(inscripcionRequest.getGrupoLongitud());
         inscripcionRepository.save(inscripcion);
+    }
+
+    private void eliminarInscripcionAsociadaPublicacion(long idPublicacion) {
+        Inscripcion inscripcion = inscripcionRepository.findByIdPublicacion(idPublicacion).orElse(null);
+        if (inscripcion != null) {
+            inscripcion.setEsActivo(false);
+            inscripcionRepository.save(inscripcion);
+        }
     }
 
 }
