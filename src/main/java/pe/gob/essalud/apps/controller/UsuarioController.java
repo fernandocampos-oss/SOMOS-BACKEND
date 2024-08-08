@@ -9,7 +9,10 @@ import pe.gob.essalud.apps.dto.usuario.request.UsuarioActualizarDatosRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarCorreoRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.service.UsuarioService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(UsuarioController.USERS)
@@ -88,6 +91,10 @@ public class UsuarioController extends BaseController {
     @PutMapping("{id}/cambiar-correo")
     public void cambiarCorreo(@PathVariable long id, @RequestBody UsuarioCambiarCorreoRequestDto request) {
         usuarioService.cambiarCorreo(id, request);
+    }
+    @GetMapping("/integration/nombres")
+    public List<Usuario> integrationFindByNombresActivo(@RequestParam("nombres") String nombres) {
+        return usuarioService.integrationFindByNombresActivo(nombres);
     }
 
 }

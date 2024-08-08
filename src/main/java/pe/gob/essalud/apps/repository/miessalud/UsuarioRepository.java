@@ -1,5 +1,6 @@
 package pe.gob.essalud.apps.repository.miessalud;
 
+import org.springframework.data.repository.query.Param;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,5 +32,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Usuario findDocumento(String numeroDocumento);
 
     List<Usuario> findByIdRolIn(List roles);
+
+    @Query("SELECT u FROM Usuario u WHERE u.esActivo=true AND u.idEstadoUsuario = '02' AND u.nombres LIKE %:nombres% ORDER BY u.nombres ASC")
+    List<Usuario> integrationFindByNombresActivo(@Param("nombres") String nombres);
 
 }

@@ -6,6 +6,7 @@ import pe.gob.essalud.apps.dto.usuario.request.UsuarioRegisterUpdateRequestDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioActualizarDatosRequestDto;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioNombresResponse;
 import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
 
 import java.util.List;
 
@@ -37,4 +38,5 @@ public interface UsuarioService {
 
     void cambiarCorreo(long id, UsuarioCambiarCorreoRequestDto request);
 
+    List<Usuario> integrationFindByNombresActivo(String nombres);
 }

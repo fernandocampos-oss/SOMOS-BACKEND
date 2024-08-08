@@ -282,4 +282,9 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
         return token;
     }
 
+    @Override
+    public List<Usuario> integrationFindByNombresActivo(String nombres) {
+        return usuarioRepository.integrationFindByNombresActivo(nombres);
+    }
+
 }
