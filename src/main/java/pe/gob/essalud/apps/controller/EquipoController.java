@@ -5,9 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.CargaMasivaVotanteDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.VotantePlanillaResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 import pe.gob.essalud.apps.service.EquipoService;
@@ -54,6 +55,13 @@ public class EquipoController {
     public List<Votante> findVotanteByNombre(@RequestParam("nombre") String nombre) {
         return equipoService.findVotanteByNombre(nombre);
     }
+    
+
+
+    @GetMapping("/buscar/nombre2")
+    public List<VotantePlanillaResponseDto> findVotanteByNombre2(@RequestParam("nombre") String nombre) {
+        return equipoService.findVotanteByNombre2(nombre);
+    }
 
     @GetMapping("/listar/perfil/votantes")
     public List<Votante> findAllVotantePerfil() {
@@ -68,6 +76,11 @@ public class EquipoController {
     @PostMapping("/carga/excel/votante")
     public List<CargaMasivaVotanteDto> cargaMasivaVotante(@RequestBody List<CargaMasivaVotanteDto> listVotantes) {
         return equipoService.cargaMasivaVotante(listVotantes);
+    }
+
+    @GetMapping("/buscar/usuario/num-doc")
+    public Usuario findUsuarioSctrByNumeroDocumento(@RequestParam("num-doc") String numDoc) {
+        return equipoService.findUsuarioSctrByNumeroDocumento(numDoc);
     }
 
 }

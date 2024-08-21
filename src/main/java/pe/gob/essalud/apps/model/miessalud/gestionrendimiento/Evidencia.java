@@ -55,6 +55,9 @@ public class Evidencia {
     @Column(name = "estado")
     private boolean estado;
 
+    @Column(name = "calificacion")
+    private Integer calificacion;
+
     @Column(name = "usuario_creacion")
     private Integer usuarioCreacion;
     @Column(name = "fecha_creacion")

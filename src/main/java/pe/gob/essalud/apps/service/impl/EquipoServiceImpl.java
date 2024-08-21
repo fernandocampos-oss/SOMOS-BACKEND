@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.CargaMasivaVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.dto.gestionrendimiento.response.VotantePlanillaResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.Votante;
@@ -72,6 +73,13 @@ public class EquipoServiceImpl implements EquipoService {
     public List<Votante> findVotanteByNombre(String nombre) {
         return equipoRepository.findVotanteByNombre(nombre);
     }
+    
+
+
+    @Override
+    public List<VotantePlanillaResponseDto> findVotanteByNombre2(String nombre) {
+        return equipoRepository.findVotanteByNombre2(nombre);
+    }
 
     @Override
     public List<Votante> findAllVotantePerfil() {
@@ -127,6 +135,11 @@ public class EquipoServiceImpl implements EquipoService {
             }
         }
         return listObservados;
+    }
+
+    @Override
+    public Usuario findUsuarioSctrByNumeroDocumento(String numDoc) {
+        return usuarioRepository.findDocumento(numDoc);
     }
 
 }
