@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.dto.inscripcion.request;
 
 import lombok.Data;
+import pe.gob.essalud.apps.dto.formencuesta.request.FormEncuestaRequestDto;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public class CreateInscripcionRequestDto {
     private Integer grupoLongitud;
     private boolean esVotacion;
     private List<Integer> usuarios;
+
+    private boolean encuestaActivo;
+    private FormEncuestaRequestDto formEncuestaRequestDto;
 }

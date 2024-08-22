@@ -43,6 +43,11 @@ public class Publicacion {
     @Column(name = "fecha_modificacion")
     private LocalDateTime fechaModificacion;
 
+    @Column(name = "encuesta_activo")
+    private boolean encuestaActivo;
+    @Column(name = "id_encuesta")
+    private Integer idEncuesta;
+
     @PrePersist
     private void prePersist() {
         this.fechaCreacion = LocalDateTime.now(ZoneId.of("America/Lima"));
