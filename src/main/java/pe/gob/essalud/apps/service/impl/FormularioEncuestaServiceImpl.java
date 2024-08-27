@@ -42,12 +42,12 @@ public class FormularioEncuestaServiceImpl implements FormularioEncuestaService 
             for (FormEncuesta i : list) {
                 FormEncuestaResponseDto model = new FormEncuestaResponseDto();
                 model.setIdFormEncuesta(i.getIdFormEncuesta());
-                Publicacion publicacion = formEncuestaRepository.getPublicacion(i.getIdFormEncuesta());
-                if (publicacion != null) {
-                    log.info("publicacion: [{}]", publicacion.getTitulo());
-                    model.setPublicacionNombre(publicacion.getTitulo());
-                }
-                model.setIdUsuarioCreacion(i.getIdUsuarioCreacion());
+//                Publicacion publicacion = formEncuestaRepository.getPublicacion(i.getIdFormEncuesta());
+//                if (publicacion != null) {
+//                    log.info("publicacion: [{}]", publicacion.getTitulo());
+//                    model.setPublicacionNombre(publicacion.getTitulo());
+//                }
+//                model.setIdUsuarioCreacion(i.getIdUsuarioCreacion());
 
                 //consulta por cada encuesta - los usuarios encuestados
                 List<FormRespuestaDto> bloquetrabajadores = new ArrayList<>();

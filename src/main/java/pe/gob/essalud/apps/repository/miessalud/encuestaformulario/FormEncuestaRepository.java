@@ -16,6 +16,6 @@ public interface FormEncuestaRepository extends JpaRepository<FormEncuesta, Long
     @Query("SELECT u FROM Usuario u WHERE u.idUsuario = ?1")
     Usuario findUserContesta(Long idUsuario);
 
-    @Query("select p from Publicacion p WHERE p.idEncuesta=:idEncuesta ")
-    Publicacion getPublicacion(@Param("idEncuesta") Integer idEncuesta);
+//    @Query("select p from Publicacion p WHERE p.idEncuesta=:idEncuesta ")
+//    Publicacion getPublicacion(@Param("idEncuesta") Integer idEncuesta);
 }

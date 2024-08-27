@@ -17,6 +17,6 @@ public class CreateInscripcionRequestDto {
     private boolean esVotacion;
     private List<Integer> usuarios;
 
-    private boolean encuestaActivo;
-    private FormEncuestaRequestDto formEncuestaRequestDto;
+//    private boolean encuestaActivo;
+//    private FormEncuestaRequestDto formEncuestaRequestDto;
 }

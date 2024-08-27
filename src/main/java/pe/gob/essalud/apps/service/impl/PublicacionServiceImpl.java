@@ -105,30 +105,28 @@ public class PublicacionServiceImpl implements PublicacionService {
             publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_CENTRAL);
         }*/
 
-        //formulario encuesta
-        FormEncuesta model = new FormEncuesta();
-        if(request.getInscripcionRequest().isEncuestaActivo()){
-            FormEncuestaRequestDto modelDto = request.getInscripcionRequest().getFormEncuestaRequestDto();
-
-            model.setIdUsuarioCreacion(authService.getIdUserSession());
-//            model.setFinalizado(false);
-            model= encuestaFormularioRepository.save(model);
-            log.info("encuesta [{}]", model.getIdFormEncuesta());
-
-            //encuesta recorrer preguntas
-            if (!modelDto.getListPregunta().isEmpty()) {
-                for (FormPregunta i : modelDto.getListPregunta()) {
-                    i.setFormEncuesta(model);
-                    formPreguntaRepository.save(i);
-                }
-            }
-        }
-
-        //solo si la encuesta se referencia en publicacion
-        if(request.getInscripcionRequest().isEncuestaActivo()){
-            publicacion.setEncuestaActivo(true);
-            publicacion.setIdEncuesta(model.getIdFormEncuesta());
-        }
+//        //formulario encuesta
+//        FormEncuesta model = new FormEncuesta();
+//        if(request.getInscripcionRequest().isEncuestaActivo()){
+//            FormEncuestaRequestDto modelDto = request.getInscripcionRequest().getFormEncuestaRequestDto();
+//
+//            model.setIdUsuarioCreacion(authService.getIdUserSession());
+//            model= encuestaFormularioRepository.save(model);
+//            log.info("encuesta [{}]", model.getIdFormEncuesta());
+//
+//            //encuesta recorrer preguntas
+//            if (!modelDto.getListPregunta().isEmpty()) {
+//                for (FormPregunta i : modelDto.getListPregunta()) {
+//                    i.setFormEncuesta(model);
+//                    formPreguntaRepository.save(i);
+//                }
+//            }
+//        }
+//        //solo si la encuesta se referencia en publicacion
+//        if(request.getInscripcionRequest().isEncuestaActivo()){
+//            publicacion.setEncuestaActivo(true);
+//            publicacion.setIdEncuesta(model.getIdFormEncuesta());
+//        }
 
         publicacion.setEsActivo(true);
         publicacion = publicacionRepository.save(publicacion);

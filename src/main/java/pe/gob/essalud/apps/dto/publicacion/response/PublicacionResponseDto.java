@@ -21,6 +21,6 @@ public class PublicacionResponseDto {
     private int idInscripcion;
     private List<String> redes;
 
-    private boolean encuestaActivo;
-    private int idEncuesta;
+//    private boolean encuestaActivo;
+//    private int idEncuesta;
 }
