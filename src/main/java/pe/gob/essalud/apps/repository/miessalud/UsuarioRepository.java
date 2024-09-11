@@ -14,6 +14,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(String numeroDocumento, String idEstadoUsuario, boolean esActivo);
 
+    @Query("SELECT u FROM Usuario u WHERE (u.numeroDocumento = ?1 OR u.correo = ?2) AND u.idEstadoUsuario = ?3 AND u.esActivo = ?4")
+    List<Usuario> findByNumeroDocumentoOrCorreoAndIdEstadoUsuarioAndEsActivo(String numeroDocumento, String correo, String idEstadoUsuario, boolean esActivo);
+
+    @Query("SELECT u FROM Usuario u WHERE u.numeroDocumento = ?1 AND u.idEstadoUsuario = ?2 AND u.esActivo = ?3 ORDER BY u.idUsuario DESC")
+    List<Usuario> findAllByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(String numeroDocumento, String idEstadoUsuario, boolean esActivo);
+
     boolean existsByNumeroDocumentoOrCodigoPlanilla(String numeroDocumento, String codigoPlanilla);
     
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN TRUE ELSE FALSE END FROM Usuario u " +

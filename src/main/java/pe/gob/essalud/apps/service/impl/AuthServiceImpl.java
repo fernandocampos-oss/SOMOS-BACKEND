@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -116,15 +117,14 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Override
     @Transactional
     public AuthUsuarioRegisterResponse save(AuthUsuarioRegisterRequestDto model) {
-        Usuario usuarioModel = usuarioRepository
-                .findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(model.getNumeroDocumento(),EstadoUsuario.ACTIVADO,true)
-                .orElse(null);
+        List<Usuario> usuarioModelList = usuarioRepository
+                .findByNumeroDocumentoOrCorreoAndIdEstadoUsuarioAndEsActivo(model.getNumeroDocumento(), model.getCorreo(), EstadoUsuario.ACTIVADO, true);
 
-        boolean alreadyRegistered = usuarioModel != null;
+        boolean alreadyRegistered = !usuarioModelList.isEmpty();
 
         if (alreadyRegistered)
             throw new ValidationException(
-                    "Ya existe un usuario con el número de documento o código de planilla ingresado");
+                    "Ya existe un usuario con el número de documento, código de planilla o correo ingresado");
 
         PersonaSAP personaSAP = _personalSapUtilServiceClient.getByNumDocAndFecNac(
                 model.getNumeroDocumento(),
@@ -137,7 +137,12 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         if (!codPlanillaValid)
             throw new ValidationException("Datos incorrectos");
 
-        usuarioModel = modelMapper.map(model, Usuario.class);
+        Usuario usuarioModel = modelMapper.map(model, Usuario.class);
+
+        List<Usuario> usuarioModelPendientes = usuarioRepository.findAllByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(model.getNumeroDocumento(), EstadoUsuario.PENDIENTE_ACTIVACION, true);
+        if (!usuarioModelPendientes.isEmpty()) {
+            usuarioModel.setIdUsuario(usuarioModelPendientes.get(0).getIdUsuario());
+        }
 
         String[] nombresArray = personaSAP.getNombres().split(",");
         usuarioModel.setNombres(nombresArray[1]);
