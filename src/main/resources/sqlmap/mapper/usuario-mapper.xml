@@ -21,7 +21,9 @@
                --us.numero_telefono   numeroTelefono,
                eu.descripcion       estado,
                r.descripcion red,
+               r.cod_red codRed,
                u.descripcion unidad,
+               u.cod_unidad codUnidad,
                us.ruta_imagen_perfil rutaImagenPerfil,
                us.ruta_imagen_firma rutaImagenFirma,
                us.regimen
