@@ -7,6 +7,8 @@ import pe.gob.essalud.apps.dto.auth.request.GenerarTokenRecuperarClaveRequestDto
 import pe.gob.essalud.apps.dto.auth.request.TokenActivacionRequestDto;
 import pe.gob.essalud.apps.dto.auth.response.AuthUsuarioRegisterResponse;
 import pe.gob.essalud.apps.dto.auth.response.GenerarTokenRecuperarClaveResponseDto;
+import pe.gob.essalud.apps.dto.captcha.CaptchaRequestDto;
+import pe.gob.essalud.apps.dto.captcha.CaptchaResponseDto;
 
 public interface AuthService {
 
@@ -31,5 +33,7 @@ public interface AuthService {
     void activarToken(TokenActivacionRequestDto request, Boolean validateUser);
 
     void cambiarClave(CambiarClaveRequestDto request);
+
+    CaptchaResponseDto validCaptcha(CaptchaRequestDto dtoRequest);
 
 }

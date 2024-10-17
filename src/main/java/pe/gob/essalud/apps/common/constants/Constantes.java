@@ -15,4 +15,7 @@ public final class Constantes {
     public static final String FORMATO_FECHA_LARGA = "yyyy-MM-dd HH:mm";
     public static final String FORMATO_HORA_MIN = " 00:00";
     public static final String ERROR_KEY_PROPERTIES = "Error en valor de properties.";
+
+    // CAPTCHA
+    public static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 }
