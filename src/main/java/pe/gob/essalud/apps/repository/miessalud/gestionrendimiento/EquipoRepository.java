@@ -17,6 +17,9 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Query("SELECT e FROM Equipo e WHERE e.usuarioCreacion = :idJefe AND e.esActivo=TRUE ORDER BY e.idEquipo DESC ")
     List<Equipo> getListTrabajadoresByIdUsuarioJefe(@Param("idJefe") Number idJefe);
 
+    @Query("SELECT e FROM Equipo e WHERE (e.jefe.idVotante = :idJefe OR e.evaluador = :idJefe) AND e.esActivo=TRUE ORDER BY e.idEquipo DESC ")
+    List<Equipo> getListTrabajadoresByIdUsuarioJefeOrEvaluador(@Param("idJefe") Number idJefe);
+
     @Transactional
     @Modifying
     @Query(value = "UPDATE equipo SET es_activo = FALSE WHERE id_equipo=? ", nativeQuery = true)
@@ -27,6 +30,12 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
 
     @Query("SELECT v FROM Votante v WHERE v.idUsuario = :idUsuario")
     Votante getVotanteByIdUsuario(@Param("idUsuario") Integer idUsuario);
+
+    @Query("SELECT v FROM Votante v WHERE v.idVotante = :idVotante")
+    Votante getVotanteByIdVotante(@Param("idVotante") Integer idVotante);
+
+    @Query("SELECT e.evaluador FROM Equipo e WHERE e.jefe.idVotante = :idJefe AND e.esActivo=TRUE GROUP BY e.evaluador ")
+    Integer getIdVotanteEvaluador(@Param("idJefe") Integer idJefe);
 
     @Query(value = "SELECT * from equipo e WHERE e.id_integrante=?  LIMIT 1", nativeQuery = true)
     Equipo getJefeByIdIntegrante(@Param("idVotante") Integer idVotante);
@@ -39,4 +48,12 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
 
     @Query(value = "SELECT MAX(id_votante) FROM Votante", nativeQuery = true)
     int getCantidadRegistro();
+
+    @Query(value = "SELECT count(*) from equipo e WHERE e.id_evaluador=? ", nativeQuery = true)
+    int getEsEvaluadorDelGrupo(@Param("idEvaluador") Integer idEvaluador);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE equipo SET id_evaluador = ? WHERE id_jefe = ? ", nativeQuery = true)
+    public int actualizarEvaluador(@Param("idEvaluador") Integer idEvaluador, @Param("idEquipo") Integer idEquipo);
 }

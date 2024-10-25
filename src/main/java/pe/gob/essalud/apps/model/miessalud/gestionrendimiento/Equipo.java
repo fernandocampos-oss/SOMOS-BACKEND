@@ -38,6 +38,9 @@ public class Equipo {
     @Column(name = "usuario_modificacion")
     private Integer usuarioModificacion;
 
+    @Column(name = "id_evaluador")
+    private Integer evaluador;
+
     @PrePersist
     private void prePersist() {
         this.fechaCreacion = LocalDateTime.now(ZoneId.of("America/Lima"));

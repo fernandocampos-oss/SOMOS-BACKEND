@@ -13,7 +13,9 @@ import java.util.List;
 public interface EquipoService {
 
     void registrarTrabajador(Equipo equipo);
+    void registrarEvaluador(Equipo equipo);
     List<Equipo> getListTrabajadoresByIdUsuarioJefe();
+    String getListEvaluadorByIdUsuarioJefe();
     int eliminarTrabajador(Number idEquipo);
     List<TrabajadorResponseDto> listAllVotante();
     Votante getVotanteByIdUsuario();
