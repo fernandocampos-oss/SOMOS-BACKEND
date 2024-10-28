@@ -1,6 +1,7 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.common.constants.RoleType;
 import pe.gob.essalud.apps.common.util.UploadUtil;
+import pe.gob.essalud.apps.dto.formencuesta.request.FormEncuestaRequestDto;
 import pe.gob.essalud.apps.dto.inscripcion.request.CreateInscripcionRequestDto;
 import pe.gob.essalud.apps.dto.publicacion.request.PublicacionRequestDto;
 import pe.gob.essalud.apps.dto.publicacion.response.PublicacionResponseDto;
@@ -15,8 +17,12 @@ import pe.gob.essalud.apps.exceptions.ForbiddenException;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.Inscripcion;
 import pe.gob.essalud.apps.model.miessalud.Publicacion;
+import pe.gob.essalud.apps.model.miessalud.encuestapublicacion.FormEncuesta;
+import pe.gob.essalud.apps.model.miessalud.encuestapublicacion.FormPregunta;
 import pe.gob.essalud.apps.repository.miessalud.InscripcionRepository;
 import pe.gob.essalud.apps.repository.miessalud.PublicacionRepository;
+import pe.gob.essalud.apps.repository.miessalud.encuestaformulario.FormPreguntaRepository;
+import pe.gob.essalud.apps.repository.miessalud.encuestaformulario.FormEncuestaRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PublicacionService;
 
@@ -27,6 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PublicacionServiceImpl implements PublicacionService {
 
     private static final int TIPO_ALCANCE_SEDE_CENTRAL = 1;
@@ -38,6 +45,8 @@ public class PublicacionServiceImpl implements PublicacionService {
     private final InscripcionRepository inscripcionRepository;
     private final AuthService authService;
     private final ModelMapper modelMapper;
+    private final FormEncuestaRepository encuestaFormularioRepository;
+    private final FormPreguntaRepository formPreguntaRepository;
 
     @Value("${upload-path}")
     private String uploadPath;
@@ -95,6 +104,29 @@ public class PublicacionServiceImpl implements PublicacionService {
         }/* else {
             publicacion.setTipoAlcance(TIPO_ALCANCE_SEDE_CENTRAL);
         }*/
+
+//        //formulario encuesta
+//        FormEncuesta model = new FormEncuesta();
+//        if(request.getInscripcionRequest().isEncuestaActivo()){
+//            FormEncuestaRequestDto modelDto = request.getInscripcionRequest().getFormEncuestaRequestDto();
+//
+//            model.setIdUsuarioCreacion(authService.getIdUserSession());
+//            model= encuestaFormularioRepository.save(model);
+//            log.info("encuesta [{}]", model.getIdFormEncuesta());
+//
+//            //encuesta recorrer preguntas
+//            if (!modelDto.getListPregunta().isEmpty()) {
+//                for (FormPregunta i : modelDto.getListPregunta()) {
+//                    i.setFormEncuesta(model);
+//                    formPreguntaRepository.save(i);
+//                }
+//            }
+//        }
+//        //solo si la encuesta se referencia en publicacion
+//        if(request.getInscripcionRequest().isEncuestaActivo()){
+//            publicacion.setEncuestaActivo(true);
+//            publicacion.setIdEncuesta(model.getIdFormEncuesta());
+//        }
 
         publicacion.setEsActivo(true);
         publicacion = publicacionRepository.save(publicacion);
@@ -173,6 +205,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         publicacion.setUsuarioModificacion(authService.getIdUserSession());
         publicacion.setEsActivo(false);
         publicacionRepository.save(publicacion);
+        eliminarInscripcionAsociadaPublicacion(idPublicacion);
     }
 
     private void validarRedesAsignadas(Publicacion publicacion, List<String> redesAsignadas) {
@@ -256,6 +289,14 @@ public class PublicacionServiceImpl implements PublicacionService {
         inscripcion.setGrupoActivo(inscripcionRequest.isGrupoActivo());
         inscripcion.setGrupoLongitud(inscripcionRequest.getGrupoLongitud());
         inscripcionRepository.save(inscripcion);
+    }
+
+    private void eliminarInscripcionAsociadaPublicacion(long idPublicacion) {
+        Inscripcion inscripcion = inscripcionRepository.findByIdPublicacion(idPublicacion).orElse(null);
+        if (inscripcion != null) {
+            inscripcion.setEsActivo(false);
+            inscripcionRepository.save(inscripcion);
+        }
     }
 
 }

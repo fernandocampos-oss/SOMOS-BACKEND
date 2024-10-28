@@ -21,12 +21,15 @@ public class UsuarioResponseDto {
     private String idEstado;
     private String estado;
     private String red;
+    private String codRed;
     private String unidad;
+    private String codUnidad;
     @JsonIgnore
     private String rutaImagenPerfil;
     @JsonIgnore
     private String rutaImagenFirma;
     private String imagenPerfilBase64;
     private String imagenFirmaBase64;
+    private String regimen;
 
 }

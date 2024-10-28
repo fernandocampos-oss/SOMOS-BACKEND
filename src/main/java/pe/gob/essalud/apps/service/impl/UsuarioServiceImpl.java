@@ -84,6 +84,11 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     }
 
     @Override
+    public UsuarioResponseDto findByNumeroDocumento(String numeroDocumento) {
+        return usuarioMyRepository.findByNumeroDocumento(numeroDocumento);
+    }
+
+    @Override
     public void update(long id, UsuarioRegisterUpdateRequestDto model) {
         boolean alreadyExists = usuarioRepository.existsByNumeroDocumentoOrCodigoPlanillaAndIdUsuarioNot(
                 model.getNumeroDocumento(),
@@ -214,6 +219,17 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     }
 
     @Override
+    public void actualizarDatosAdministrador(long id, UsuarioActualizarDatosRequestDto request) {
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("El usuario no se encuentra registrado"));
+
+        usuario.setNumeroCelular(request.getNumeroCelular());
+        usuario.setCorreo(request.getCorreo());
+        usuarioRepository.save(usuario);
+    }
+
+    @Override
     public void cambiarCorreo(long id, UsuarioCambiarCorreoRequestDto request) {
         if(authService.getIdUserSession() != id) {
             throw new ValidationException("No puede actualizar los datos de un usuario diferente al de la sesión");
@@ -264,6 +280,11 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
 
         tokenActivacionRepository.save(tokenRegistroModel);
         return token;
+    }
+
+    @Override
+    public List<Usuario> integrationFindByNombresActivo(String nombres) {
+        return usuarioRepository.integrationFindByNombresActivo(nombres);
     }
 
 }

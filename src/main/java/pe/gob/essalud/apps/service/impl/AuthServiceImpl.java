@@ -1,9 +1,15 @@
 package pe.gob.essalud.apps.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.client.RestTemplate;
 import pe.gob.essalud.apps.base.BaseService;
 import pe.gob.essalud.apps.client.EmailServiceClient;
 import pe.gob.essalud.apps.client.PersonalSapUtilServiceClient;
+import pe.gob.essalud.apps.config.CaptchaConfig;
+import pe.gob.essalud.apps.dto.captcha.CaptchaRequestDto;
+import pe.gob.essalud.apps.dto.captcha.CaptchaResponseDto;
 import pe.gob.essalud.apps.dto.emailservice.ActivarCuentaRequestDto;
 import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
 import pe.gob.essalud.apps.dto.personalsaputilservice.PersonaSAP;
@@ -21,6 +27,7 @@ import pe.gob.essalud.apps.dto.auth.response.GenerarTokenRecuperarClaveResponseD
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.TokenActivacion;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
+import pe.gob.essalud.apps.model.miessalud.captcha.CaptchaResponse;
 import pe.gob.essalud.apps.repository.miessalud.TokenActivacionRepository;
 import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.sqlmap.AuthMyRepository;
@@ -35,9 +42,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthServiceImpl extends BaseService implements AuthService {
 
@@ -54,6 +63,11 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     private final EmailServiceClient _emailServiceClient;
 
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private CaptchaConfig captchaConfig;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public UserSessionDto getUserSession() {
@@ -116,15 +130,14 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Override
     @Transactional
     public AuthUsuarioRegisterResponse save(AuthUsuarioRegisterRequestDto model) {
-        Usuario usuarioModel = usuarioRepository
-                .findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(model.getNumeroDocumento(),EstadoUsuario.ACTIVADO,true)
-                .orElse(null);
+        List<Usuario> usuarioModelList = usuarioRepository
+                .findByNumeroDocumentoOrCorreoAndIdEstadoUsuarioAndEsActivo(model.getNumeroDocumento(), model.getCorreo(), EstadoUsuario.ACTIVADO, true);
 
-        boolean alreadyRegistered = usuarioModel != null;
+        boolean alreadyRegistered = !usuarioModelList.isEmpty();
 
         if (alreadyRegistered)
             throw new ValidationException(
-                    "Ya existe un usuario con el número de documento o código de planilla ingresado");
+                    "Ya existe un usuario con el número de documento, código de planilla o correo ingresado");
 
         PersonaSAP personaSAP = _personalSapUtilServiceClient.getByNumDocAndFecNac(
                 model.getNumeroDocumento(),
@@ -137,7 +150,12 @@ public class AuthServiceImpl extends BaseService implements AuthService {
         if (!codPlanillaValid)
             throw new ValidationException("Datos incorrectos");
 
-        usuarioModel = modelMapper.map(model, Usuario.class);
+        Usuario usuarioModel = modelMapper.map(model, Usuario.class);
+
+        List<Usuario> usuarioModelPendientes = usuarioRepository.findAllByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(model.getNumeroDocumento(), EstadoUsuario.PENDIENTE_ACTIVACION, true);
+        if (!usuarioModelPendientes.isEmpty()) {
+            usuarioModel.setIdUsuario(usuarioModelPendientes.get(0).getIdUsuario());
+        }
 
         String[] nombresArray = personaSAP.getNombres().split(",");
         usuarioModel.setNombres(nombresArray[1]);
@@ -251,6 +269,34 @@ public class AuthServiceImpl extends BaseService implements AuthService {
 
         tokenModel.setEsConfirmado(true);
         tokenActivacionRepository.save(tokenModel);
+    }
+
+    @Override
+    public CaptchaResponseDto validCaptcha(CaptchaRequestDto dtoRequest) {
+        CaptchaResponseDto dto = new CaptchaResponseDto();
+        if (!dtoRequest.getLlave().isEmpty()) {
+            log.info("llave {}", dtoRequest.getLlave());
+
+            String verifyUri = Constantes.RECAPTCHA_VERIFY_URL + "?secret=" + captchaConfig.getSecret() + "&response=" + dtoRequest.getLlave();
+            log.info("verifyUri {}", verifyUri);
+
+            CaptchaResponse captchaResponse = restTemplate.getForObject(verifyUri, CaptchaResponse.class);
+            log.info("success {}", captchaResponse.isSuccess());
+            log.info("score {}", captchaResponse.getScore());
+            log.info("action {}", captchaResponse.getAction());
+            log.info("challenge_ts {}", captchaResponse.getChallengeTs());
+            log.info("hostname {}", captchaResponse.getHostname());
+
+            if (captchaResponse != null && captchaResponse.isSuccess()) {
+                dto.setRespuestaCaptcha(captchaResponse.isSuccess());
+                // Validar el resultado según la puntuación
+                boolean umbral = captchaResponse.getScore() >= 0.5;
+                log.info("umbral {}", umbral);
+                if (captchaResponse.isSuccess() == true && umbral == true) {
+                }
+            }
+        }
+        return dto;
     }
 
 }

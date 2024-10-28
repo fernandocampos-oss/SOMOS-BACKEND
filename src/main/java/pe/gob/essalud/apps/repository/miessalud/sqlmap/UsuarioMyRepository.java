@@ -7,5 +7,6 @@ import pe.gob.essalud.apps.dto.usuario.response.UsuarioResponseDto;
 public interface UsuarioMyRepository {
 
     UsuarioResponseDto findById(long id);
+    UsuarioResponseDto findByNumeroDocumento(String numeroDocumento);
 
 }

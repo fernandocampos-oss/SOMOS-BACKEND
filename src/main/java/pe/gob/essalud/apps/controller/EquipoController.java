@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.CargaMasivaVotanteDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateEvidenciaDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.VotantePlanillaResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
@@ -91,6 +91,10 @@ public class EquipoController {
     @PostMapping("/registrar/evaluador")
     public void registrarEvaluador(@RequestBody Equipo equipo) {
         equipoService.registrarEvaluador(equipo);
+
+    @GetMapping("/buscar/usuario/num-doc")
+    public Usuario findUsuarioSctrByNumeroDocumento(@RequestParam("num-doc") String numDoc) {
+        return equipoService.findUsuarioSctrByNumeroDocumento(numDoc);
     }
 
 }

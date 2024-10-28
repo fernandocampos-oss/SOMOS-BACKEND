@@ -21,14 +21,45 @@
                --us.numero_telefono   numeroTelefono,
                eu.descripcion       estado,
                r.descripcion red,
+               r.cod_red codRed,
                u.descripcion unidad,
+               u.cod_unidad codUnidad,
                us.ruta_imagen_perfil rutaImagenPerfil,
-               us.ruta_imagen_firma rutaImagenFirma
+               us.ruta_imagen_firma rutaImagenFirma,
+               us.regimen
         FROM usuario us
             INNER JOIN estado_usuario eu on us.id_estado_usuario = eu.id_estado_usuario
             LEFT JOIN red_personal r on us.cod_red = r.cod_red
             LEFT JOIN unidad_organizativa u on us.cod_unidad = u.cod_unidad
         WHERE us.es_activo = true AND us.id_usuario = #{id}
+    </select>
+
+    <select id="findByNumeroDocumento" resultType="UsuarioResponse">
+        SELECT us.id_usuario        idUsuario,
+               us.numero_documento  numeroDocumento,
+               us.codigo_planilla   codigoPlanilla,
+               us.cargo,
+               us.nombres,
+               us.apellidos,
+               us.fecha_nacimiento  fechaNacimiento,
+               us.numero_celular    numeroCelular,
+               us.correo,
+               us.id_rol            idRol,
+               us.id_estado_usuario idEstado,
+               --us.id_ubigeo         idUbigeo,
+               --us.direccion,
+               --us.numero_telefono   numeroTelefono,
+               eu.descripcion       estado,
+               r.descripcion red,
+               u.descripcion unidad,
+               us.ruta_imagen_perfil rutaImagenPerfil,
+               us.ruta_imagen_firma rutaImagenFirma,
+               us.regimen
+        FROM usuario us
+                 INNER JOIN estado_usuario eu on us.id_estado_usuario = eu.id_estado_usuario
+                 LEFT JOIN red_personal r on us.cod_red = r.cod_red
+                 LEFT JOIN unidad_organizativa u on us.cod_unidad = u.cod_unidad
+        WHERE us.es_activo = true AND us.id_estado_usuario = '02' AND us.numero_documento = #{numeroDocumento}
     </select>
 
 </mapper>

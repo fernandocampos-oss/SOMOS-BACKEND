@@ -1,5 +1,6 @@
 package pe.gob.essalud.apps.repository.miessalud;
 
+import org.springframework.data.repository.query.Param;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	Optional<Usuario> findByNumeroDocumento(String numeroDocumento);
 
     Optional<Usuario> findByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(String numeroDocumento, String idEstadoUsuario, boolean esActivo);
+
+    @Query("SELECT u FROM Usuario u WHERE (u.numeroDocumento = ?1 OR u.correo = ?2) AND u.idEstadoUsuario = ?3 AND u.esActivo = ?4")
+    List<Usuario> findByNumeroDocumentoOrCorreoAndIdEstadoUsuarioAndEsActivo(String numeroDocumento, String correo, String idEstadoUsuario, boolean esActivo);
+
+    @Query("SELECT u FROM Usuario u WHERE u.numeroDocumento = ?1 AND u.idEstadoUsuario = ?2 AND u.esActivo = ?3 ORDER BY u.idUsuario DESC")
+    List<Usuario> findAllByNumeroDocumentoAndIdEstadoUsuarioAndEsActivo(String numeroDocumento, String idEstadoUsuario, boolean esActivo);
 
     boolean existsByNumeroDocumentoOrCodigoPlanilla(String numeroDocumento, String codigoPlanilla);
     
@@ -31,5 +38,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Usuario findDocumento(String numeroDocumento);
 
     List<Usuario> findByIdRolIn(List roles);
+
+    @Query("SELECT u FROM Usuario u WHERE u.esActivo=true AND u.idEstadoUsuario = '02' AND u.nombres LIKE %:nombres% ORDER BY u.nombres ASC")
+    List<Usuario> integrationFindByNombresActivo(@Param("nombres") String nombres);
 
 }
