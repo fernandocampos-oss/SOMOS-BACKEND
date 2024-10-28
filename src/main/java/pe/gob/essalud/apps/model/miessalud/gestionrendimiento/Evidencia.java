@@ -18,7 +18,7 @@ public class Evidencia {
     @Column(name = "id_evidencia")
     private Integer idEvidencia;
 
-    @Column(name="descripcion")
+    @Column(name="descripcion", length = 350)
     private String descripcion;
 
     @Column(name = "plazo")

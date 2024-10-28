@@ -19,7 +19,7 @@ public class Indicador {
     @Column(name = "id_indicador")
     private Integer idIndicador;
 
-    @Column(name="descripcion")
+    @Column(name="descripcion", length = 350)
     private String descripcion;
 
     @Column(name="peso")
@@ -65,7 +65,7 @@ public class Indicador {
     
     /* Agregado de 2 columnas - Inicio */
     
-    @Column(name = "des_prioridad")
+    @Column(name = "des_prioridad", length = 350)
     private String desPrioridad;
     @Column(name = "fl_des_prioridad")
     private String flDesPrioridad;

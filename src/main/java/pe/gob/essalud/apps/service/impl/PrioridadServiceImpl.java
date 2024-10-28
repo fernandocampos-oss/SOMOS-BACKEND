@@ -47,7 +47,9 @@ public class PrioridadServiceImpl implements PrioridadService {
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
-        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+//        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(votante.getIdVotante());
 
         List<MainDto> listMainDto = new ArrayList<>();
         for (Equipo e : trabajadoresPorJefe) {

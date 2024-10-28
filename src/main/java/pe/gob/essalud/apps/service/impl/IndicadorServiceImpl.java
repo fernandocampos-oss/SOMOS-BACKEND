@@ -186,7 +186,7 @@ public class IndicadorServiceImpl implements IndicadorService {
 
     @Override
     public List<TipoValorMeta> getAllTipoValorMeta() {
-        return tipoValorMetaRepository.findAll();
+        return tipoValorMetaRepository.findAllByEstado(true);
     }
 
     @Override

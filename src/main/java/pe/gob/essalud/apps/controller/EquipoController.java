@@ -13,7 +13,9 @@ import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 import pe.gob.essalud.apps.service.EquipoService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(EquipoController.EQUIPO)
@@ -32,6 +34,14 @@ public class EquipoController {
     public ResponseEntity<List<Equipo>> getListTrabajadoresByIdUsuarioJefe() {
         List<Equipo> lista = equipoService.getListTrabajadoresByIdUsuarioJefe();
         return new ResponseEntity<List<Equipo>>(lista, HttpStatus.OK);
+    }
+
+    @GetMapping("/listar/evaluador")
+    public ResponseEntity<Map<String, String>> getListEvaluadorByIdUsuarioJefe() {
+        String votante = equipoService.getListEvaluadorByIdUsuarioJefe();
+        Map<String, String> response = new HashMap<>();
+        response.put("evaluador", votante);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/eliminar")
@@ -77,6 +87,10 @@ public class EquipoController {
     public List<CargaMasivaVotanteDto> cargaMasivaVotante(@RequestBody List<CargaMasivaVotanteDto> listVotantes) {
         return equipoService.cargaMasivaVotante(listVotantes);
     }
+
+    @PostMapping("/registrar/evaluador")
+    public void registrarEvaluador(@RequestBody Equipo equipo) {
+        equipoService.registrarEvaluador(equipo);
 
     @GetMapping("/buscar/usuario/num-doc")
     public Usuario findUsuarioSctrByNumeroDocumento(@RequestParam("num-doc") String numDoc) {

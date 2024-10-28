@@ -50,8 +50,40 @@ public class EquipoServiceImpl implements EquipoService {
     }
 
     @Override
+    public void registrarEvaluador(Equipo equipo) {
+        if (equipo != null) {
+            Votante getJefeVotante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+
+            if (getJefeVotante != null) {
+                Votante votante = new Votante();
+                votante.setIdVotante(getJefeVotante.getIdVotante());
+                equipo.setJefe(votante);
+                equipo.setEsActivo(true);
+                equipo.setUsuarioCreacion(authService.getIdUserSession());
+            } else {
+                throw new ValidationException("No puede registrar evaluador porque no cuenta con usuario en votantes");
+            }
+        }
+        assert equipo != null;
+        Integer respt = equipoRepository.actualizarEvaluador( equipo.getIntegrante().getIdVotante(), equipo.getJefe().getIdVotante());
+    }
+
+    @Override
     public List<Equipo> getListTrabajadoresByIdUsuarioJefe() {
-        return equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        return equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(votante.getIdVotante());
+//        return equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+    }
+    @Override
+    public String getListEvaluadorByIdUsuarioJefe() {
+        Votante jefe = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        Integer idVotanteEvaluador = equipoRepository.getIdVotanteEvaluador(jefe.getIdVotante());
+        if (idVotanteEvaluador!=null){
+            Votante evaluador = equipoRepository.getVotanteByIdVotante(idVotanteEvaluador);
+            return evaluador.getNumeroDocumento()+" "+evaluador.getNombres()+" "+evaluador.getApellidos();
+        }else{
+            return null;
+        }
     }
 
     @Override
@@ -66,7 +98,14 @@ public class EquipoServiceImpl implements EquipoService {
 
     @Override
     public Votante getVotanteByIdUsuario() {
-        return equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        if (votante!= null && votante.getIdSegmento().equals(3)){
+            Integer esEvaluador = equipoRepository.getEsEvaluadorDelGrupo(votante.getIdVotante());
+            if (esEvaluador>0){
+                votante.setIdSegmento(5);
+            }
+        }
+        return votante;
     }
 
     @Override

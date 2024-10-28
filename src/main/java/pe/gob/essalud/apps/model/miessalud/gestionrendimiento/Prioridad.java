@@ -16,7 +16,7 @@ public class Prioridad {
     @Column(name = "id_prioridad")
     private Integer idPrioridad;
 
-    @Column(name="descripcion")
+    @Column(name="descripcion", length = 350)
     private String descripcion;
 
     @Column(name = "anio")
