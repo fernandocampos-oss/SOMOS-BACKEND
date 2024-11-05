@@ -91,7 +91,7 @@ public class EquipoController {
     @PostMapping("/registrar/evaluador")
     public void registrarEvaluador(@RequestBody Equipo equipo) {
         equipoService.registrarEvaluador(equipo);
-
+    }
     @GetMapping("/buscar/usuario/num-doc")
     public Usuario findUsuarioSctrByNumeroDocumento(@RequestParam("num-doc") String numDoc) {
         return equipoService.findUsuarioSctrByNumeroDocumento(numDoc);
