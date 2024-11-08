@@ -51,7 +51,7 @@ public class EquipoController {
 
     @GetMapping("/listar/votantes")
     public ResponseEntity<List<TrabajadorResponseDto>> listAllVotante() {
-        List<TrabajadorResponseDto> listAllVotante = equipoService.listAllVotante();
+        List<TrabajadorResponseDto> listAllVotante = equipoService.listAllVotanteByUnidadOrganizativa();
         return new ResponseEntity<List<TrabajadorResponseDto>>(listAllVotante, HttpStatus.OK);
     }
 

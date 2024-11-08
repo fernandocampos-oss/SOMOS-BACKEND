@@ -3,14 +3,17 @@ package pe.gob.essalud.apps.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pe.gob.essalud.apps.dto.auth.UserSessionDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.CargaMasivaVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.UpdateVotanteDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.TrabajadorResponseDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.VotantePlanillaResponseDto;
 import pe.gob.essalud.apps.exceptions.ValidationException;
+import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
+import pe.gob.essalud.apps.repository.miessalud.UnidadOrganizativaRepository;
 import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.VotanteRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EquipoRepository;
@@ -30,6 +33,7 @@ public class EquipoServiceImpl implements EquipoService {
     private final VotanteRepository votanteRepository;
     private final AuthService authService;
     private final UsuarioRepository usuarioRepository;
+    private final UnidadOrganizativaRepository unidadOrganizativaRepository;
 
     @Override
     public void registrarTrabajador(Equipo equipo) {
@@ -180,5 +184,23 @@ public class EquipoServiceImpl implements EquipoService {
     public Usuario findUsuarioSctrByNumeroDocumento(String numDoc) {
         return usuarioRepository.findDocumento(numDoc);
     }
+
+    @Override
+    public List<TrabajadorResponseDto> listAllVotanteByUnidadOrganizativa() {
+        UserSessionDto userSessionDto = authService.getUserSession();
+        String codUnidad = userSessionDto.getCodUnidad();
+        UnidadOrganizativa unidadOrganizativa = unidadOrganizativaRepository.findFirstByCodUnidad(codUnidad);
+        if (unidadOrganizativa.getCodPadre() == null){
+            List<UnidadOrganizativa> listadoUnidades = unidadOrganizativaRepository.findAllByCodPadre(unidadOrganizativa.getCodPadre());
+            List<String> codigosDeUnidades = new ArrayList<>();
+            listadoUnidades.forEach(und -> codigosDeUnidades.add(und.getCodUnidad()));
+            return equipoRepository.listAllVotanteByCodUnidad(authService.getIdUserSession(), codigosDeUnidades);
+        }else{
+            List<String> codigosDeUnidades = new ArrayList<>();
+            codigosDeUnidades.add(unidadOrganizativa.getCodUnidad());
+            return equipoRepository.listAllVotanteByCodUnidad(authService.getIdUserSession(), codigosDeUnidades);
+        }
+    }
+
 
 }
