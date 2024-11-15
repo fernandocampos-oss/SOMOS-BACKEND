@@ -34,7 +34,7 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Query("SELECT v FROM Votante v WHERE v.idVotante = :idVotante")
     Votante getVotanteByIdVotante(@Param("idVotante") Integer idVotante);
 
-    @Query("SELECT e.evaluador FROM Equipo e WHERE e.jefe.idVotante = :idJefe AND e.esActivo=TRUE GROUP BY e.evaluador ")
+    @Query("SELECT e.evaluador FROM Equipo e WHERE e.jefe.idVotante = :idJefe AND e.esActivo=TRUE AND e.evaluador != null GROUP BY e.evaluador ")
     Integer getIdVotanteEvaluador(@Param("idJefe") Integer idJefe);
 
     @Query(value = "SELECT * from equipo e WHERE e.id_integrante=?  LIMIT 1", nativeQuery = true)

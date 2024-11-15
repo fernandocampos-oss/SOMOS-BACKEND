@@ -46,6 +46,14 @@ public class EquipoServiceImpl implements EquipoService {
                 equipo.setJefe(votante);
                 equipo.setEsActivo(true);
                 equipo.setUsuarioCreacion(authService.getIdUserSession());
+
+                //se trae toda la lista de equipo para buscar el evaluador
+                List<Equipo> listEquipo = equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(getJefeVotante.getIdVotante());
+                equipo.setEvaluador(listEquipo.stream()
+                        .map(Equipo::getEvaluador)
+                        .filter(evaluador -> evaluador != null)
+                        .findFirst()
+                        .orElse(null));
             } else {
                 throw new ValidationException("No puede registrar trabajador porque no cuenta con usuario en votantes");
             }
