@@ -34,7 +34,7 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Query("SELECT v FROM Votante v WHERE v.idVotante = :idVotante")
     Votante getVotanteByIdVotante(@Param("idVotante") Integer idVotante);
 
-    @Query("SELECT e.evaluador FROM Equipo e WHERE e.jefe.idVotante = :idJefe AND e.esActivo=TRUE GROUP BY e.evaluador ")
+    @Query("SELECT e.evaluador FROM Equipo e WHERE e.jefe.idVotante = :idJefe AND e.esActivo=TRUE AND e.evaluador != null GROUP BY e.evaluador ")
     Integer getIdVotanteEvaluador(@Param("idJefe") Integer idJefe);
 
     @Query(value = "SELECT * from equipo e WHERE e.id_integrante=?  LIMIT 1", nativeQuery = true)
@@ -56,4 +56,15 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Modifying
     @Query(value = "UPDATE equipo SET id_evaluador = ? WHERE id_jefe = ? ", nativeQuery = true)
     public int actualizarEvaluador(@Param("idEvaluador") Integer idEvaluador, @Param("idEquipo") Integer idEquipo);
+
+    @Query(value = "SELECT v.nombres as nombres, v.apellidos as apellidos, v.id_votante as idVotante " +
+            "FROM votante v " +
+            "INNER JOIN usuario u ON v.id_usuario = u.id_usuario " +
+            "WHERE v.id_usuario != :idJefe " +
+            "AND v.id_usuario IS NOT NULL " +
+            "AND u.cod_unidad IN :codigosUnidad", nativeQuery = true)
+    List<TrabajadorResponseDto> listAllVotanteByCodUnidad(
+            @Param("idJefe") Number idJefe,
+            @Param("codigosUnidad") List<String> codigosUnidad);
+
 }

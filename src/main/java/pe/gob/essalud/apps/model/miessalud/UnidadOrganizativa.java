@@ -16,5 +16,6 @@ public class UnidadOrganizativa {
     @Column(name = "cod_unidad")
     private String codUnidad;
     private String descripcion;
-
+    @Column(name = "cod_padre")
+    private String codPadre;
 }

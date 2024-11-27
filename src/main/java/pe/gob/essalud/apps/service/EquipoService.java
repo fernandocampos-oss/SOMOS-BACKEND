@@ -26,5 +26,5 @@ public interface EquipoService {
     void modificarPerfilVotante(int id, UpdateVotanteDto request);
     List<CargaMasivaVotanteDto> cargaMasivaVotante(List<CargaMasivaVotanteDto> listVotantes);
     Usuario findUsuarioSctrByNumeroDocumento(String numDoc);
-
+    List<TrabajadorResponseDto> listAllVotanteByUnidadOrganizativa();
 }
