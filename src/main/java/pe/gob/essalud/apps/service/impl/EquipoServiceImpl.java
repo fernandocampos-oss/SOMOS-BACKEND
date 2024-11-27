@@ -199,9 +199,10 @@ public class EquipoServiceImpl implements EquipoService {
         String codUnidad = userSessionDto.getCodUnidad();
         UnidadOrganizativa unidadOrganizativa = unidadOrganizativaRepository.findFirstByCodUnidad(codUnidad);
         if (unidadOrganizativa.getCodPadre() == null){
-            List<UnidadOrganizativa> listadoUnidades = unidadOrganizativaRepository.findAllByCodPadre(unidadOrganizativa.getCodPadre());
+            List<UnidadOrganizativa> listadoUnidades = unidadOrganizativaRepository.findAllByCodPadre(unidadOrganizativa.getCodUnidad());
             List<String> codigosDeUnidades = new ArrayList<>();
             listadoUnidades.forEach(und -> codigosDeUnidades.add(und.getCodUnidad()));
+            codigosDeUnidades.add(unidadOrganizativa.getCodUnidad());
             return equipoRepository.listAllVotanteByCodUnidad(authService.getIdUserSession(), codigosDeUnidades);
         }else{
             List<String> codigosDeUnidades = new ArrayList<>();
