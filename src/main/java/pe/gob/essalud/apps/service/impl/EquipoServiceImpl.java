@@ -97,6 +97,20 @@ public class EquipoServiceImpl implements EquipoService {
             return null;
         }
     }
+    @Override
+    public Boolean verificaEvaluadorByIdUsuarioJefe() {
+        Votante jefe = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        Integer idVotanteEvaluador = equipoRepository.getIdVotanteEvaluador(jefe.getIdVotante());
+        if (idVotanteEvaluador!=null){
+            if (idVotanteEvaluador.equals(jefe.getIdVotante())){
+                return Boolean.TRUE;
+            }else{
+                return Boolean.FALSE;
+            }
+        }else{
+            return Boolean.FALSE;
+        }
+    }
 
     @Override
     public int eliminarTrabajador(Number idEquipo) {
@@ -208,6 +222,23 @@ public class EquipoServiceImpl implements EquipoService {
             List<String> codigosDeUnidades = new ArrayList<>();
             codigosDeUnidades.add(unidadOrganizativa.getCodUnidad());
             return equipoRepository.listAllVotanteByCodUnidad(authService.getIdUserSession(), codigosDeUnidades);
+        }
+    }
+
+    public List<TrabajadorResponseDto> listAllAvalibleEvaluador() {
+        UserSessionDto userSessionDto = authService.getUserSession();
+        String codUnidad = userSessionDto.getCodUnidad();
+        UnidadOrganizativa unidadOrganizativa = unidadOrganizativaRepository.findFirstByCodUnidad(codUnidad);
+        if (unidadOrganizativa.getCodPadre() == null){
+            List<UnidadOrganizativa> listadoUnidades = unidadOrganizativaRepository.findAllByCodPadre(unidadOrganizativa.getCodUnidad());
+            List<String> codigosDeUnidades = new ArrayList<>();
+            listadoUnidades.forEach(und -> codigosDeUnidades.add(und.getCodUnidad()));
+            codigosDeUnidades.add(unidadOrganizativa.getCodUnidad());
+            return equipoRepository.listAllAvalibleEvaluador(codigosDeUnidades);
+        }else{
+            List<String> codigosDeUnidades = new ArrayList<>();
+            codigosDeUnidades.add(unidadOrganizativa.getCodUnidad());
+            return equipoRepository.listAllAvalibleEvaluador(codigosDeUnidades);
         }
     }
 

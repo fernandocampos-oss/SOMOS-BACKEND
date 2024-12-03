@@ -32,7 +32,7 @@ public class UsuarioRedController {
         return usuarioRedService.listarAministradoresRed();
     }
 
-    @PreAuthorizeAdminCentral
+    //@PreAuthorizeAdminCentral
     @GetMapping("/redes")
     public List<RedPersonal> listarRedes() {
         return usuarioRedService.listarRedes();

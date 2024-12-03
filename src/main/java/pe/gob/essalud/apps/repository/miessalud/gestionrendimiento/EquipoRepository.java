@@ -61,10 +61,20 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
             "FROM votante v " +
             "INNER JOIN usuario u ON v.id_usuario = u.id_usuario " +
             "WHERE v.id_usuario != :idJefe " +
+            "AND V.id_segmento <> 1 " +
             "AND v.id_usuario IS NOT NULL " +
             "AND u.cod_unidad IN :codigosUnidad", nativeQuery = true)
     List<TrabajadorResponseDto> listAllVotanteByCodUnidad(
             @Param("idJefe") Number idJefe,
+            @Param("codigosUnidad") List<String> codigosUnidad);
+
+    @Query(value = "SELECT v.nombres as nombres, v.apellidos as apellidos, v.id_votante as idVotante " +
+            "FROM votante v " +
+            "INNER JOIN usuario u ON v.id_usuario = u.id_usuario " +
+            "WHERE " +
+            "v.id_usuario IS NOT NULL " +
+            "AND u.cod_unidad IN :codigosUnidad", nativeQuery = true)
+    List<TrabajadorResponseDto> listAllAvalibleEvaluador(
             @Param("codigosUnidad") List<String> codigosUnidad);
 
 }

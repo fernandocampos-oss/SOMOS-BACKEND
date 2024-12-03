@@ -17,6 +17,7 @@ public interface EquipoService {
     void registrarEvaluador(Equipo equipo);
     List<Equipo> getListTrabajadoresByIdUsuarioJefe();
     String getListEvaluadorByIdUsuarioJefe();
+    Boolean verificaEvaluadorByIdUsuarioJefe();
     int eliminarTrabajador(Number idEquipo);
     List<TrabajadorResponseDto> listAllVotante();
     Votante getVotanteByIdUsuario();
@@ -27,4 +28,5 @@ public interface EquipoService {
     List<CargaMasivaVotanteDto> cargaMasivaVotante(List<CargaMasivaVotanteDto> listVotantes);
     Usuario findUsuarioSctrByNumeroDocumento(String numDoc);
     List<TrabajadorResponseDto> listAllVotanteByUnidadOrganizativa();
+    List<TrabajadorResponseDto> listAllAvalibleEvaluador();
 }
