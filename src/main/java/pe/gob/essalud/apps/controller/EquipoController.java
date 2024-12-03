@@ -44,6 +44,12 @@ public class EquipoController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/verifica/evaluador")
+    public ResponseEntity<Boolean> verificaEvaluador() {
+        Boolean result = equipoService.verificaEvaluadorByIdUsuarioJefe();
+        return new ResponseEntity<Boolean>(result, HttpStatus.OK);
+    }
+
     @GetMapping("/eliminar")
     public int eliminarTrabajador(@RequestParam("idEquipo") Number idEquipo) {
         return equipoService.eliminarTrabajador(idEquipo);
@@ -52,6 +58,12 @@ public class EquipoController {
     @GetMapping("/listar/votantes")
     public ResponseEntity<List<TrabajadorResponseDto>> listAllVotante() {
         List<TrabajadorResponseDto> listAllVotante = equipoService.listAllVotanteByUnidadOrganizativa();
+        return new ResponseEntity<List<TrabajadorResponseDto>>(listAllVotante, HttpStatus.OK);
+    }
+
+    @GetMapping("/listar/candidatos/evaluador")
+    public ResponseEntity<List<TrabajadorResponseDto>> listAllCandidatoEvaluador() {
+        List<TrabajadorResponseDto> listAllVotante = equipoService.listAllAvalibleEvaluador();
         return new ResponseEntity<List<TrabajadorResponseDto>>(listAllVotante, HttpStatus.OK);
     }
 
