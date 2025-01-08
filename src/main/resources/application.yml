@@ -9,10 +9,3 @@ spring:
     config:
       username: ${CONFIG_SERVER_USERNAME}
       password: ${CONFIG_SERVER_PASSWORD}
-
-google:
-  recaptcha:
-    key:
-      site: 6Leg21AqAAAAAGflBoFxs18aQZbixF3mUQcU_KW2
-      secret: 6Leg21AqAAAAAMrWFs4NJBC8rcgX3S1fg2My5pE4
-      threshold: 0.5
