@@ -19,6 +19,7 @@ import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,7 +57,7 @@ public class OnomasticoController extends BaseController {
 
     @PostConstruct
     public void sendEmailSaludoOnomasticoMasivo() {
-        System.out.println("Iniciado envio programado de correos masivos por onomastico diario a las 7AM");
+        log.info("Iniciado envio programado de correos masivos por onomastico diario a las 7AM [{}]", LocalDateTime.now());
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
             log.info("Tarea ejecutada a las [{}]", LocalDateTime.now());
@@ -72,7 +73,7 @@ public class OnomasticoController extends BaseController {
             }
         };
 //		long initialDelay = calculateInitialDelay(7, 0); // Hora: 7:00 AM formato 24h
-        long initialDelay = calculateInitialDelay(15, 42);
+        long initialDelay = calculateInitialDelay(21, 00);
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por cada día
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
 
