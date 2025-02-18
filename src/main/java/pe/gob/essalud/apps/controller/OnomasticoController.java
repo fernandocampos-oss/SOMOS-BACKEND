@@ -57,10 +57,11 @@ public class OnomasticoController extends BaseController {
 
     @PostConstruct
     public void sendEmailSaludoOnomasticoMasivo() {
-        log.info("Iniciado envio programado de correos masivos por onomastico diario a las 7AM [{}]", LocalDateTime.now());
+        LocalDateTime fechaInicioLocal = LocalDateTime.now(ZoneId.of("America/Lima"));
+        log.info("Inicio programado de correos masivos por onomastico horario local por dia a las 7AM [{}-{}]", LocalDateTime.now(), fechaInicioLocal);
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
-            log.info("Tarea ejecutada a las [{}]", LocalDateTime.now());
+            log.info("Tarea ejecutada a las [{}]", fechaInicioLocal);
             LocalDate fechaActual = LocalDate.now();
             String mesFormato = String.format("%02d", fechaActual.getMonthValue());
             String diaFormato = String.format("%02d", fechaActual.getDayOfMonth());
@@ -73,7 +74,7 @@ public class OnomasticoController extends BaseController {
             }
         };
 //		long initialDelay = calculateInitialDelay(7, 0); // Hora: 7:00 AM formato 24h
-        long initialDelay = calculateInitialDelay(21, 00);
+        long initialDelay = calculateInitialDelay(21, 40);
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por cada día
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
 
