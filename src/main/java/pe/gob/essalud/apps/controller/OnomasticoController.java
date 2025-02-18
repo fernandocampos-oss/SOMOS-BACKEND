@@ -72,7 +72,7 @@ public class OnomasticoController extends BaseController {
             }
         };
 //		long initialDelay = calculateInitialDelay(7, 0); // Hora: 7:00 AM formato 24h
-        long initialDelay = calculateInitialDelay(15, 10);
+        long initialDelay = calculateInitialDelay(15, 42);
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por cada día
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
 
