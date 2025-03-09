@@ -8,6 +8,7 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelTrabajadorDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
+import pe.gob.essalud.apps.model.miessalud.GdrParametro;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.IndicadorService;
 
@@ -60,6 +61,16 @@ public class IndicadorController {
     @PutMapping("modificar/{id}")
     public void modificarIndicador(@PathVariable Integer id, @RequestBody Indicador request) {
         indicadorService.modificarIndicador(id, request);
+    }
+
+    @GetMapping("parametros")
+    public GdrParametro obtenerParametros() {
+        return indicadorService.obtenerParametros();
+    }
+
+    @PutMapping("parametros/{id}")
+    public void actualizarParametros(@PathVariable Integer id, @RequestBody GdrParametro request) {
+        indicadorService.actualizarParametros(id, request);
     }
 
 }

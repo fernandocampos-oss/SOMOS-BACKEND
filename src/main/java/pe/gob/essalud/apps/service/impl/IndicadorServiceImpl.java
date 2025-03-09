@@ -8,9 +8,11 @@ import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
 import pe.gob.essalud.apps.exceptions.ValidationException;
+import pe.gob.essalud.apps.model.miessalud.GdrParametro;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
+import pe.gob.essalud.apps.repository.miessalud.GdrParametroRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
@@ -34,6 +36,7 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final PrioridadRepository prioridadRepository;
     private final EvidenciaRepository evidenciaRepository;
     private final EquipoRepository equipoRepository;
+    private final GdrParametroRepository gdrParametroRepository;
 
     @Override
     @Transactional
@@ -136,7 +139,7 @@ public class IndicadorServiceImpl implements IndicadorService {
         for (Prioridad p : prioridades) {
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-            modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+            modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
             modelPrioridadDto.setIdActividad(p.getActividad().getIdActividad());
             modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
             int porcentajeTotal = 0;
@@ -281,6 +284,21 @@ public class IndicadorServiceImpl implements IndicadorService {
         indicador.setPeso(request.getPeso());
         indicador.setUsuarioModificacion(authService.getIdUserSession());
         indicadorRepository.save(indicador);
+    }
+
+    @Override
+    public GdrParametro obtenerParametros() {
+        return gdrParametroRepository.findById(1).orElse(new GdrParametro());
+    }
+
+    @Override
+    public void actualizarParametros(Integer id, GdrParametro request) {
+        GdrParametro parametro = gdrParametroRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("El parámetro no se encuentra"));
+        parametro.setFechaLimitePlanificacion(request.getFechaLimitePlanificacion().withHour(0).withMinute(0).withSecond(0).withNano(0));
+        parametro.setFechaLimiteSeguimiento(request.getFechaLimiteSeguimiento().withHour(0).withMinute(0).withSecond(0).withNano(0));
+        parametro.setFechaLimiteEvaluacion(request.getFechaLimiteEvaluacion().withHour(0).withMinute(0).withSecond(0).withNano(0));
+        gdrParametroRepository.save(parametro);
     }
 
 }
