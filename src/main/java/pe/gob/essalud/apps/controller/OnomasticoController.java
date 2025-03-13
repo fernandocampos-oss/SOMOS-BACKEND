@@ -72,13 +72,15 @@ public class OnomasticoController extends BaseController {
             }
         };
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 //		long initialDelay = calculateInitialDelay(7, 0); // Hora: 7:00 AM formato 24h
         long initialDelay = calculateInitialDelay(22, 45);
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por cada día
 =======
+=======
+>>>>>>> Stashed changes
 		long initialDelay = calculateInitialDelay(12, 0); // Hora: 7:00 AM formato 24h
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por día
->>>>>>> Stashed changes
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
     }
 
