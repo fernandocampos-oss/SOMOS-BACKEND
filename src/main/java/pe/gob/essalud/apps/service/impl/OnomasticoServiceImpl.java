@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.util.UriComponentsBuilder;
 import pe.gob.essalud.apps.base.BaseService;
+import pe.gob.essalud.apps.common.constants.Constantes;
 import pe.gob.essalud.apps.dto.onomastico.response.OnomasticoResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Onomastico;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
@@ -78,10 +80,10 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
         requestFactory.setConnectTimeout(5000);
         requestFactory.setReadTimeout(5000);
-
         RestTemplate restTemplate = new RestTemplate(requestFactory);
-//        String url = "https://appsqa.essalud.gob.pe/sagw/email-somos-service/somos-essalud/saludoOnomastico";
-        String url = "http://appsqa.essalud.gob.pe/sagw/email-somos-service/somos-essalud/saludoOnomastico";
+
+        String url = getProperty(Constantes.URL_REDIRECT_SALUDO_ONOMASTICO);
+        url = UriComponentsBuilder.fromUriString(url).build().encode().toUriString();
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("email", correo);

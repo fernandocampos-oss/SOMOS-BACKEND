@@ -68,10 +68,11 @@ public class OnomasticoController extends BaseController {
             List<OnomasticoResponseDto> listUser=  onomasticoService.obtenerOnomasticosPorDiaAndEstado(mesFormato, diaFormato);
             log.info("list: [{}]", listUser.size());
             for (OnomasticoResponseDto t : listUser) {
-                log.info("enviado: [{}]", t);
+                log.info("Usuario: [{}]", t);
             }
         };
 		long initialDelay = calculateInitialDelay(12, 0); // Hora: 7:00 AM formato 24h
+//        long initialDelay = calculateInitialDelay(14, 18); //local
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por día
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
     }

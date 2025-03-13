@@ -14,8 +14,4 @@ public interface EmailServiceClient {
 
     @PostMapping("somos-essalud/recuperarClave")
     boolean recuperarClave(@RequestBody RecuperarClaveWebRequestDto input);
-
-//    @PostMapping("somos-essalud/saludoOnomastico")
-//    boolean saludoOnomastico(@RequestBody SaludoOnomasticoRequestDto input);
-
 }

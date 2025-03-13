@@ -11,7 +11,7 @@ public final class Constantes {
     public static final String ATTACHMENT = "attachment; filename=\"";
 
     public static final String URL_REDIRECT_RECUPERAR_CLAVE = "redirect.recuperar-clave";
-//    public static final String URL_REDIRECT_SALUDO_ONOMASTICO = "redirect.saludo-onomastico";
+    public static final String URL_REDIRECT_SALUDO_ONOMASTICO = "redirect.saludo-onomastico";
 
     public static final String FORMATO_FECHA_LARGA = "yyyy-MM-dd HH:mm";
     public static final String FORMATO_HORA_MIN = " 00:00";
