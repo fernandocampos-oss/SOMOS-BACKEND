@@ -65,9 +65,7 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
             trabajador.setApellidos(apellido);
             trabajador.setCorreo(correo);
             listOnomastico.add(trabajador);
-
             log.info("Nombre: [{}], Apellido: [{}], Correo: [{}]", (String) row[1], (String) row[2], (String) row[4]);
-
             String nombreCompleto = trabajador.getNombres() + " " + trabajador.getApellidos();
             _sendMailSaludoOnomastico(correo, nombreCompleto);
         }
@@ -76,12 +74,10 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
 
     @Async
     protected void _sendMailSaludoOnomastico(String correo, String nombreCompleto) {
-//        log.info("uri feing: [{}]", urlEmail);
         log.info("correo a notificar: [{}-{}]", correo, nombreCompleto);
-
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(5000); // 7 segundos
-        requestFactory.setReadTimeout(5000); // 7 segundos
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
 
         RestTemplate restTemplate = new RestTemplate(requestFactory);
 //        String url = "https://appsqa.essalud.gob.pe/sagw/email-somos-service/somos-essalud/saludoOnomastico";
@@ -95,15 +91,12 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
             log.info("Código de respuesta: [{}], Cuerpo de la respuesta: [{}]", response.getStatusCode(), response.getBody());
-
         } catch (Exception e) {
             log.info("Error en la petición: [{}]", e.getMessage());
         }
-
     }
 
 }

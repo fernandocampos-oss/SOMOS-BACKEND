@@ -2,8 +2,6 @@ package pe.gob.essalud.apps.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,11 +69,15 @@ public class OnomasticoController extends BaseController {
                 log.info("enviado: [{}]", t);
             }
         };
+<<<<<<< Updated upstream
 //		long initialDelay = calculateInitialDelay(7, 0); // Hora: 7:00 AM formato 24h
         long initialDelay = calculateInitialDelay(15, 10);
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por cada día
+=======
+		long initialDelay = calculateInitialDelay(12, 0); // Hora: 7:00 AM formato 24h
+        long period = TimeUnit.DAYS.toMillis(1); // Repeticion por día
+>>>>>>> Stashed changes
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
-
     }
 
     // Calculo de la demora inicial para la próxima ejecución a las 7:00AM
