@@ -30,4 +30,6 @@ public interface PrioridadService {
 
     void modificarPrioridad(int id, UpdatePrioridadDto requestDto);
 
+    void eliminarPrioridad(int id);
+
 }

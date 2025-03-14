@@ -354,4 +354,15 @@ public class PrioridadServiceImpl implements PrioridadService {
         }
     }
 
+    @Override
+    public void eliminarPrioridad(int id) {
+        Prioridad prioridad = prioridadRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("La prioridad no se encuentra"));
+        List<Indicador> indicadores = indicadorRepository.getListIndicadoresByPrioridad(prioridad.getIdPrioridad());
+        if (!indicadores.isEmpty()) {
+            throw new ValidationException("La prioridad tiene indicador registrado");
+        }
+        prioridadRepository.delete(prioridad);
+    }
+
 }

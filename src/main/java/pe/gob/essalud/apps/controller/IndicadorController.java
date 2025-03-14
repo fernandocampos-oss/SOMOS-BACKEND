@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelTrabajadorDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
-import pe.gob.essalud.apps.model.miessalud.GdrParametro;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.IndicadorService;
 
@@ -63,14 +61,9 @@ public class IndicadorController {
         indicadorService.modificarIndicador(id, request);
     }
 
-    @GetMapping("parametros")
-    public GdrParametro obtenerParametros() {
-        return indicadorService.obtenerParametros();
-    }
-
-    @PutMapping("parametros/{id}")
-    public void actualizarParametros(@PathVariable Integer id, @RequestBody GdrParametro request) {
-        indicadorService.actualizarParametros(id, request);
+    @DeleteMapping("/eliminar/{id}")
+    public void eliminarIndicador(@PathVariable int id) {
+        indicadorService.eliminarIndicador(id);
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,6 +144,17 @@ public class EvidenciaServiceImpl implements EvidenciaService {
                 .orElseThrow(() -> new ValidationException("La evidencia no se encuentra"));
         evidencia.setComentario(request.getComentario());
         evidencia.setCalificacion(request.getCalificacion());
+        evidenciaRepository.save(evidencia);
+    }
+
+    @Override
+    public void eliminarEvidencia(int id) {
+        Evidencia evidencia = evidenciaRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("La evidencia no se encuentra"));
+        if (StringUtils.isNotBlank(evidencia.getSustentoRutaFile())) {
+            throw new ValidationException("La evidencia tiene sustento registrado");
+        }
+        evidencia.setEstado(false);
         evidenciaRepository.save(evidencia);
     }
 

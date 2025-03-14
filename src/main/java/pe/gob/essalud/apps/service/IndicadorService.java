@@ -1,10 +1,8 @@
 package pe.gob.essalud.apps.service;
 
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelTrabajadorDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
-import pe.gob.essalud.apps.model.miessalud.GdrParametro;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 
 import java.util.List;
@@ -26,8 +24,6 @@ public interface IndicadorService {
 
     void modificarIndicador(int id, Indicador request);
 
-    GdrParametro obtenerParametros();
-
-    void actualizarParametros(Integer id, GdrParametro request);
+    void eliminarIndicador(int id);
 
 }

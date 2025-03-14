@@ -8,7 +8,6 @@ import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
 import pe.gob.essalud.apps.exceptions.ValidationException;
-import pe.gob.essalud.apps.model.miessalud.GdrParametro;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
@@ -18,9 +17,6 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -287,18 +283,15 @@ public class IndicadorServiceImpl implements IndicadorService {
     }
 
     @Override
-    public GdrParametro obtenerParametros() {
-        return gdrParametroRepository.findById(1).orElse(new GdrParametro());
-    }
-
-    @Override
-    public void actualizarParametros(Integer id, GdrParametro request) {
-        GdrParametro parametro = gdrParametroRepository.findById(id)
-                .orElseThrow(() -> new ValidationException("El parámetro no se encuentra"));
-        parametro.setFechaLimitePlanificacion(request.getFechaLimitePlanificacion().withHour(0).withMinute(0).withSecond(0).withNano(0));
-        parametro.setFechaLimiteSeguimiento(request.getFechaLimiteSeguimiento().withHour(0).withMinute(0).withSecond(0).withNano(0));
-        parametro.setFechaLimiteEvaluacion(request.getFechaLimiteEvaluacion().withHour(0).withMinute(0).withSecond(0).withNano(0));
-        gdrParametroRepository.save(parametro);
+    public void eliminarIndicador(int id) {
+        Indicador indicador = indicadorRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("El indicador no se encuentra"));
+        List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(indicador.getIdIndicador());
+        if (!evidencias.isEmpty()) {
+            throw new ValidationException("El indicador tiene evidencia registrada");
+        }
+        indicador.setEstado(false);
+        indicadorRepository.save(indicador);
     }
 
 }
