@@ -158,4 +158,16 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         evidenciaRepository.save(evidencia);
     }
 
+    @Override
+    public void eliminarSustento(int id) {
+        Evidencia evidencia = evidenciaRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("La evidencia no se encuentra"));
+        evidencia.setSustentoDescripcion(null);
+        evidencia.setSustentoExtensionFile(null);
+        evidencia.setSustentoFechaRegistro(null);
+        evidencia.setSustentoExtensionFile(null);
+        evidencia.setSustentoRutaFile(null);
+        evidenciaRepository.save(evidencia);
+    }
+
 }
