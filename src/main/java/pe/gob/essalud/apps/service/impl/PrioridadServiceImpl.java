@@ -174,7 +174,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                 ExcelPrioridadDto modelExcelPrioridadDto = new ExcelPrioridadDto();
                 modelExcelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
                 modelExcelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-                modelExcelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+                modelExcelPrioridadDto.setPrioridadNombre(p.getDescripcion());
 
                 List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(e.getIntegrante().getIdVotante(), p.getIdPrioridad());
 

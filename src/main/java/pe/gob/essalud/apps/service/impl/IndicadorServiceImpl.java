@@ -223,7 +223,7 @@ public class IndicadorServiceImpl implements IndicadorService {
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-            modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+            modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
 
             List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(votanteTrabajador.getIdVotante(), p.getIdPrioridad());
 
