@@ -20,6 +20,8 @@ public interface IndicadorService {
 
     ExcelTrabajadorDto generarExcelTrabajador();
 
+    ExcelTrabajadorDto generarExcelTrabajadorByVotanteAdmin(int idVotante);
+
     Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(int idVotante);
 
     void modificarIndicador(int id, Indicador request);

@@ -51,6 +51,12 @@ public class IndicadorController {
         return new ResponseEntity<ExcelTrabajadorDto>(model, HttpStatus.OK);
     }
 
+    @GetMapping("/excel/trabajador/admin/{idVotante}")
+    public ResponseEntity<ExcelTrabajadorDto> generarExcelTrabajadorByVotanteAdmin(@PathVariable int idVotante) {
+        ExcelTrabajadorDto model = indicadorService.generarExcelTrabajadorByVotanteAdmin(idVotante);
+        return new ResponseEntity<ExcelTrabajadorDto>(model, HttpStatus.OK);
+    }
+
     @GetMapping("/peso-total/{idVotante}")
     public Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(@PathVariable int idVotante) {
         return indicadorService.sumaTotalPesoAllIndicadorByTrabajador(idVotante);
