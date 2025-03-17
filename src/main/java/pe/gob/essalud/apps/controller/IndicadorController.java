@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelTrabajadorDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
@@ -52,6 +51,12 @@ public class IndicadorController {
         return new ResponseEntity<ExcelTrabajadorDto>(model, HttpStatus.OK);
     }
 
+    @GetMapping("/excel/trabajador/admin/{idVotante}")
+    public ResponseEntity<ExcelTrabajadorDto> generarExcelTrabajadorByVotanteAdmin(@PathVariable int idVotante) {
+        ExcelTrabajadorDto model = indicadorService.generarExcelTrabajadorByVotanteAdmin(idVotante);
+        return new ResponseEntity<ExcelTrabajadorDto>(model, HttpStatus.OK);
+    }
+
     @GetMapping("/peso-total/{idVotante}")
     public Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(@PathVariable int idVotante) {
         return indicadorService.sumaTotalPesoAllIndicadorByTrabajador(idVotante);
@@ -60,6 +65,11 @@ public class IndicadorController {
     @PutMapping("modificar/{id}")
     public void modificarIndicador(@PathVariable Integer id, @RequestBody Indicador request) {
         indicadorService.modificarIndicador(id, request);
+    }
+
+    @DeleteMapping("/eliminar/{id}")
+    public void eliminarIndicador(@PathVariable int id) {
+        indicadorService.eliminarIndicador(id);
     }
 
 }

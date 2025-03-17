@@ -62,5 +62,15 @@ public class EvidenciaController {
     public void modificarCalificacion(@RequestBody ApruebaEvidenciaRequestDto request){
         evidenciaService.aprobarEvidencia(request);
     }
+
+    @DeleteMapping("/eliminar/{id}")
+    public void eliminarEvidencia(@PathVariable int id) {
+        evidenciaService.eliminarEvidencia(id);
+    }
+
+    @DeleteMapping("/eliminar/sustento/{id}")
+    public void eliminarSustento(@PathVariable int id) {
+        evidenciaService.eliminarSustento(id);
+    }
 }
 

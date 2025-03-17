@@ -68,4 +68,9 @@ public class PrioridadController {
         prioridadService.modificarPrioridad(id, requestDto);
     }
 
+    @DeleteMapping("/eliminar/{id}")
+    public void eliminarPrioridad(@PathVariable int id) {
+        prioridadService.eliminarPrioridad(id);
+    }
+
 }
