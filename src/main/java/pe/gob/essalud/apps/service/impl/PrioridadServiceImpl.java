@@ -195,7 +195,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                         modelExcelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
                         modelExcelEvidenciaDto.setDescripcion(t.getDescripcion());
                         modelExcelEvidenciaDto.setPlazo(t.getPlazo());
-
+                        modelExcelEvidenciaDto.setComentario(t.getComentario());
                         modelExcelEvidenciaDto.setFechaCreacion(t.getFechaCreacion());
                         modelExcelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                         modelExcelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());

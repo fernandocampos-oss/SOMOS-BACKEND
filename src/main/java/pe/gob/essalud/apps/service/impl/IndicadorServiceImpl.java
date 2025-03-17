@@ -245,7 +245,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     modelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
                     modelEvidenciaDto.setDescripcion(t.getDescripcion());
                     modelEvidenciaDto.setPlazo(t.getPlazo());
-
+                    modelEvidenciaDto.setComentario(t.getComentario());
                     modelEvidenciaDto.setFechaCreacion(t.getFechaCreacion());
                     modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                     modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
