@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import pe.gob.essalud.apps.dto.emailservice.ActivarCuentaRequestDto;
 import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
 
-@FeignClient(name = "emailserviceclient", url = "${feign-clients.email-service.url}")
+//@FeignClient(name = "emailserviceclient", url = "${feign-clients.email-service.url}")
+@FeignClient(name = "emailserviceclient", url = "${feign-clients.email-somos-service.url}")
 public interface EmailServiceClient {
 
     @PostMapping("somos-essalud/activarCuenta")
