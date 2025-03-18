@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;
 import pe.gob.essalud.apps.base.BaseService;
+import pe.gob.essalud.apps.client.EmailServiceClient;
 import pe.gob.essalud.apps.common.constants.Constantes;
+import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
+import pe.gob.essalud.apps.dto.emailservice.SaludoOnomasticobRequestDto;
 import pe.gob.essalud.apps.dto.onomastico.response.OnomasticoResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Onomastico;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
@@ -29,9 +32,7 @@ import java.util.Map;
 public class OnomasticoServiceImpl extends BaseService implements OnomasticoService {
 
     private final OnomasticoRepository onomasticoRepository;
-
-//    @Value("${feign-clients.email-somos-service}")
-//    private String urlEmail;
+    private final EmailServiceClient _emailServiceClient;
 
     @Override
     public List<Onomastico> findAllOnomasticos() {
@@ -77,28 +78,10 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
     @Async
     protected void _sendMailSaludoOnomastico(String correo, String nombreCompleto) {
         log.info("correo a notificar: [{}-{}]", correo, nombreCompleto);
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(5000);
-        requestFactory.setReadTimeout(5000);
-        RestTemplate restTemplate = new RestTemplate(requestFactory);
-
-        String url = getProperty(Constantes.URL_REDIRECT_SALUDO_ONOMASTICO);
-        url = UriComponentsBuilder.fromUriString(url).build().encode().toUriString();
-
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("email", correo);
-        requestBody.put("nombre", nombreCompleto);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-            log.info("Código de respuesta: [{}], Cuerpo de la respuesta: [{}]", response.getStatusCode(), response.getBody());
-        } catch (Exception e) {
-            log.info("Error en la petición: [{}]", e.getMessage());
-        }
+        SaludoOnomasticobRequestDto requestSaludoOnomastico = new SaludoOnomasticobRequestDto();
+        requestSaludoOnomastico.setEmail(correo);
+        requestSaludoOnomastico.setNombre(nombreCompleto);
+        _emailServiceClient.saludoOnomastico(requestSaludoOnomastico);
     }
 
 }
