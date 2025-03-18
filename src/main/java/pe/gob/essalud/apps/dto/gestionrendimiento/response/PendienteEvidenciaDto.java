@@ -9,7 +9,7 @@ public class PendienteEvidenciaDto {
     private int idEvidencia;
     private String descripcion;
     private LocalDateTime plazo;
-
+    private String comentario;
     private LocalDateTime fechaCreacion;
     private String sustentoDescripcion;
     private LocalDateTime sustentoFechaRegistro;

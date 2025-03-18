@@ -22,4 +22,8 @@ public interface EvidenciaService {
     void modificarEvidencia(int id, UpdateEvidenciaDto request);
 
     void aprobarEvidencia(ApruebaEvidenciaRequestDto request);
+
+    void eliminarEvidencia(int id);
+
+    void eliminarSustento(int id);
 }

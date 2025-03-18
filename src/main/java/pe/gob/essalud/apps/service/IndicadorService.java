@@ -1,7 +1,6 @@
 package pe.gob.essalud.apps.service;
 
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
-import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.ExcelTrabajadorDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.PendienteDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
@@ -21,8 +20,12 @@ public interface IndicadorService {
 
     ExcelTrabajadorDto generarExcelTrabajador();
 
+    ExcelTrabajadorDto generarExcelTrabajadorByVotanteAdmin(int idVotante);
+
     Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(int idVotante);
 
     void modificarIndicador(int id, Indicador request);
+
+    void eliminarIndicador(int id);
 
 }

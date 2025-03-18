@@ -174,7 +174,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                 ExcelPrioridadDto modelExcelPrioridadDto = new ExcelPrioridadDto();
                 modelExcelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
                 modelExcelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-                modelExcelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+                modelExcelPrioridadDto.setPrioridadNombre(p.getDescripcion());
 
                 List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(e.getIntegrante().getIdVotante(), p.getIdPrioridad());
 
@@ -195,7 +195,7 @@ public class PrioridadServiceImpl implements PrioridadService {
                         modelExcelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
                         modelExcelEvidenciaDto.setDescripcion(t.getDescripcion());
                         modelExcelEvidenciaDto.setPlazo(t.getPlazo());
-
+                        modelExcelEvidenciaDto.setComentario(t.getComentario());
                         modelExcelEvidenciaDto.setFechaCreacion(t.getFechaCreacion());
                         modelExcelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                         modelExcelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
@@ -352,6 +352,17 @@ public class PrioridadServiceImpl implements PrioridadService {
             prioridad.setDescripcion(requestDto.getPrioridadNombre());
             prioridadRepository.save(prioridad);
         }
+    }
+
+    @Override
+    public void eliminarPrioridad(int id) {
+        Prioridad prioridad = prioridadRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("La prioridad no se encuentra"));
+        List<Indicador> indicadores = indicadorRepository.getListIndicadoresByPrioridad(prioridad.getIdPrioridad());
+        if (!indicadores.isEmpty()) {
+            throw new ValidationException("La prioridad tiene indicador registrado");
+        }
+        prioridadRepository.delete(prioridad);
     }
 
 }

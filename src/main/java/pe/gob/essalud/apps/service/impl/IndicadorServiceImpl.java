@@ -11,14 +11,12 @@ import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
+import pe.gob.essalud.apps.repository.miessalud.GdrParametroRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +32,7 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final PrioridadRepository prioridadRepository;
     private final EvidenciaRepository evidenciaRepository;
     private final EquipoRepository equipoRepository;
+    private final GdrParametroRepository gdrParametroRepository;
 
     @Override
     @Transactional
@@ -136,7 +135,7 @@ public class IndicadorServiceImpl implements IndicadorService {
         for (Prioridad p : prioridades) {
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-            modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+            modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
             modelPrioridadDto.setIdActividad(p.getActividad().getIdActividad());
             modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
             int porcentajeTotal = 0;
@@ -224,7 +223,7 @@ public class IndicadorServiceImpl implements IndicadorService {
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
-            modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+            modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
 
             List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(votanteTrabajador.getIdVotante(), p.getIdPrioridad());
 
@@ -246,7 +245,81 @@ public class IndicadorServiceImpl implements IndicadorService {
                     modelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
                     modelEvidenciaDto.setDescripcion(t.getDescripcion());
                     modelEvidenciaDto.setPlazo(t.getPlazo());
+                    modelEvidenciaDto.setComentario(t.getComentario());
+                    modelEvidenciaDto.setFechaCreacion(t.getFechaCreacion());
+                    modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
+                    modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
+                    modelEvidenciaDto.setSustentoExtensionFile(t.getSustentoExtensionFile());
 
+                    listEvidenciaDto.add(modelEvidenciaDto);
+                }
+                modelIndicadorDto.setListEvidencia(listEvidenciaDto);
+                listIndicadorDto.add(modelIndicadorDto);
+            }
+            modelPrioridadDto.setListIndicador(listIndicadorDto);
+            listPrioridadDto.add(modelPrioridadDto);
+        }
+        mainDto.setListPrioridad(listPrioridadDto);
+        return mainDto;
+    }
+
+    @Override
+    public ExcelTrabajadorDto generarExcelTrabajadorByVotanteAdmin(int idVotante) {
+        ExcelTrabajadorDto mainDto = new ExcelTrabajadorDto();
+
+        Votante votanteTrabajador = equipoRepository.getVotanteByIdVotante(idVotante);
+        EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(votanteTrabajador.getIdUsuario());
+        mainDto.setEvaluadoNombreCompleto(votanteTrabajador.getApellidos() + " " + votanteTrabajador.getNombres());
+        mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
+        UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
+        mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
+        if (votanteTrabajador.getIdSegmento() == 1) {
+            mainDto.setEvaluadoSegmento("DIRECTIVO");
+        }
+        if (votanteTrabajador.getIdSegmento() == 3) {
+            mainDto.setEvaluadoSegmento("EJECUTOR");
+        }
+        Equipo JefeEquipo = equipoRepository.getJefeByIdIntegrante(votanteTrabajador.getIdVotante());
+        EvaluadorResponseDto jefe = prioridadRepository.findUsuarioById(JefeEquipo.getJefe().getIdUsuario());
+        UnidadOrganizativa unidadJefe = prioridadRepository.getUnidadByCod(jefe.getUnidad());
+        mainDto.setEvaluadorCodUnidad(unidadJefe.getDescripcion());
+        mainDto.setEvaluadorNombreCompleto(JefeEquipo.getJefe().getApellidos() + " " + JefeEquipo.getJefe().getNombres());
+        mainDto.setEvaluadorPuesto(jefe.getPuesto());
+        if (JefeEquipo.getJefe().getIdSegmento() == 1) {
+            mainDto.setEvaluadorSegmento("DIRECTIVO");
+        }
+        mainDto.setEvaluadorNumeroDocumento(jefe.getNumeroDocumento());
+
+        List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), votanteTrabajador.getIdVotante());
+
+        List<PendienteDto> listPrioridadDto = new ArrayList<>();
+        for (Prioridad p : prioridades) {
+            PendienteDto modelPrioridadDto = new PendienteDto();
+            modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
+            modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
+            modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
+
+            List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(votanteTrabajador.getIdVotante(), p.getIdPrioridad());
+
+            List<PendienteIndicadorDto> listIndicadorDto = new ArrayList<>();
+            for (Indicador i : indicadoresPorTrabajadorYPrioridad) {
+                log.info("[{}-{}]", i.getIdIndicador(), i.getDescripcion());
+                PendienteIndicadorDto modelIndicadorDto = new PendienteIndicadorDto();
+                modelIndicadorDto.setIdIndicador(i.getIdIndicador());
+                modelIndicadorDto.setNombreIndicador(i.getDescripcion());
+                modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
+                modelIndicadorDto.setValorMeta(i.getValorMeta());
+                modelIndicadorDto.setPeso(i.getPeso());
+
+                List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
+
+                List<PendienteEvidenciaDto> listEvidenciaDto = new ArrayList<>();
+                for (Evidencia t : listEvidencia) {
+                    PendienteEvidenciaDto modelEvidenciaDto = new PendienteEvidenciaDto();
+                    modelEvidenciaDto.setIdEvidencia(t.getIdEvidencia());
+                    modelEvidenciaDto.setDescripcion(t.getDescripcion());
+                    modelEvidenciaDto.setPlazo(t.getPlazo());
+                    modelEvidenciaDto.setComentario(t.getComentario());
                     modelEvidenciaDto.setFechaCreacion(t.getFechaCreacion());
                     modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                     modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
@@ -280,6 +353,18 @@ public class IndicadorServiceImpl implements IndicadorService {
         indicador.setValorMeta(request.getValorMeta());
         indicador.setPeso(request.getPeso());
         indicador.setUsuarioModificacion(authService.getIdUserSession());
+        indicadorRepository.save(indicador);
+    }
+
+    @Override
+    public void eliminarIndicador(int id) {
+        Indicador indicador = indicadorRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("El indicador no se encuentra"));
+        List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(indicador.getIdIndicador());
+        if (!evidencias.isEmpty()) {
+            throw new ValidationException("El indicador tiene evidencia registrada");
+        }
+        indicador.setEstado(false);
         indicadorRepository.save(indicador);
     }
 
