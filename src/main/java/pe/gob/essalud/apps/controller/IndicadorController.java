@@ -1,7 +1,11 @@
 package pe.gob.essalud.apps.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
@@ -11,6 +15,7 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.IndicadorService;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +60,21 @@ public class IndicadorController {
     public ResponseEntity<ExcelTrabajadorDto> generarExcelTrabajadorByVotanteAdmin(@PathVariable int idVotante) {
         ExcelTrabajadorDto model = indicadorService.generarExcelTrabajadorByVotanteAdmin(idVotante);
         return new ResponseEntity<ExcelTrabajadorDto>(model, HttpStatus.OK);
+    }
+
+    @GetMapping("/excel/trabajador/download")
+    public ResponseEntity<Resource> downloadExcelTrabajador() {
+        try {
+            ExcelTrabajadorDto model = indicadorService.generarExcelTrabajador();
+            ByteArrayResource resource = indicadorService.generateExcel(model);
+            String filename = "GDR_" + model.getEvaluadoNombreCompleto() + ".xlsx";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/peso-total/{idVotante}")

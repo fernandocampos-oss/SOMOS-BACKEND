@@ -12,7 +12,7 @@ public class ExcelTrabajadorDto {
     private String evaluadorCodUnidad;
     private String evaluadorSegmento;
     private String evaluadorNumeroDocumento;
-
+    private String evaluadoNumeroDocumento;
     private String evaluadoNombreCompleto;
     private String evaluadoPuesto;
     private String evaluadoCodUnidad;
