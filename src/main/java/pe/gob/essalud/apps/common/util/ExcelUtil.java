@@ -126,6 +126,32 @@ public class ExcelUtil {
             }
         }
 
+        // Guardar comentarios antes de mover filas
+        Map<Integer, Map<Integer, String>> commentsMap = new HashMap<>();
+        for (int i = startRow; i <= footerEndRow; i++) {
+            Row row = sheet.getRow(i);
+            if (row != null) {
+                for (Cell cell : row) {
+                    if (cell.getCellComment() != null) {
+                        String commentText = cell.getCellComment().getString().getString();
+                        commentsMap.computeIfAbsent(i, k -> new HashMap<>()).put(cell.getColumnIndex(), commentText);
+                    }
+                }
+            }
+        }
+
+        // Eliminar comentarios de las celdas originales
+        for (int i = startRow; i <= footerEndRow; i++) {
+            Row row = sheet.getRow(i);
+            if (row != null) {
+                for (Cell cell : row) {
+                    if (cell.getCellComment() != null) {
+                        cell.removeCellComment();
+                    }
+                }
+            }
+        }
+
         // Mover filas del footer hacia abajo
         for (int i = footerEndRow; i >= startRow; i--) {
             Row oldRow = sheet.getRow(i);
@@ -177,7 +203,7 @@ public class ExcelUtil {
             ));
         }
 
-        // *estaurar validaciones de datos
+        // Restaurar validaciones de datos
         for (XSSFDataValidation validation : validations) {
             CellRangeAddressList newRegions = new CellRangeAddressList();
             for (CellRangeAddress region : validation.getRegions().getCellRangeAddresses()) {
@@ -193,6 +219,34 @@ public class ExcelUtil {
             XSSFDataValidationHelper helper = new XSSFDataValidationHelper(sheetXSSF);
             XSSFDataValidation newValidation = (XSSFDataValidation) helper.createValidation(validation.getValidationConstraint(), newRegions);
             sheetXSSF.addValidationData(newValidation);
+        }
+
+        // Restaurar comentarios en la nueva posición
+        for (Map.Entry<Integer, Map<Integer, String>> rowEntry : commentsMap.entrySet()) {
+            int oldRowNum = rowEntry.getKey();
+            int newRowNum = oldRowNum + totalRowsNeeded;
+
+            for (Map.Entry<Integer, String> cellEntry : rowEntry.getValue().entrySet()) {
+                int colIndex = cellEntry.getKey();
+                String commentText = cellEntry.getValue();
+
+                Row row = sheet.getRow(newRowNum);
+                if (row == null) {
+                    row = sheet.createRow(newRowNum);
+                }
+                Cell cell = row.getCell(colIndex);
+                if (cell == null) {
+                    cell = row.createCell(colIndex);
+                }
+
+                // Crear el comentario en la nueva celda
+                CreationHelper factory = sheet.getWorkbook().getCreationHelper();
+                Drawing<?> drawing = sheet.createDrawingPatriarch();
+                ClientAnchor anchor = factory.createClientAnchor();
+                Comment comment = drawing.createCellComment(anchor);
+                comment.setString(factory.createRichTextString(commentText));
+                cell.setCellComment(comment);
+            }
         }
 
         // Restaurar anchos de columnas

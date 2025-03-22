@@ -15,9 +15,12 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.IndicadorService;
 
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping(IndicadorController.INDICADOR)
@@ -66,12 +69,56 @@ public class IndicadorController {
     public ResponseEntity<Resource> downloadExcelTrabajador() {
         try {
             ExcelTrabajadorDto model = indicadorService.generarExcelTrabajador();
-            ByteArrayResource resource = indicadorService.generateExcel(model);
+            ByteArrayResource resource = indicadorService.generateFormatoExcel(model);
             String filename = "GDR_" + model.getEvaluadoNombreCompleto() + ".xlsx";
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/excel/trabajador/admin/download/{idVotante}")
+    public ResponseEntity<Resource> downloadExcelTrabajadorByVotanteAdmin(@PathVariable int idVotante) {
+        try {
+            ExcelTrabajadorDto model = indicadorService.generarExcelTrabajadorByVotanteAdmin(idVotante);
+            ByteArrayResource resource = indicadorService.generateFormatoExcel(model);
+            String filename = "GDR_" + model.getEvaluadoNombreCompleto() + ".xlsx";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/excel/directivo/download")
+    public ResponseEntity<Resource> downloadExcelDirectivo() {
+        try {
+            ByteArrayOutputStream zipOutputStream = new ByteArrayOutputStream();
+            ZipOutputStream zipOut = new ZipOutputStream(zipOutputStream);
+
+            List<ExcelTrabajadorDto> modelos = indicadorService.generarExcelDirectivo();
+            for (ExcelTrabajadorDto model : modelos) {
+                ByteArrayResource excelResource = indicadorService.generateFormatoExcel(model);
+                String filename = "GDR_" + model.getEvaluadoNombreCompleto() + ".xlsx";
+                ZipEntry zipEntry = new ZipEntry(filename);
+                zipOut.putNextEntry(zipEntry);
+                zipOut.write(excelResource.getByteArray());
+                zipOut.closeEntry();
+            }
+
+            zipOut.close();
+            ByteArrayResource zipResource = new ByteArrayResource(zipOutputStream.toByteArray());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=FORMATOS_GDR.zip")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(zipResource);
+
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }

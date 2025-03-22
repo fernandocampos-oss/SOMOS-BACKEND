@@ -24,7 +24,9 @@ public interface IndicadorService {
 
     ExcelTrabajadorDto generarExcelTrabajadorByVotanteAdmin(int idVotante);
 
-    ByteArrayResource generateExcel(ExcelTrabajadorDto excelTrabajadorDto) throws IOException;
+    List<ExcelTrabajadorDto> generarExcelDirectivo();
+
+    ByteArrayResource generateFormatoExcel(ExcelTrabajadorDto excelTrabajadorDto) throws IOException;
 
     Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(int idVotante);
 

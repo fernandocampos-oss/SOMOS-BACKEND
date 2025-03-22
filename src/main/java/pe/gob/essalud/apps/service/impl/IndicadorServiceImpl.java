@@ -283,10 +283,18 @@ public class IndicadorServiceImpl implements IndicadorService {
     public ExcelTrabajadorDto generarExcelTrabajadorByVotanteAdmin(int idVotante) {
         ExcelTrabajadorDto mainDto = new ExcelTrabajadorDto();
 
+        Map<Integer, String> calificacionMap = new HashMap<>();
+        calificacionMap.put(0, "NO presenta evidencia de logro final");
+        calificacionMap.put(1, "En proceso de logro");
+        calificacionMap.put(2, "SI presenta evidencia final");
+        calificacionMap.put(3, "Logrado");
+        calificacionMap.put(4, "No presenta evidencia");
+
         Votante votanteTrabajador = equipoRepository.getVotanteByIdVotante(idVotante);
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(votanteTrabajador.getIdUsuario());
         mainDto.setEvaluadoNombreCompleto(votanteTrabajador.getApellidos() + " " + votanteTrabajador.getNombres());
         mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
+        mainDto.setEvaluadoNumeroDocumento(trabajadorUsuario.getNumeroDocumento());
         UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
         mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
         if (votanteTrabajador.getIdSegmento() == 1) {
@@ -340,7 +348,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                     modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
                     modelEvidenciaDto.setSustentoExtensionFile(t.getSustentoExtensionFile());
-
+                    modelEvidenciaDto.setCalificacionDescripcion(calificacionMap.get(t.getCalificacion()));
                     listEvidenciaDto.add(modelEvidenciaDto);
                 }
                 modelIndicadorDto.setListEvidencia(listEvidenciaDto);
@@ -354,7 +362,20 @@ public class IndicadorServiceImpl implements IndicadorService {
     }
 
     @Override
-    public ByteArrayResource generateExcel(ExcelTrabajadorDto excelTrabajadorDto) throws IOException {
+    public List<ExcelTrabajadorDto> generarExcelDirectivo() {
+        List<ExcelTrabajadorDto> mainDtoList = new ArrayList<>();
+
+        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+        for (Equipo e : trabajadoresPorJefe) {
+            ExcelTrabajadorDto excelTrabajadorDto = generarExcelTrabajadorByVotanteAdmin(e.getIntegrante().getIdVotante());
+            mainDtoList.add(excelTrabajadorDto);
+        }
+
+        return mainDtoList;
+    }
+
+    @Override
+    public ByteArrayResource generateFormatoExcel(ExcelTrabajadorDto excelTrabajadorDto) throws IOException {
         FileInputStream fileInputStream = new FileInputStream("src/main/resources/templates/formato-gdr.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
         XSSFSheet sheet = workbook.getSheetAt(0);
