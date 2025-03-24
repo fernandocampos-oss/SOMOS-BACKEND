@@ -22,6 +22,9 @@ public class Indicador {
     @Column(name="descripcion", length = 350)
     private String descripcion;
 
+    @Column(name = "sentido")
+    private int sentido;
+
     @Column(name="peso")
     private int peso;
 

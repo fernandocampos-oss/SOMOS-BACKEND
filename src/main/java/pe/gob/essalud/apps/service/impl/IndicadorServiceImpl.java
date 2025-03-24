@@ -109,6 +109,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setPeso(i.getPeso());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
@@ -160,6 +161,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setPeso(i.getPeso());
                 int numero = 0;
                 numero = i.getPeso();
@@ -200,13 +202,6 @@ public class IndicadorServiceImpl implements IndicadorService {
     @Override
     public ExcelTrabajadorDto generarExcelTrabajador() {
         ExcelTrabajadorDto mainDto = new ExcelTrabajadorDto();
-
-        Map<Integer, String> calificacionMap = new HashMap<>();
-        calificacionMap.put(0, "NO presenta evidencia de logro final");
-        calificacionMap.put(1, "En proceso de logro");
-        calificacionMap.put(2, "SI presenta evidencia final");
-        calificacionMap.put(3, "Logrado");
-        calificacionMap.put(4, "No presenta evidencia");
 
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(authService.getIdUserSession());
         Votante votanteTrabajador = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
@@ -250,6 +245,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
 
@@ -266,7 +262,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                     modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
                     modelEvidenciaDto.setSustentoExtensionFile(t.getSustentoExtensionFile());
-                    modelEvidenciaDto.setCalificacionDescripcion(calificacionMap.get(t.getCalificacion()));
+                    modelEvidenciaDto.setCalificacion(t.getCalificacion() != null ? t.getCalificacion() : -1);
                     listEvidenciaDto.add(modelEvidenciaDto);
                 }
                 modelIndicadorDto.setListEvidencia(listEvidenciaDto);
@@ -282,13 +278,6 @@ public class IndicadorServiceImpl implements IndicadorService {
     @Override
     public ExcelTrabajadorDto generarExcelTrabajadorByVotanteAdmin(int idVotante) {
         ExcelTrabajadorDto mainDto = new ExcelTrabajadorDto();
-
-        Map<Integer, String> calificacionMap = new HashMap<>();
-        calificacionMap.put(0, "NO presenta evidencia de logro final");
-        calificacionMap.put(1, "En proceso de logro");
-        calificacionMap.put(2, "SI presenta evidencia final");
-        calificacionMap.put(3, "Logrado");
-        calificacionMap.put(4, "No presenta evidencia");
 
         Votante votanteTrabajador = equipoRepository.getVotanteByIdVotante(idVotante);
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(votanteTrabajador.getIdUsuario());
@@ -332,6 +321,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
 
@@ -348,7 +338,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                     modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
                     modelEvidenciaDto.setSustentoExtensionFile(t.getSustentoExtensionFile());
-                    modelEvidenciaDto.setCalificacionDescripcion(calificacionMap.get(t.getCalificacion()));
+                    modelEvidenciaDto.setCalificacion(t.getCalificacion() != null ? t.getCalificacion() : -1);
                     listEvidenciaDto.add(modelEvidenciaDto);
                 }
                 modelIndicadorDto.setListEvidencia(listEvidenciaDto);
@@ -380,6 +370,17 @@ public class IndicadorServiceImpl implements IndicadorService {
         XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
         XSSFSheet sheet = workbook.getSheetAt(0);
         XSSFCellStyle centeredStyle = ExcelUtil.createCenteredStyle(workbook);
+
+        Map<Integer, String> calificacionMap = new HashMap<>();
+        calificacionMap.put(0, "NO presenta evidencia de logro final");
+        calificacionMap.put(1, "En proceso de logro");
+        calificacionMap.put(2, "SI presenta evidencia final");
+        calificacionMap.put(3, "Logrado");
+        calificacionMap.put(4, "No presenta evidencia");
+
+        Map<Integer, String> sentidoMap = new HashMap<>();
+        sentidoMap.put(1, "Ascendente");
+        sentidoMap.put(2, "Descendente");
 
         //*********************HEADER**********
         // ENTIDAD
@@ -440,7 +441,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     ExcelUtil.createCell(row, 7, evidencia.getDescripcion(), centeredStyle, false);
                     ExcelUtil.createCell(row, 8, evidencia.getPlazo().format(formatter), centeredStyle, false);
                     //*************LISTA*******
-                    ExcelUtil.createCell(row, 9, Objects.requireNonNullElse(evidencia.getCalificacionDescripcion(), "[Seleccione]"), centeredStyle, false);
+                    ExcelUtil.createCell(row, 9, calificacionMap.getOrDefault(evidencia.getCalificacion(), "[Seleccione]"), centeredStyle, false);
                     CellRangeAddressList addressList = new CellRangeAddressList(row.getRowNum(), row.getRowNum(), 9, 9);
                     DataValidation validation = validationHelper.createValidation(constraintEvidenciaAvance, addressList);
                     validation.setShowErrorBox(true);
@@ -460,7 +461,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 3, indicador.getNombreIndicador(), centeredStyle, false);
 
                 //*************LISTA*******
-                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 4, "[Seleccione]", centeredStyle, false);
+                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 4, sentidoMap.getOrDefault(indicador.getSentido(), "[Seleccione]"), centeredStyle, false);
                 CellRangeAddressList addressList = new CellRangeAddressList(indicadorStartRow, indicadorStartRow, 4, 4);
                 DataValidation validation = validationHelper.createValidation(constraintSentidoIndicador, addressList);
                 validation.setShowErrorBox(true);
@@ -507,6 +508,7 @@ public class IndicadorServiceImpl implements IndicadorService {
         indicador.setDescripcion(request.getDescripcion());
         indicador.setTipoValorMeta(request.getTipoValorMeta());
         indicador.setValorMeta(request.getValorMeta());
+        indicador.setSentido(request.getSentido());
         indicador.setPeso(request.getPeso());
         indicador.setUsuarioModificacion(authService.getIdUserSession());
         indicadorRepository.save(indicador);
