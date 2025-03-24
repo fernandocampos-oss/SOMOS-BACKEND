@@ -382,6 +382,8 @@ public class IndicadorServiceImpl implements IndicadorService {
         sentidoMap.put(1, "Ascendente");
         sentidoMap.put(2, "Descendente");
 
+        boolean presentaEvidenciaMeta = false;
+
         //*********************HEADER**********
         // ENTIDAD
         ExcelUtil.updateCellValue(sheet.getRow(3), 3, "SEGURO SOCIAL DE SALUD - ESSALUD", false);
@@ -435,6 +437,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 int indicadorStartRow = currentRow;
                 int indicadorRowSpan = indicador.getListEvidencia().size();
 
+                int contSustento = 0;
                 for (PendienteEvidenciaDto evidencia : indicador.getListEvidencia()) {
                     Row row = sheet.createRow(currentRow++);
                     row.setHeightInPoints(60);
@@ -449,6 +452,13 @@ public class IndicadorServiceImpl implements IndicadorService {
                     //*************LISTA*******
                     ExcelUtil.mergeCellsInRow(sheet, row.getRowNum(), 10, 11, centeredStyle);
                     ExcelUtil.createCell(row, 10, evidencia.getComentario(), centeredStyle, false);
+                    if (evidencia.getSustentoExtensionFile() != null) {
+                        contSustento++;
+                    }
+                }
+
+                if (indicadorRowSpan == contSustento) {
+                    presentaEvidenciaMeta = true;
                 }
 
                 // Fusionar celdas del indicador
@@ -485,6 +495,12 @@ public class IndicadorServiceImpl implements IndicadorService {
             ExcelUtil.mergeCellsInColumn(sheet, prioridadStartRow, prioridadStartRow + prioridadRowSpan - 1, 2, centeredStyle);
             ExcelUtil.createCell(sheet.getRow(prioridadStartRow), 1, contPrioridades, centeredStyle, false);
             ExcelUtil.createCell(sheet.getRow(prioridadStartRow), 2, prioridad.getPrioridadNombre(), centeredStyle, false);
+        }
+
+        if (presentaEvidenciaMeta) {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 11, "Sí", false);
+        } else {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 11, "No", false);
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
