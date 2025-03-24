@@ -27,6 +27,7 @@ import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -248,6 +249,8 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
+                modelIndicadorDto.setAsisteReunion(i.isAsisteReunion());
+                modelIndicadorDto.setFechaReunion(i.getFechaReunion());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
 
@@ -324,6 +327,8 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
+                modelIndicadorDto.setAsisteReunion(i.isAsisteReunion());
+                modelIndicadorDto.setFechaReunion(i.getFechaReunion());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
 
@@ -383,6 +388,8 @@ public class IndicadorServiceImpl implements IndicadorService {
         sentidoMap.put(2, "Descendente");
 
         boolean presentaEvidenciaMeta = false;
+        boolean asisteReunion = false;
+        LocalDateTime fechaReunion = null;
 
         //*********************HEADER**********
         // ENTIDAD
@@ -436,6 +443,11 @@ public class IndicadorServiceImpl implements IndicadorService {
             for (PendienteIndicadorDto indicador : prioridad.getListIndicador()) {
                 int indicadorStartRow = currentRow;
                 int indicadorRowSpan = indicador.getListEvidencia().size();
+
+                if (indicador.isAsisteReunion()) {
+                    asisteReunion = true;
+                    fechaReunion = indicador.getFechaReunion();
+                }
 
                 int contSustento = 0;
                 for (PendienteEvidenciaDto evidencia : indicador.getListEvidencia()) {
@@ -495,6 +507,15 @@ public class IndicadorServiceImpl implements IndicadorService {
             ExcelUtil.mergeCellsInColumn(sheet, prioridadStartRow, prioridadStartRow + prioridadRowSpan - 1, 2, centeredStyle);
             ExcelUtil.createCell(sheet.getRow(prioridadStartRow), 1, contPrioridades, centeredStyle, false);
             ExcelUtil.createCell(sheet.getRow(prioridadStartRow), 2, prioridad.getPrioridadNombre(), centeredStyle, false);
+        }
+
+        if (asisteReunion) {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 3, "Sí", false);
+            if (fechaReunion != null) {
+                ExcelUtil.updateCellValue(sheet.getRow(17), 7, fechaReunion.format(formatter), false);
+            }
+        } else {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 3, "No", false);
         }
 
         if (presentaEvidenciaMeta) {
