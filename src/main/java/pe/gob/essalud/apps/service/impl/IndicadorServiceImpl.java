@@ -2,9 +2,16 @@ package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.common.constants.gestionrendimiento.EstadoEvidenciaConstant;
 import pe.gob.essalud.apps.common.util.DateUtil;
+import pe.gob.essalud.apps.common.util.ExcelUtil;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
 import pe.gob.essalud.apps.exceptions.ValidationException;
@@ -17,9 +24,12 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -100,6 +110,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setPeso(i.getPeso());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
@@ -151,6 +162,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setPeso(i.getPeso());
                 int numero = 0;
                 numero = i.getPeso();
@@ -190,13 +202,13 @@ public class IndicadorServiceImpl implements IndicadorService {
 
     @Override
     public ExcelTrabajadorDto generarExcelTrabajador() {
-
         ExcelTrabajadorDto mainDto = new ExcelTrabajadorDto();
 
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(authService.getIdUserSession());
         Votante votanteTrabajador = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
         mainDto.setEvaluadoNombreCompleto(votanteTrabajador.getApellidos() + " " + votanteTrabajador.getNombres());
         mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
+        mainDto.setEvaluadoNumeroDocumento(trabajadorUsuario.getNumeroDocumento());
         UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
         mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
         if (votanteTrabajador.getIdSegmento() == 1) {
@@ -234,8 +246,11 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
+                modelIndicadorDto.setAsisteReunion(i.isAsisteReunion());
+                modelIndicadorDto.setFechaReunion(i.getFechaReunion());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
 
@@ -250,7 +265,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                     modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
                     modelEvidenciaDto.setSustentoExtensionFile(t.getSustentoExtensionFile());
-
+                    modelEvidenciaDto.setCalificacion(t.getCalificacion() != null ? t.getCalificacion() : -1);
                     listEvidenciaDto.add(modelEvidenciaDto);
                 }
                 modelIndicadorDto.setListEvidencia(listEvidenciaDto);
@@ -271,6 +286,7 @@ public class IndicadorServiceImpl implements IndicadorService {
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(votanteTrabajador.getIdUsuario());
         mainDto.setEvaluadoNombreCompleto(votanteTrabajador.getApellidos() + " " + votanteTrabajador.getNombres());
         mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
+        mainDto.setEvaluadoNumeroDocumento(trabajadorUsuario.getNumeroDocumento());
         UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
         mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
         if (votanteTrabajador.getIdSegmento() == 1) {
@@ -308,8 +324,11 @@ public class IndicadorServiceImpl implements IndicadorService {
                 modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
                 modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
+                modelIndicadorDto.setSentido(i.getSentido());
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
+                modelIndicadorDto.setAsisteReunion(i.isAsisteReunion());
+                modelIndicadorDto.setFechaReunion(i.getFechaReunion());
 
                 List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
 
@@ -324,7 +343,7 @@ public class IndicadorServiceImpl implements IndicadorService {
                     modelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                     modelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
                     modelEvidenciaDto.setSustentoExtensionFile(t.getSustentoExtensionFile());
-
+                    modelEvidenciaDto.setCalificacion(t.getCalificacion() != null ? t.getCalificacion() : -1);
                     listEvidenciaDto.add(modelEvidenciaDto);
                 }
                 modelIndicadorDto.setListEvidencia(listEvidenciaDto);
@@ -335,6 +354,181 @@ public class IndicadorServiceImpl implements IndicadorService {
         }
         mainDto.setListPrioridad(listPrioridadDto);
         return mainDto;
+    }
+
+    @Override
+    public List<ExcelTrabajadorDto> generarExcelDirectivo() {
+        List<ExcelTrabajadorDto> mainDtoList = new ArrayList<>();
+
+        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+        for (Equipo e : trabajadoresPorJefe) {
+            ExcelTrabajadorDto excelTrabajadorDto = generarExcelTrabajadorByVotanteAdmin(e.getIntegrante().getIdVotante());
+            mainDtoList.add(excelTrabajadorDto);
+        }
+
+        return mainDtoList;
+    }
+
+    @Override
+    public ByteArrayResource generateFormatoExcel(ExcelTrabajadorDto excelTrabajadorDto) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream("src/main/resources/templates/formato-gdr.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFCellStyle centeredStyle = ExcelUtil.createCenteredStyle(workbook);
+
+        Map<Integer, String> calificacionMap = new HashMap<>();
+        calificacionMap.put(0, "NO presenta evidencia de logro final");
+        calificacionMap.put(1, "En proceso de logro");
+        calificacionMap.put(2, "SI presenta evidencia final");
+        calificacionMap.put(3, "Logrado");
+        calificacionMap.put(4, "No presenta evidencia");
+
+        Map<Integer, String> sentidoMap = new HashMap<>();
+        sentidoMap.put(1, "Ascendente");
+        sentidoMap.put(2, "Descendente");
+
+        boolean presentaEvidenciaMeta = false;
+        boolean asisteReunion = false;
+        LocalDateTime fechaReunion = null;
+
+        //*********************HEADER**********
+        // ENTIDAD
+        ExcelUtil.updateCellValue(sheet.getRow(3), 3, "SEGURO SOCIAL DE SALUD - ESSALUD", false);
+        //EVALUADO
+        ExcelUtil.updateCellValue(sheet.getRow(7), 3, excelTrabajadorDto.getEvaluadoNumeroDocumento(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(8), 3, excelTrabajadorDto.getEvaluadoNombreCompleto(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(9), 3, excelTrabajadorDto.getEvaluadoPuesto(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(10), 3, excelTrabajadorDto.getEvaluadoSegmento(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(11), 3, excelTrabajadorDto.getEvaluadoCodUnidad(), false);
+        //EVALUADOR
+        ExcelUtil.updateCellValue(sheet.getRow(7), 10, excelTrabajadorDto.getEvaluadorNumeroDocumento(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(8), 10, excelTrabajadorDto.getEvaluadorNombreCompleto(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(9), 10, excelTrabajadorDto.getEvaluadorPuesto(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(10), 10, excelTrabajadorDto.getEvaluadorSegmento(), false);
+        ExcelUtil.updateCellValue(sheet.getRow(11), 10, excelTrabajadorDto.getEvaluadorCodUnidad(), false);
+        //*********************HEADER**********
+
+        int startRow = 20; // Fila 21 en Excel (0-based index)
+
+        // Calcular el número total de filas que serán usadas
+        int totalRowsNeeded = excelTrabajadorDto.getListPrioridad().stream()
+                .flatMap(prioridad -> prioridad.getListIndicador().stream())
+                .mapToInt(indicador -> indicador.getListEvidencia().size())
+                .sum();
+
+        //*********************FOOTER**********
+        ExcelUtil.moveFooterDown(sheet, startRow, totalRowsNeeded);
+        //*********************FOOTER**********
+
+        //********************LISTA**********
+        String[] opcionesSentidoIndicador = {"[Seleccione]", "Ascendente", "Descendente"};
+        String[] opcionesEvidenciaAvance = {"[Seleccione]", "NO presenta evidencia de logro final", "En proceso de logro",
+                "SI presenta evidencia final", "Logrado", "No presenta evidencia"};
+
+        // Crear la validación de datos (DropDown)
+        DataValidationHelper validationHelper = sheet.getDataValidationHelper();
+        DataValidationConstraint constraintSentidoIndicador = validationHelper.createExplicitListConstraint(opcionesSentidoIndicador);
+        DataValidationConstraint constraintEvidenciaAvance = validationHelper.createExplicitListConstraint(opcionesEvidenciaAvance);
+        //********************LISTA**********
+
+        // Ahora llenamos la data sin afectar el footer
+        int currentRow = startRow;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        int contPrioridades = 0;
+        for (PendienteDto prioridad : excelTrabajadorDto.getListPrioridad()) {
+            int prioridadStartRow = currentRow;
+            int prioridadRowSpan = 0;
+
+            for (PendienteIndicadorDto indicador : prioridad.getListIndicador()) {
+                int indicadorStartRow = currentRow;
+                int indicadorRowSpan = indicador.getListEvidencia().size();
+
+                if (indicador.isAsisteReunion()) {
+                    asisteReunion = true;
+                    fechaReunion = indicador.getFechaReunion();
+                }
+
+                int contSustento = 0;
+                for (PendienteEvidenciaDto evidencia : indicador.getListEvidencia()) {
+                    Row row = sheet.createRow(currentRow++);
+                    row.setHeightInPoints(60);
+                    ExcelUtil.createCell(row, 7, evidencia.getDescripcion(), centeredStyle, false);
+                    ExcelUtil.createCell(row, 8, evidencia.getPlazo().format(formatter), centeredStyle, false);
+                    //*************LISTA*******
+                    ExcelUtil.createCell(row, 9, calificacionMap.getOrDefault(evidencia.getCalificacion(), "[Seleccione]"), centeredStyle, false);
+                    CellRangeAddressList addressList = new CellRangeAddressList(row.getRowNum(), row.getRowNum(), 9, 9);
+                    DataValidation validation = validationHelper.createValidation(constraintEvidenciaAvance, addressList);
+                    validation.setShowErrorBox(true);
+                    sheet.addValidationData(validation);
+                    //*************LISTA*******
+                    ExcelUtil.mergeCellsInRow(sheet, row.getRowNum(), 10, 11, centeredStyle);
+                    ExcelUtil.createCell(row, 10, evidencia.getComentario(), centeredStyle, false);
+                    if (evidencia.getSustentoExtensionFile() != null) {
+                        contSustento++;
+                    }
+                }
+
+                if (indicadorRowSpan == contSustento) {
+                    presentaEvidenciaMeta = true;
+                }
+
+                // Fusionar celdas del indicador
+                ExcelUtil.mergeCellsInColumn(sheet, indicadorStartRow, indicadorStartRow + indicadorRowSpan - 1, 3, centeredStyle);
+                ExcelUtil.mergeCellsInColumn(sheet, indicadorStartRow, indicadorStartRow + indicadorRowSpan - 1, 4, centeredStyle);
+                ExcelUtil.mergeCellsInColumn(sheet, indicadorStartRow, indicadorStartRow + indicadorRowSpan - 1, 5, centeredStyle);
+                ExcelUtil.mergeCellsInColumn(sheet, indicadorStartRow, indicadorStartRow + indicadorRowSpan - 1, 6, centeredStyle);
+                ExcelUtil.mergeCellsInColumn(sheet, indicadorStartRow, indicadorStartRow + indicadorRowSpan - 1, 12, centeredStyle);
+                ExcelUtil.mergeCellsInColumn(sheet, indicadorStartRow, indicadorStartRow + indicadorRowSpan - 1, 13, centeredStyle);
+                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 3, indicador.getNombreIndicador(), centeredStyle, false);
+
+                //*************LISTA*******
+                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 4, sentidoMap.getOrDefault(indicador.getSentido(), "[Seleccione]"), centeredStyle, false);
+                CellRangeAddressList addressList = new CellRangeAddressList(indicadorStartRow, indicadorStartRow, 4, 4);
+                DataValidation validation = validationHelper.createValidation(constraintSentidoIndicador, addressList);
+                validation.setShowErrorBox(true);
+                sheet.addValidationData(validation);
+                //*************LISTA*******
+
+                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 5, indicador.getValorMeta(), centeredStyle, false);
+                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 6, indicador.getPeso() + "%", centeredStyle, false);
+                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 12, "", centeredStyle, false);
+
+                String formula = "IFERROR(IF($L$18=\"No\",\"No corresponde\",IF(OR(M{row}=\"\",E{row}=\"[Seleccione]\"),\"-\",IF(IF(E{row}=\"Ascendente\",(M{row}/F{row})*100*G{row},(((1-(M{row}/F{row}))+1)*100*G{row}))>(G{row}*100),(G{row}*100),IF(E{row}=\"Ascendente\",(M{row}/F{row})*100*G{row},IF(AND(E{row}=\"Descendente\",(M{row}>F{row}*2)),0,((1-(M{row}/F{row}))+1)*100*G{row}))))),\"-\")";
+                formula = formula.replace("{row}", String.valueOf(indicadorStartRow + 1));
+                ExcelUtil.createCell(sheet.getRow(indicadorStartRow), 13, formula, centeredStyle, true);
+
+                prioridadRowSpan += indicadorRowSpan;
+            }
+
+            // Fusionar celdas de la prioridad
+            contPrioridades++;
+            ExcelUtil.mergeCellsInColumn(sheet, prioridadStartRow, prioridadStartRow + prioridadRowSpan - 1, 1, centeredStyle);
+            ExcelUtil.mergeCellsInColumn(sheet, prioridadStartRow, prioridadStartRow + prioridadRowSpan - 1, 2, centeredStyle);
+            ExcelUtil.createCell(sheet.getRow(prioridadStartRow), 1, contPrioridades, centeredStyle, false);
+            ExcelUtil.createCell(sheet.getRow(prioridadStartRow), 2, prioridad.getPrioridadNombre(), centeredStyle, false);
+        }
+
+        if (asisteReunion) {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 3, "Sí", false);
+            if (fechaReunion != null) {
+                ExcelUtil.updateCellValue(sheet.getRow(17), 7, fechaReunion.format(formatter), false);
+            }
+        } else {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 3, "No", false);
+        }
+
+        if (presentaEvidenciaMeta) {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 11, "Sí", false);
+        } else {
+            ExcelUtil.updateCellValue(sheet.getRow(17), 11, "No", false);
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+
+        return new ByteArrayResource(outputStream.toByteArray());
     }
 
     @Override
@@ -351,6 +545,7 @@ public class IndicadorServiceImpl implements IndicadorService {
         indicador.setDescripcion(request.getDescripcion());
         indicador.setTipoValorMeta(request.getTipoValorMeta());
         indicador.setValorMeta(request.getValorMeta());
+        indicador.setSentido(request.getSentido());
         indicador.setPeso(request.getPeso());
         indicador.setUsuarioModificacion(authService.getIdUserSession());
         indicadorRepository.save(indicador);
