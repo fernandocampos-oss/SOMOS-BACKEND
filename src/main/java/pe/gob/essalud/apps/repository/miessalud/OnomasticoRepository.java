@@ -16,7 +16,10 @@ public interface OnomasticoRepository extends JpaRepository<Onomastico, Integer>
     @Query("SELECT u from Usuario u WHERE u.numeroDocumento=:numDoc and u.esActivo=true ")
     Usuario findUsuarioByNumDocAndEstado(@Param("numDoc") String numDoc);
 
-    @Query(value = "SELECT * FROM fn_onomasticos_por_dia(?, ?) ", nativeQuery = true)
-    List<Object[]> obtenerOnomasticosPorDiaAndEstado(@Param("mes") String mes, @Param("dia") String dia);
+    @Query(value = "SELECT * FROM fn_onomasticos_interfaz_por_dia(?, ?) ", nativeQuery = true)
+    List<Object[]> obtenerOnomasticosInterfazPorDiaAndEstado(@Param("mes") String mes, @Param("dia") String dia);
+
+    @Query(value = "SELECT * FROM fn_onomasticos_correo_por_dia(?, ?) ", nativeQuery = true)
+    List<Object[]> obtenerOnomasticosCorreoPorDiaAndEstado(@Param("mes") String mes, @Param("dia") String dia);
 
 }
