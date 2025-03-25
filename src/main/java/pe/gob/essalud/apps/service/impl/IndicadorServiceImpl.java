@@ -25,8 +25,8 @@ import pe.gob.essalud.apps.service.IndicadorService;
 
 import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -371,8 +371,9 @@ public class IndicadorServiceImpl implements IndicadorService {
 
     @Override
     public ByteArrayResource generateFormatoExcel(ExcelTrabajadorDto excelTrabajadorDto) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream("src/main/resources/templates/formato-gdr.xlsx");
-        XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("templates/formato-gdr.xlsx");
+
+        XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
         XSSFSheet sheet = workbook.getSheetAt(0);
         XSSFCellStyle centeredStyle = ExcelUtil.createCenteredStyle(workbook);
 
