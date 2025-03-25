@@ -43,9 +43,13 @@ public class OnomasticoController extends BaseController {
         return onomasticoService.findAllOnomasticosByMes(mes);
     }
 
+//    @GetMapping("mes/{mes}/dia/{dia}")
+//    public List<Onomastico> findAllOnomasticosByMesAndDia(@PathVariable String mes, @PathVariable String dia) {
+//        return onomasticoService.findAllOnomasticosByMesAndDia(mes, dia);
+//    }
     @GetMapping("mes/{mes}/dia/{dia}")
-    public List<Onomastico> findAllOnomasticosByMesAndDia(@PathVariable String mes, @PathVariable String dia) {
-        return onomasticoService.findAllOnomasticosByMesAndDia(mes, dia);
+    public List<OnomasticoResponseDto> getOnomasticosByMesAndDiaAndEstado(@PathVariable String mes, @PathVariable String dia) {
+        return onomasticoService.getOnomasticosByMesAndDiaAndEstado(mes, dia);
     }
 
     @GetMapping("/find/usuario/num-doc/{numeroDocumento}")
@@ -68,7 +72,7 @@ public class OnomasticoController extends BaseController {
             List<OnomasticoResponseDto> listUser=  onomasticoService.obtenerOnomasticosPorDiaAndEstado(mesFormato, diaFormato);
             log.info("Cant. envios: [{}]", listUser.size());
         };
-//        long initialDelay = calculateInitialDelay(15, 28); //local
+//        long initialDelay = calculateInitialDelay(21, 27); //local
 		long initialDelay = calculateInitialDelay(12, 0); // Hora: 7:00 AM formato 24h
         long period = TimeUnit.DAYS.toMillis(1); // Repeticion por día
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);

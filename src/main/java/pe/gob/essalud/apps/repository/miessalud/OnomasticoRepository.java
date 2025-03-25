@@ -11,7 +11,7 @@ import java.util.List;
 public interface OnomasticoRepository extends JpaRepository<Onomastico, Integer> {
 
     List<Onomastico> findByMes(String mes);
-    List<Onomastico> findByMesAndDia(String mes, String dia);
+//    List<Onomastico> findByMesAndDia(String mes, String dia);
 
     @Query("SELECT u from Usuario u WHERE u.numeroDocumento=:numDoc and u.esActivo=true ")
     Usuario findUsuarioByNumDocAndEstado(@Param("numDoc") String numDoc);

@@ -12,4 +12,5 @@ public class OnomasticoResponseDto {
     private String fechaNacimiento;
     private String correo;
     private Boolean esActivo;
+    private String unidad;
 }

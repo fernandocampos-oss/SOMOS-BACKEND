@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,9 +45,27 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
         return onomasticoRepository.findByMes(mes);
     }
 
+//    @Override
+//    public List<Onomastico> findAllOnomasticosByMesAndDia(String mes, String dia) {
+//        return onomasticoRepository.findByMesAndDia(mes, dia);
+//    }
     @Override
-    public List<Onomastico> findAllOnomasticosByMesAndDia(String mes, String dia) {
-        return onomasticoRepository.findByMesAndDia(mes, dia);
+    public List<OnomasticoResponseDto> getOnomasticosByMesAndDiaAndEstado(String mes, String dia) {
+        List<OnomasticoResponseDto> listOnomastico = new ArrayList<>();
+        List<Object[]> listUser = onomasticoRepository.obtenerOnomasticosPorDiaAndEstado(mes, dia);
+        log.info("Total cumpleaños: [{}]", listUser.size());
+        for (Object[] row : listUser) {
+            OnomasticoResponseDto trabajador = new OnomasticoResponseDto();
+            String nombre = (String) row[1];
+            String apellido = (String) row[2];
+            String descripcionUnidad = (String) row[6];
+            trabajador.setNombres(nombre);
+            trabajador.setApellidos(apellido);
+            trabajador.setUnidad(descripcionUnidad);
+            listOnomastico.add(trabajador);
+            log.info("Nombre: [{}], Apellido: [{}], descripcionUnidad: [{}]", (String) row[1], (String) row[2], (String) row[6]);
+        }
+        return listOnomastico;
     }
 
     @Override
@@ -57,7 +76,7 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
     @Override
     public List<OnomasticoResponseDto> obtenerOnomasticosPorDiaAndEstado(String mes, String dia) {
         List<OnomasticoResponseDto> listOnomastico = new ArrayList<>();
-        List<Object[]> listUser =  onomasticoRepository.obtenerOnomasticosPorDiaAndEstado(mes, dia);
+        List<Object[]> listUser = onomasticoRepository.obtenerOnomasticosPorDiaAndEstado(mes, dia);
         log.info("Total correos a enviar: [{}]", listUser.size());
         for (Object[] row : listUser) {
             OnomasticoResponseDto trabajador = new OnomasticoResponseDto();
