@@ -66,6 +66,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
 
     @Autowired
     private CaptchaConfig captchaConfig;
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -274,6 +275,12 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Override
     public CaptchaResponseDto validCaptcha(CaptchaRequestDto dtoRequest) {
         CaptchaResponseDto dto = new CaptchaResponseDto();
+
+        if (!captchaConfig.isEnabled()) {
+            dto.setRespuestaCaptcha(true);
+            return dto;
+        }
+
         if (!dtoRequest.getLlave().isEmpty()) {
             log.info("llave {}", dtoRequest.getLlave());
 
@@ -281,21 +288,19 @@ public class AuthServiceImpl extends BaseService implements AuthService {
             log.info("verifyUri {}", verifyUri);
 
             CaptchaResponse captchaResponse = restTemplate.getForObject(verifyUri, CaptchaResponse.class);
-            log.info("success {}", captchaResponse.isSuccess());
-            log.info("score {}", captchaResponse.getScore());
-            log.info("action {}", captchaResponse.getAction());
-            log.info("challenge_ts {}", captchaResponse.getChallengeTs());
-            log.info("hostname {}", captchaResponse.getHostname());
-
-            if (captchaResponse != null && captchaResponse.isSuccess()) {
+            if (captchaResponse != null) {
+                log.info("success {}", captchaResponse.isSuccess());
+                log.info("score {}", captchaResponse.getScore());
+                log.info("action {}", captchaResponse.getAction());
+                log.info("challenge_ts {}", captchaResponse.getChallengeTs());
+                log.info("hostname {}", captchaResponse.getHostname());
                 dto.setRespuestaCaptcha(captchaResponse.isSuccess());
                 // Validar el resultado según la puntuación
                 boolean umbral = captchaResponse.getScore() >= 0.5;
                 log.info("umbral {}", umbral);
-                if (captchaResponse.isSuccess() == true && umbral == true) {
-                }
             }
         }
+
         return dto;
     }
 
