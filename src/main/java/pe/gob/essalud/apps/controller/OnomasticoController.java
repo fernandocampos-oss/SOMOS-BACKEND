@@ -2,13 +2,14 @@ package pe.gob.essalud.apps.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.gob.essalud.apps.base.BaseController;
-import pe.gob.essalud.apps.dto.onomastico.response.OnomasticoResponseDto;
+import pe.gob.essalud.apps.dto.onomastico.response.IOnomasticoResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Onomastico;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.service.OnomasticoService;
@@ -32,6 +33,12 @@ public class OnomasticoController extends BaseController {
 
     static final String ONOMASTICO = "onomasticos";
     private final OnomasticoService onomasticoService;
+    @Value("${correo.hora}")
+    private int hora;
+    @Value("${correo.minuto}")
+    private int minuto;
+    @Value("${correo.estado}")
+    private String estado;
 
     @GetMapping
     public List<Onomastico> findAllOnomasticos() {
@@ -48,8 +55,8 @@ public class OnomasticoController extends BaseController {
 //        return onomasticoService.findAllOnomasticosByMesAndDia(mes, dia);
 //    }
     @GetMapping("mes/{mes}/dia/{dia}")
-    public List<OnomasticoResponseDto> getOnomasticosByMesAndDiaAndEstado(@PathVariable String mes, @PathVariable String dia) {
-        return onomasticoService.getOnomasticosByMesAndDiaAndEstado(mes, dia);
+    public List<IOnomasticoResponseDto> obtenerOnomasticosInterfazPorDiaAndEstado(@PathVariable String mes, @PathVariable String dia) {
+        return onomasticoService.obtenerOnomasticosInterfazPorDiaAndEstado(mes, dia);
     }
 
     @GetMapping("/find/usuario/num-doc/{numeroDocumento}")
@@ -60,29 +67,28 @@ public class OnomasticoController extends BaseController {
     @PostConstruct
     public void sendEmailSaludoOnomasticoMasivo() {
         LocalDateTime fechaInicioLocal = LocalDateTime.now(ZoneId.of("America/Lima"));
-        log.info("Inicio programado envio de correos masivos por onomastico horario [{}-{}]", LocalDateTime.now(), fechaInicioLocal);
+        log.info("Inicio programado envio de correos masivos por onomastico [{}-{}]", LocalDateTime.now(), fechaInicioLocal);
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
-            log.info("Tarea ejecutada a las [{}]", fechaInicioLocal);
             LocalDate fechaActual = LocalDate.now();
             String mesFormato = String.format("%02d", fechaActual.getMonthValue());
             String diaFormato = String.format("%02d", fechaActual.getDayOfMonth());
-            log.info("Dia: [{}], Mes: [{}]", diaFormato, mesFormato);
-
-            List<OnomasticoResponseDto> listUser=  onomasticoService.obtenerOnomasticosPorDiaAndEstado(mesFormato, diaFormato);
-            log.info("Cant. envios: [{}]", listUser.size());
+            if (estado.equals("true")) {
+                log.info("Envio de correo onomastico [Activo] [{}-{}-{}]", hora, minuto, estado);
+                List<IOnomasticoResponseDto> listUser=  onomasticoService.obtenerOnomasticosCorreoPorDiaAndEstado(mesFormato, diaFormato);
+                log.info("Cant. envios: [{}]", listUser.size());
+            }
+            if (estado.equals("false")) {
+                log.info("Envio de correo onomastico [Inactivo] [{}-{}-{}]", hora, minuto, estado);
+            }
         };
-//        long initialDelay = calculateInitialDelay(21, 27); //local
-		long initialDelay = calculateInitialDelay(12, 0); // Hora: 7:00 AM formato 24h
-        long period = TimeUnit.DAYS.toMillis(1); // Repeticion por día
+		long initialDelay = calculateInitialDelay(hora, minuto); //formato 24h
+        long period = TimeUnit.DAYS.toMillis(1);
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
     }
-
-    // Calculo de la demora inicial para la próxima ejecución a las 7:00AM
     private static long calculateInitialDelay(int hour, int minute) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime nextRun = now.withHour(hour).withMinute(minute).withSecond(0).withNano(0);
-        // Si la hora actual ya pasó, se programa para el siguiente día
         if (now.isAfter(nextRun)) {
             nextRun = nextRun.plusDays(1);
         }

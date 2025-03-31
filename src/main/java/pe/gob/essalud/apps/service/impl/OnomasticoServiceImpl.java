@@ -4,14 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.util.UriComponentsBuilder;
 import pe.gob.essalud.apps.base.BaseService;
 import pe.gob.essalud.apps.client.EmailServiceClient;
-import pe.gob.essalud.apps.common.constants.Constantes;
-import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
 import pe.gob.essalud.apps.dto.emailservice.SaludoOnomasticobRequestDto;
-import pe.gob.essalud.apps.dto.onomastico.response.OnomasticoResponseDto;
+import pe.gob.essalud.apps.dto.onomastico.response.IOnomasticoResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Onomastico;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.repository.miessalud.OnomasticoRepository;
@@ -19,13 +15,6 @@ import pe.gob.essalud.apps.service.OnomasticoService;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -50,21 +39,10 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
 //        return onomasticoRepository.findByMesAndDia(mes, dia);
 //    }
     @Override
-    public List<OnomasticoResponseDto> getOnomasticosByMesAndDiaAndEstado(String mes, String dia) {
-        List<OnomasticoResponseDto> listOnomastico = new ArrayList<>();
-        List<Object[]> listUser = onomasticoRepository.obtenerOnomasticosInterfazPorDiaAndEstado(mes, dia);
-        log.info("Total cumpleaños: [{}]", listUser.size());
-        for (Object[] row : listUser) {
-            OnomasticoResponseDto trabajador = new OnomasticoResponseDto();
-            String nombre = (String) row[1];
-            String apellido = (String) row[2];
-            String descripcionUnidad = (String) row[6];
-            trabajador.setNombres(nombre);
-            trabajador.setApellidos(apellido);
-            trabajador.setUnidad(descripcionUnidad);
-            listOnomastico.add(trabajador);
-            log.info("Nombre: [{}], Apellido: [{}], descripcionUnidad: [{}]", (String) row[1], (String) row[2], (String) row[6]);
-        }
+    public List<IOnomasticoResponseDto> obtenerOnomasticosInterfazPorDiaAndEstado(String mes, String dia) {
+        List<IOnomasticoResponseDto> listOnomastico;
+        listOnomastico = onomasticoRepository.obtenerOnomasticosInterfazPorDiaAndEstado(mes, dia);
+        log.info("cant. cumpleaños: [{}]", listOnomastico.size());
         return listOnomastico;
     }
 
@@ -74,22 +52,13 @@ public class OnomasticoServiceImpl extends BaseService implements OnomasticoServ
     }
 
     @Override
-    public List<OnomasticoResponseDto> obtenerOnomasticosPorDiaAndEstado(String mes, String dia) {
-        List<OnomasticoResponseDto> listOnomastico = new ArrayList<>();
-        List<Object[]> listUser = onomasticoRepository.obtenerOnomasticosCorreoPorDiaAndEstado(mes, dia);
-        log.info("Total correos a enviar: [{}]", listUser.size());
-        for (Object[] row : listUser) {
-            OnomasticoResponseDto trabajador = new OnomasticoResponseDto();
-            String nombre = (String) row[1];
-            String apellido = (String) row[2];
-            String correo = (String) row[4];
-            trabajador.setNombres(nombre);
-            trabajador.setApellidos(apellido);
-            trabajador.setCorreo(correo);
-            listOnomastico.add(trabajador);
-            log.info("Nombre: [{}], Apellido: [{}], Correo: [{}]", (String) row[1], (String) row[2], (String) row[4]);
-            String nombreCompleto = trabajador.getNombres() + " " + trabajador.getApellidos();
-            _sendMailSaludoOnomastico(correo, nombreCompleto);
+    public List<IOnomasticoResponseDto> obtenerOnomasticosCorreoPorDiaAndEstado(String mes, String dia) {
+        List<IOnomasticoResponseDto> listOnomastico;
+        listOnomastico = onomasticoRepository.obtenerOnomasticosInterfazPorDiaAndEstado(mes, dia);
+        for (IOnomasticoResponseDto row : listOnomastico) {
+            log.info("Nombre: [{}], Apellido: [{}], Correo: [{}]", row.getNombres(), row.getApellidos(), row.getCorreo());
+            String nombreCompleto = row.getNombres() + " " + row.getApellidos();
+            _sendMailSaludoOnomastico(row.getCorreo(), nombreCompleto);
         }
         return listOnomastico;
     }
