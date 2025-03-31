@@ -33,11 +33,11 @@ public class OnomasticoController extends BaseController {
 
     static final String ONOMASTICO = "onomasticos";
     private final OnomasticoService onomasticoService;
-    @Value("${correo.hora}")
+    @Value("${email.hour}")
     private int hora;
-    @Value("${correo.minuto}")
+    @Value("${email.minute}")
     private int minuto;
-    @Value("${correo.estado}")
+    @Value("${email.enabled}")
     private String estado;
 
     @GetMapping
