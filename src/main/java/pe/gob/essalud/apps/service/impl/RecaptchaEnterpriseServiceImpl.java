@@ -1,5 +1,7 @@
 package pe.gob.essalud.apps.service.impl;
 
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import pe.gob.essalud.apps.client.RecaptchaEnterpriseServiceClient;
 import pe.gob.essalud.apps.dto.captcha.CaptchaResponseDto;
 import pe.gob.essalud.apps.dto.recaptcha.RecaptchaResponseDto;
@@ -18,7 +20,10 @@ public class RecaptchaEnterpriseServiceImpl implements RecaptchaEnterpriseServic
     public CaptchaResponseDto verifyToken(String token, String action) {
         CaptchaResponseDto dto = new CaptchaResponseDto();
         try {
-            RecaptchaResponseDto recaptchaResponseDto = recaptchaEnterpriseServiceClient.verify(token, action);
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("token", token);
+            formData.add("action", action);
+            RecaptchaResponseDto recaptchaResponseDto = recaptchaEnterpriseServiceClient.verify(formData);
             log.info("Recaptcha enterprise response: {}", recaptchaResponseDto);
             if (recaptchaResponseDto != null) {
                 dto.setRespuestaCaptcha(recaptchaResponseDto.isSuccess());
