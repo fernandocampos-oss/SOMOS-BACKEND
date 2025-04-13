@@ -1,9 +1,8 @@
 package pe.gob.essalud.apps.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import pe.gob.essalud.apps.config.FormUrlEncodedFeignConfig;
 import pe.gob.essalud.apps.dto.recaptcha.RecaptchaResponseDto;
 
@@ -11,6 +10,6 @@ import pe.gob.essalud.apps.dto.recaptcha.RecaptchaResponseDto;
 public interface RecaptchaEnterpriseServiceClient {
 
     @PostMapping(value = "verify", consumes = "application/x-www-form-urlencoded")
-    RecaptchaResponseDto verify(@RequestBody MultiValueMap<String, String> formData);
+    RecaptchaResponseDto verify(@RequestParam("token") String token, @RequestParam("action") String action);
 
 }
