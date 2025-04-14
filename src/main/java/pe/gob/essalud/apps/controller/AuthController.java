@@ -77,7 +77,7 @@ public class AuthController extends BaseController {
 
     @PostMapping("/captcha")
     public CaptchaResponseDto validCaptcha(@RequestBody CaptchaRequestDto dtoRequest) {
-        return recaptchaEnterpriseService.verifyToken(dtoRequest.getLlave(), "login");
+        return authService.validCaptcha(dtoRequest);
     }
 
 }

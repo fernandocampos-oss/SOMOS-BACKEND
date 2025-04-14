@@ -11,7 +11,6 @@ public class CaptchaConfig {
     private String site;
     private String secret;
     private float threshold;
-    private boolean enabled;
 
     public String getSite() {
         return site;
@@ -37,11 +36,4 @@ public class CaptchaConfig {
         this.threshold = threshold;
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 }

@@ -2,6 +2,7 @@ package pe.gob.essalud.apps.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 import pe.gob.essalud.apps.base.BaseService;
@@ -69,6 +70,9 @@ public class AuthServiceImpl extends BaseService implements AuthService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Value("${google.recaptcha.validation.enabled}")
+    private boolean captchaValidationEnabled;
 
     @Override
     public UserSessionDto getUserSession() {
@@ -276,7 +280,7 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     public CaptchaResponseDto validCaptcha(CaptchaRequestDto dtoRequest) {
         CaptchaResponseDto dto = new CaptchaResponseDto();
 
-        if (!captchaConfig.isEnabled()) {
+        if (!captchaValidationEnabled) {
             dto.setRespuestaCaptcha(true);
             return dto;
         }
