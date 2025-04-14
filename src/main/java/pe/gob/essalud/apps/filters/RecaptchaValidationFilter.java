@@ -21,9 +21,11 @@ public class RecaptchaValidationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        if ("/auth/login".equals(request.getServletPath()) && "POST".equalsIgnoreCase(request.getMethod())) {
+        String requestPath  = request.getServletPath();
+        if (("/auth".equals(requestPath ) || "/auth/login".equals(requestPath )) && "POST".equalsIgnoreCase(request.getMethod())) {
             String captchaToken = request.getHeader("X-Captcha-Token");
-            if (captchaToken == null || !recaptchaEnterpriseService.verifyToken(captchaToken, "login")) {
+            String captchaAction = request.getHeader("X-Captcha-Action");
+            if (captchaToken == null || !recaptchaEnterpriseService.verifyToken(captchaToken, captchaAction)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid captcha");
                 return;
             }
