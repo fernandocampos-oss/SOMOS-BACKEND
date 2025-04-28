@@ -2,7 +2,6 @@ package pe.gob.essalud.apps.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 import pe.gob.essalud.apps.base.BaseService;
@@ -67,12 +66,8 @@ public class AuthServiceImpl extends BaseService implements AuthService {
 
     @Autowired
     private CaptchaConfig captchaConfig;
-
     @Autowired
     private RestTemplate restTemplate;
-
-    @Value("${google.recaptcha.validation.enabled}")
-    private boolean captchaValidationEnabled;
 
     @Override
     public UserSessionDto getUserSession() {
@@ -279,12 +274,6 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     @Override
     public CaptchaResponseDto validCaptcha(CaptchaRequestDto dtoRequest) {
         CaptchaResponseDto dto = new CaptchaResponseDto();
-
-        if (!captchaValidationEnabled) {
-            dto.setRespuestaCaptcha(true);
-            return dto;
-        }
-
         if (!dtoRequest.getLlave().isEmpty()) {
             log.info("llave {}", dtoRequest.getLlave());
 
@@ -292,19 +281,21 @@ public class AuthServiceImpl extends BaseService implements AuthService {
             log.info("verifyUri {}", verifyUri);
 
             CaptchaResponse captchaResponse = restTemplate.getForObject(verifyUri, CaptchaResponse.class);
-            if (captchaResponse != null) {
-                log.info("success {}", captchaResponse.isSuccess());
-                log.info("score {}", captchaResponse.getScore());
-                log.info("action {}", captchaResponse.getAction());
-                log.info("challenge_ts {}", captchaResponse.getChallengeTs());
-                log.info("hostname {}", captchaResponse.getHostname());
+            log.info("success {}", captchaResponse.isSuccess());
+            log.info("score {}", captchaResponse.getScore());
+            log.info("action {}", captchaResponse.getAction());
+            log.info("challenge_ts {}", captchaResponse.getChallengeTs());
+            log.info("hostname {}", captchaResponse.getHostname());
+
+            if (captchaResponse != null && captchaResponse.isSuccess()) {
                 dto.setRespuestaCaptcha(captchaResponse.isSuccess());
                 // Validar el resultado según la puntuación
                 boolean umbral = captchaResponse.getScore() >= 0.5;
                 log.info("umbral {}", umbral);
+                if (captchaResponse.isSuccess() == true && umbral == true) {
+                }
             }
         }
-
         return dto;
     }
 

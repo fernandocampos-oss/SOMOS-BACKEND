@@ -11,7 +11,6 @@ public class MainIndicadorDto {
     private String codTipoValorMeta;
     private int idTipoValorMeta;
     private int valorMeta;
-    private int sentido;
     private int peso;
     private List<MainEvidenciaDto> listEvidencia;
     

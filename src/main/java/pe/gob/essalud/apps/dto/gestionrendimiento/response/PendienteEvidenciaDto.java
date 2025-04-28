@@ -14,5 +14,4 @@ public class PendienteEvidenciaDto {
     private String sustentoDescripcion;
     private LocalDateTime sustentoFechaRegistro;
     private String sustentoExtensionFile;
-    private int calificacion;
 }

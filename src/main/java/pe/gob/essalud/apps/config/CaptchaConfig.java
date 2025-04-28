@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "google.recaptcha.key")
 public class CaptchaConfig {
-
     private String site;
     private String secret;
     private float threshold;
@@ -35,5 +34,4 @@ public class CaptchaConfig {
     public void setThreshold(float threshold) {
         this.threshold = threshold;
     }
-
 }

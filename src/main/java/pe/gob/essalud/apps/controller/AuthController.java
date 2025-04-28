@@ -19,7 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-import pe.gob.essalud.apps.service.RecaptchaEnterpriseService;
 import pe.gob.essalud.apps.service.UsuarioService;
 
 @RestController
@@ -32,7 +31,6 @@ public class AuthController extends BaseController {
     private final JwtService jwtService;
     private final AuthService authService;
     private final UsuarioService usuarioService;
-    private final RecaptchaEnterpriseService recaptchaEnterpriseService;
 
     @PreAuthorize("authenticated")
     @PostMapping(LOGIN)

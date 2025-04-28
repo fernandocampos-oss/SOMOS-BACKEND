@@ -22,9 +22,6 @@ public class Indicador {
     @Column(name="descripcion", length = 350)
     private String descripcion;
 
-    @Column(name = "sentido")
-    private int sentido;
-
     @Column(name="peso")
     private int peso;
 
@@ -65,17 +62,15 @@ public class Indicador {
     private Integer usuarioModificacion;
     @Column(name = "fecha_modificacion")
     private LocalDateTime  fechaModificacion;
-
+    
+    /* Agregado de 2 columnas - Inicio */
+    
     @Column(name = "des_prioridad", length = 350)
     private String desPrioridad;
     @Column(name = "fl_des_prioridad")
     private String flDesPrioridad;
-
-    @Column(name = "asiste_reunion")
-    private boolean asisteReunion;
-
-    @Column(name = "fecha_reunion")
-    private LocalDateTime fechaReunion;
+    
+    /* Agregado de 2 columnas - Fin */
 
     @PrePersist
     private void prePersist() {

@@ -88,7 +88,6 @@ public class PrioridadServiceImpl implements PrioridadService {
                     modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
                     modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
                     modelIndicadorDto.setValorMeta(i.getValorMeta());
-                    modelIndicadorDto.setSentido(i.getSentido());
                     modelIndicadorDto.setPeso(i.getPeso());
                     /* Agregado de 2 columnas - Inicio */
                     modelIndicadorDto.setDesPrioridad(i.getDesPrioridad());

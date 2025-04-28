@@ -1,6 +1,5 @@
 package pe.gob.essalud.apps.config;
 
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import pe.gob.essalud.apps.filters.JwtAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,8 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import pe.gob.essalud.apps.filters.RecaptchaValidationFilter;
-import pe.gob.essalud.apps.service.RecaptchaEnterpriseService;
 
 @Configuration
 @EnableWebSecurity
@@ -24,13 +21,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-    private final RecaptchaEnterpriseService recaptchaEnterpriseService;
 
     public SecurityConfig(@Qualifier("app.users") UserDetailsService userDetailsService,
-                          PasswordEncoder passwordEncoder, RecaptchaEnterpriseService recaptchaEnterpriseService) {
+            PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
-        this.recaptchaEnterpriseService = recaptchaEnterpriseService;
     }
 
     @Override
@@ -46,9 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .httpBasic() // login with Auth Basic for getting a login
             .authenticationEntryPoint(new Http401AuthenticationEntryPoint())
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // stateless to API
-            .and()
-            .addFilterBefore(new RecaptchaValidationFilter(recaptchaEnterpriseService), BasicAuthenticationFilter.class)
-            .addFilter(jwtAuthorizationFilter());
+            .and().addFilter(jwtAuthorizationFilter());
     }
 
     @Bean
