@@ -10,8 +10,6 @@ import pe.gob.essalud.apps.dto.auth.response.AuthUsuarioRegisterResponse;
 import pe.gob.essalud.apps.dto.auth.response.GenerarTokenRecuperarClaveResponseDto;
 import pe.gob.essalud.apps.dto.auth.response.LoginResponseDto;
 import pe.gob.essalud.apps.dto.auth.response.UserResponseDto;
-import pe.gob.essalud.apps.dto.captcha.CaptchaRequestDto;
-import pe.gob.essalud.apps.dto.captcha.CaptchaResponseDto;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -71,11 +69,6 @@ public class AuthController extends BaseController {
                 userSession.getCodRed(),
                 userSession.getCodUnidad(),
                 userSession.getIdRolAdicional());
-    }
-
-    @PostMapping("/captcha")
-    public CaptchaResponseDto validCaptcha(@RequestBody CaptchaRequestDto dtoRequest) {
-        return authService.validCaptcha(dtoRequest);
     }
 
 }
