@@ -25,13 +25,24 @@ public class RecaptchaValidationFilter extends OncePerRequestFilter {
         if (("/auth".equals(requestPath ) || "/auth/login".equals(requestPath )) && "POST".equalsIgnoreCase(request.getMethod())) {
             String captchaToken = request.getHeader("X-Captcha-Token");
             String captchaAction = request.getHeader("X-Captcha-Action");
-            if (captchaToken == null || !recaptchaEnterpriseService.verifyToken(captchaToken, captchaAction)) {
+            String clientIp = extractClientIp(request);
+            if (captchaToken == null || !recaptchaEnterpriseService.verifyToken(captchaToken, captchaAction, clientIp)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid captcha");
                 return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty()) {
+            ip = request.getRemoteAddr();
+        } else {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
     }
 }
 

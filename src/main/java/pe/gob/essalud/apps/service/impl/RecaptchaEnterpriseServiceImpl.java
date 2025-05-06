@@ -18,13 +18,14 @@ public class RecaptchaEnterpriseServiceImpl implements RecaptchaEnterpriseServic
 
     private final RecaptchaEnterpriseServiceClient recaptchaEnterpriseServiceClient;
 
-    public boolean verifyToken(String token, String action) {
+    public boolean verifyToken(String token, String action, String clientIp) {
         try {
             if (!captchaValidationEnabled) {
                 return true;
             }
 
-            RecaptchaResponseDto recaptchaResponseDto = recaptchaEnterpriseServiceClient.verify(token, action);
+            log.info("Recaptcha enterprise request: action={}, clientIp={}", action, clientIp);
+            RecaptchaResponseDto recaptchaResponseDto = recaptchaEnterpriseServiceClient.verify(token, action, clientIp);
             log.info("Recaptcha enterprise response: {}", recaptchaResponseDto);
             if (recaptchaResponseDto != null) {
                 return recaptchaResponseDto.isSuccess();
