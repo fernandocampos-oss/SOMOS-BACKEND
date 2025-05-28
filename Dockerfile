@@ -1,15 +1,22 @@
-FROM openjdk:11-jdk-slim-buster
+FROM openjdk:17-jdk-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN chmod +x ./mvnw
+RUN ./mvnw clean package -DskipTests
 
-#Gradle: build/libs/my-app.jar
-#Maven: target/my-app.jar
-ARG JAR_FILE
+FROM openjdk:17-jdk-slim-buster AS deploy
 
-ENV APP_HOME=/app
-ENV APP_JAR_NAME=app.jar
-ENV APP_JAR_FILE=$APP_HOME/$APP_JAR_NAME
+ENV TZ=America/Lima
+ENV JAR_NAME=com.marcas-0.0.1-SNAPSHOT.jar
+WORKDIR /app
 
-WORKDIR ${APP_HOME}
+# Copiamos el JAR compilado desde la etapa de construcción
+COPY --from=builder /app/target/$JAR_NAME ./app.jar
 
-COPY ${JAR_FILE} ${APP_JAR_FILE}
+# Instalación de fontconfig, libfreetype6 (para reportes excel)
+#RUN apt-get update && apt-get install -y fontconfig libfreetype6 && apt-get clean
 
-ENTRYPOINT java -jar $APP_JAR_NAME
+# Afinación para contenedor
+ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

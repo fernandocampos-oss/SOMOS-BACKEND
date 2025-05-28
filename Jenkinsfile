@@ -1,23 +1,13 @@
-@Library(['git_essalud_lib','common_essalud_lib','docker_essalud_lib','maven_essalud_lib']) _
+@Library(['git_lib','docker_lib']) _
 
-def gitLib = new git_essalud_lib()
-def commonLib = new common_essalud_lib()
-def dockerLib = new docker_essalud_lib()
-def mavenLib = new maven_essalud_lib()
+def gitLib = new git_lib()
+def dockerLib = new docker_lib()
 
 pipeline {
 
-    agent any
+    agent { label 'master' }
 
-    tools {
-        'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'docker-tool'
-        maven 'maven-tool'
-    }
-
-    environment {
-        GROUP_ID = '47a9c151-9643-4efd-b66d-92b98ba5896a'
-        APPLICATION_ID = '83e2d5c2-2f92-47cd-a749-8a18f1b6aed5'
-    }
+    environment { APP_NAME = 'somos-essalud-service' }
 
     options {
         skipStagesAfterUnstable()
@@ -27,61 +17,39 @@ pipeline {
 
     stages {
 
-        stage('Check Tools') {
+        stage('Initialize') {
             steps {
-                script {
-                    commonLib.msgJobBuildStarted()
-                    mavenLib.showToolVersion()
-                    dockerLib.showToolVersion()
-                 }
+                script { gitLib.loadJenkinsConfig() }
+                stash name: 'source', includes: '**'
             }
         }
 
-        stage('Clone Repository') {
-            steps {
-                checkout scm
-
-                script {
-                    gitLib.cloneEnv()
-                    commonLib.showWsFiles()
-                }
-            }
+        stage('Check Agent') {
+            agent { label "${env.agent}" }
+            options { skipDefaultCheckout true }
+            steps { script { dockerLib.showVersion() } }
         }
 
-        stage('Build Project') {
-            steps {
-                script {
-                    mavenLib.buildProject()
-                    commonLib.showWsFiles()
-                }
-            }
+        stage('Copy Source') {
+            agent { label "${env.agent}" }
+            options { skipDefaultCheckout true }
+            steps { unstash 'source' }
         }
 
         stage('Build Image') {
-            steps {
-                script { dockerLib.buildImage() }
-            }
+            agent { label "${env.agent}" }
+            options { skipDefaultCheckout true }
+            steps { script { dockerLib.buildImage() } }
         }
 
-        stage('Push Image') {
-            steps {
-                script { dockerLib.pushImage() }
-            }
+        stage('Run Container') {
+            agent { label "${env.agent}" }
+            options { skipDefaultCheckout true }
+            steps { script { dockerLib.runContainer() } }
+            post { always { cleanWs() } }
         }
-
-        stage('Deploy') {
-            steps {
-                script { dockerLib.runContainer() }
-            }
-        }
-
     }
 
-    post {
-        always { cleanWs() }
-        success { script { commonLib.msgJobBuildSuccess() } }
-        failure { script { commonLib.msgJobBuildFailed() } }
-        unstable { script { commonLib.msgJobBuildUnstable() } }
-    }
+    post { always { cleanWs() } }
 
 }
