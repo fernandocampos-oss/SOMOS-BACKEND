@@ -39,4 +39,6 @@ public interface UsuarioService {
     void cambiarCorreo(long id, UsuarioCambiarCorreoRequestDto request);
 
     List<Usuario> integrationFindByNombresActivo(String nombres);
+
+    boolean usuarioTienePermisoModulo(String modulo);
 }
