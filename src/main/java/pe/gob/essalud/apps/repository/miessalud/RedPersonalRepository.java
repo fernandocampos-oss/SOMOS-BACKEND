@@ -4,4 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import pe.gob.essalud.apps.model.miessalud.RedPersonal;
 
 public interface RedPersonalRepository extends JpaRepository<RedPersonal, String> {
+    RedPersonal findByCodRed(String cod);
 }
