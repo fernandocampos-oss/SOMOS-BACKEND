@@ -27,7 +27,6 @@ import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.TokenActivacion;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.repository.miessalud.TokenActivacionRepository;
-import pe.gob.essalud.apps.repository.miessalud.UsuarioModuloRepository;
 import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.sqlmap.UsuarioMyRepository;
 import pe.gob.essalud.apps.service.AuthService;
@@ -54,7 +53,6 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMyRepository usuarioMyRepository;
     private final TokenActivacionRepository tokenActivacionRepository;
-    private final UsuarioModuloRepository usuarioModuloRepository;
     private final TokenActivacionValidator tokenActivacionValidator;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
@@ -287,11 +285,6 @@ public class UsuarioServiceImpl extends BaseService implements UsuarioService {
     @Override
     public List<Usuario> integrationFindByNombresActivo(String nombres) {
         return usuarioRepository.integrationFindByNombresActivo(nombres);
-    }
-
-    @Override
-    public boolean usuarioTienePermisoModulo(String modulo) {
-        return usuarioModuloRepository.findByIdUsuarioAndModulo(authService.getIdUserSession(), modulo).isPresent();
     }
 
 }
