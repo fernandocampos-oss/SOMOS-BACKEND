@@ -97,4 +97,9 @@ public class UsuarioController extends BaseController {
         return usuarioService.integrationFindByNombresActivo(nombres);
     }
 
+    @GetMapping("/permiso/modulo/{modulo}")
+    public boolean usuarioTienePermisoModulo(@PathVariable String modulo) {
+        return usuarioService.usuarioTienePermisoModulo(modulo);
+    }
+
 }
