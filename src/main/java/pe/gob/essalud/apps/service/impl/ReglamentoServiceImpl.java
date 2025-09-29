@@ -65,12 +65,18 @@ public class ReglamentoServiceImpl implements ReglamentoService {
         model.setPrimerSemestre(model.getPrimerSemestre());
         model.setSegundoSemestre(model.getSegundoSemestre());
         model.setAnio(LocalDateTime.now(ZoneId.of("America/Lima")).getYear());
-        if (!red.getDescripcion().isEmpty()) {
+        if (red.getDescripcion() != null && !red.getDescripcion().isEmpty()) {
             model.setRed(red.getDescripcion());
+        }else {
+            log.info("red vacía o null");
         }
-        if (!unidad.getDescripcion().isEmpty()) {
+
+        if (unidad.getDescripcion() != null && !unidad.getDescripcion().isEmpty()) {
             model.setUnidad(unidad.getDescripcion());
+        } else {
+            log.info("unidad vacía o null");
         }
+
         model.setFechaAperturaUsuario(usuario.getFechaCreacion());
         reglamentoRepository.save(model);
     }
