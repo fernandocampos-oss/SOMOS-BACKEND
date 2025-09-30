@@ -51,10 +51,10 @@ public class ReglamentoServiceImpl implements ReglamentoService {
         Usuario usuario = usuarioRepository.findById((long) authService.getIdUserSession()).orElseThrow(() -> new ValidationException("El usuario no existe"));
         RedPersonal red = new RedPersonal();
         UnidadOrganizativa unidad = new UnidadOrganizativa();
-        if (!usuario.getCodigoRed().isEmpty()) {
+        if (usuario.getCodigoRed() != null) {
             red = redPersonalRepository.findByCodRed(usuario.getCodigoRed());
         }
-        if (!usuario.getCodigoUnidad().isEmpty()) {
+        if (usuario.getCodigoUnidad() != null) {
             unidad = unidadOrganizativaRepository.findFirstByCodUnidad(usuario.getCodigoUnidad());
         }
         model.setIdUsuario(authService.getIdUserSession());
@@ -65,18 +65,12 @@ public class ReglamentoServiceImpl implements ReglamentoService {
         model.setPrimerSemestre(model.getPrimerSemestre());
         model.setSegundoSemestre(model.getSegundoSemestre());
         model.setAnio(LocalDateTime.now(ZoneId.of("America/Lima")).getYear());
-        if (red.getDescripcion() != null && !red.getDescripcion().isEmpty()) {
+        if (red.getCodRed() != null) {
             model.setRed(red.getDescripcion());
-        }else {
-            log.info("red vacía o null");
         }
-
-        if (unidad.getDescripcion() != null && !unidad.getDescripcion().isEmpty()) {
+        if (unidad.getCodUnidad() != null) {
             model.setUnidad(unidad.getDescripcion());
-        } else {
-            log.info("unidad vacía o null");
         }
-
         model.setFechaAperturaUsuario(usuario.getFechaCreacion());
         reglamentoRepository.save(model);
     }
