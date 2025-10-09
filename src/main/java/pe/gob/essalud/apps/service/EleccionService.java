@@ -8,4 +8,5 @@ public interface EleccionService {
     EleccionResponseDto buscarEleccionActiva();
     void guardarVoto(VotoRequestDto votoRequestDto);
 
+    boolean getDiaVotacion();
 }
