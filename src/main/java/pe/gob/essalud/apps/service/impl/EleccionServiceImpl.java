@@ -1,6 +1,10 @@
 package pe.gob.essalud.apps.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.PropertiesUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import pe.gob.essalud.apps.dto.eleccion.request.VotoRequestDto;
@@ -12,6 +16,9 @@ import pe.gob.essalud.apps.repository.miessalud.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.EleccionService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +26,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class EleccionServiceImpl implements EleccionService {
+    private static final Logger logger = LogManager.getLogger(EleccionServiceImpl.class);
 
     private final EleccionRepository eleccionRepository;
     private final VotanteRepository votanteRepository;
@@ -29,6 +37,17 @@ public class EleccionServiceImpl implements EleccionService {
 
     private final AuthService authService;
     private final ModelMapper modelMapper;
+
+    @Value("${elecciones.anio}")
+    private int anio;
+    @Value("${elecciones.mes}")
+    private int mes;
+    @Value("${elecciones.dia}")
+    private int dia;
+    @Value("${elecciones.inicio}")
+    private int horaInicio;
+    @Value("${elecciones.fin}")
+    private int horaFin;
 
     @Override
     public EleccionResponseDto buscarEleccionActiva() {
@@ -89,6 +108,20 @@ public class EleccionServiceImpl implements EleccionService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean getDiaVotacion() {
+        LocalDateTime fechaLocal = LocalDateTime.now(ZoneId.of("America/Lima"));
+        logger.info("fechaLocal={}", fechaLocal);
+        logger.info("fecha voto yml: anio={}, mes={}, dia={}", anio, mes, dia);
+        LocalDate fechaVotacion = LocalDate.of(anio, mes, dia);
+        if (!fechaLocal.toLocalDate().isEqual(fechaVotacion)) {
+            return false;
+        }
+        int hora = fechaLocal.getHour();
+        logger.info("hora voto yml : horaInicio={}, horaFin={}", horaInicio, horaFin);
+        return hora >= horaInicio && hora < horaFin;
     }
 
 }
