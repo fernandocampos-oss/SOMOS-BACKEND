@@ -25,6 +25,7 @@ import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EvidenciaRepo
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.IndicadorRepository;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.EvidenciaService;
+import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     private final EvidenciaRepository evidenciaRepository;
     private final AuthService authService;
     private final IndicadorRepository indicadorRepository;
+    private final SentidoIndicadorService sentidoIndicadorService;
 
     @Value("${upload-path}")
     private String uploadPath;
@@ -73,6 +75,21 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         model.setCodRed(authService.getCodRedSession());
         model.setCodUnidad(authService.getCodUnidadSession());
         Indicador indicadorGuardado = indicadorRepository.save(model);
+
+        // Guardar sentido del indicador en BD local
+        if (dto.getSentidoIndicador() != null && !dto.getSentidoIndicador().isEmpty()) {
+            try {
+                sentidoIndicadorService.guardarOActualizar(
+                    indicadorGuardado.getIdIndicador().longValue(), 
+                    dto.getSentidoIndicador()
+                );
+                log.info("Sentido del indicador guardado: ID={}, Sentido={}", 
+                    indicadorGuardado.getIdIndicador(), dto.getSentidoIndicador());
+            } catch (Exception e) {
+                log.error("Error al guardar sentido del indicador: {}", e.getMessage());
+                // No lanzar excepción para que no falle el registro principal
+            }
+        }
 
         if (!dto.getListEvidencia().isEmpty()) {
             for (Evidencia e : dto.getListEvidencia()) {

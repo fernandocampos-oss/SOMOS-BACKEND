@@ -1,0 +1,82 @@
+# Configuración para desarrollo local
+spring:
+  cloud:
+    config:
+      enabled: false  # Deshabilitar Config Server en local
+      import-check:
+        enabled: false
+        
+  datasource:
+    # BD Principal de EsSalud (misma que dev/prod)
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+# BD Local solo para sentido_indicador (fuera de spring.datasource)
+gdr:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/GDR
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: none  # No modifica estructura de BD automáticamente
+    show-sql: true    # Muestra queries en consola
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        
+  logging:
+    info: true
+
+# Configuración del servidor
+server:
+  port: 8080
+  
+# Logs para debug
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Configuraciones stub para desarrollo local (mínimas requeridas)
+feign-clients:
+  recaptcha-enterprise-service:
+    url: http://localhost:9999/stub
+  email-somos-service:
+    url: http://localhost:9999/stub
+    key: stub-key
+  plaza-sap-service:
+    url: http://localhost:9999/stub
+    key: stub-key
+  personal-sap-util-service:
+    url: http://localhost:9999/stub
+    key: stub-key
+  marcacion-cons-service:
+    url: http://localhost:9999/stub
+    key: stub-key
+  boleta-sap-service:
+    url: http://localhost:9999/stub
+    key: stub-key
+
+google:
+  recaptcha:
+    validation:
+      enabled: false
+
+auth0:
+  issuer: http://localhost
+  secret-key: local-secret-key-for-development-only
+
+upload-path: C:/temp/uploads
+
+elecciones:
+  anio: 2025
+  mes: 1
+  dia: 1
+  inicio: 0
+  fin: 23

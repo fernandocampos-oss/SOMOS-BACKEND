@@ -1,0 +1,17 @@
+# Configuración adicional para perfil DEV
+# La BD principal viene del Config Server, aquí solo agregamos la BD local para GDR
+
+spring:
+  config:
+    import: configserver:${CONFIG_SERVER_URL}
+  cloud:
+    config:
+      username: ${CONFIG_SERVER_USERNAME}
+      password: ${CONFIG_SERVER_PASSWORD}
+
+gdr:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/GDR
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
