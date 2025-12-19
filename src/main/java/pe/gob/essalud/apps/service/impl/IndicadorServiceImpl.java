@@ -15,6 +15,7 @@ import pe.gob.essalud.apps.repository.miessalud.GdrParametroRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
+import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final EvidenciaRepository evidenciaRepository;
     private final EquipoRepository equipoRepository;
     private final GdrParametroRepository gdrParametroRepository;
+    private final SentidoIndicadorService sentidoIndicadorService;
 
     @Override
     @Transactional
@@ -57,6 +59,21 @@ public class IndicadorServiceImpl implements IndicadorService {
         model.setCodUnidad(authService.getCodUnidadSession());
         
         Indicador indicadorGuardado = indicadorRepository.save(model);
+
+        // Guardar sentido del indicador en BD local
+        if (requestDto.getSentidoIndicador() != null && !requestDto.getSentidoIndicador().isEmpty()) {
+            try {
+                sentidoIndicadorService.guardarOActualizar(
+                    indicadorGuardado.getIdIndicador().longValue(), 
+                    requestDto.getSentidoIndicador()
+                );
+                log.info("Sentido del indicador guardado: ID={}, Sentido={}", 
+                    indicadorGuardado.getIdIndicador(), requestDto.getSentidoIndicador());
+            } catch (Exception e) {
+                log.error("Error al guardar sentido del indicador: {}", e.getMessage());
+                // No lanzar excepción para que no falle el registro principal
+            }
+        }
 
         if (!requestDto.getListEvidencia().isEmpty()) {
             for (Evidencia i : requestDto.getListEvidencia()) {

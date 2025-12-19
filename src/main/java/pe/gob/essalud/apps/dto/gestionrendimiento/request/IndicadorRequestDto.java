@@ -14,4 +14,5 @@ public class IndicadorRequestDto {
     private Votante votante;
     private Indicador indicador;
     private List<Evidencia> listEvidencia;
+    private String sentidoIndicador;  // 'ascendente' o 'descendente'
 }
