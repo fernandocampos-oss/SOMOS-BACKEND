@@ -22,7 +22,7 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
                            @Param("sustentoComentario") String sustentoComentario,
                            @Param("idEvidencia") Number idEvidencia);
 
-    @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador ORDER BY t.idEvidencia ASC ")
+    @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador AND t.estado = true ORDER BY t.idEvidencia ASC ")
     List<Evidencia> listEvidenciaByIdIndicador(@Param("idIndicador") int idIndicador);
 
 }

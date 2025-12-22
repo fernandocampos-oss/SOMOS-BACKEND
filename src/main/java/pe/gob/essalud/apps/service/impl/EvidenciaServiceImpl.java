@@ -26,6 +26,8 @@ import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.IndicadorRepo
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.EvidenciaService;
 import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
+import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
+import pe.gob.essalud.apps.service.gdr.ComentarioEstadoService;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +40,8 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     private static final String FORMATO_PDF_EVIDENCIA = ".pdf";
 
     private final EvidenciaRepository evidenciaRepository;
+    private final EvidenciaTipoService evidenciaTipoService;
+    private final ComentarioEstadoService comentarioEstadoService;
     private final AuthService authService;
     private final IndicadorRepository indicadorRepository;
     private final SentidoIndicadorService sentidoIndicadorService;
@@ -49,7 +53,11 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     @Override
     public void registrarEvidenciaExistIndicador(IndicadorExistRequestDto dto) {
         if (!dto.getListEvidencia().isEmpty()) {
-            for (Evidencia e : dto.getListEvidencia()) {
+            int orden = 1;
+            int totalEvidencias = dto.getListEvidencia().size();
+            
+            for (int i = 0; i < totalEvidencias; i++) {
+                Evidencia e = dto.getListEvidencia().get(i);
                 e.setIndicador(dto.getIndicador());
                 e.setUsuarioCreacion(authService.getIdUserSession());
 
@@ -58,7 +66,22 @@ public class EvidenciaServiceImpl implements EvidenciaService {
                 e.setEstadoEvidencia(model);
 
                 e.setEstado(true);
-                evidenciaRepository.save(e);
+                Evidencia evidenciaGuardada = evidenciaRepository.save(e);
+                
+                // Guardar tipo y orden en BD local
+                try {
+                    String tipo = (i == totalEvidencias - 1) ? "final" : "inicial";
+                    evidenciaTipoService.guardarOActualizar(
+                        evidenciaGuardada.getIdEvidencia().longValue(),
+                        dto.getIndicador().getIdIndicador().longValue(),
+                        tipo,
+                        orden++
+                    );
+                    log.info("Tipo de evidencia guardado: ID={}, Tipo={}, Orden={}", 
+                        evidenciaGuardada.getIdEvidencia(), tipo, orden - 1);
+                } catch (Exception ex) {
+                    log.error("Error al guardar tipo de evidencia: {}", ex.getMessage());
+                }
             }
         }
     }
@@ -92,7 +115,11 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         }
 
         if (!dto.getListEvidencia().isEmpty()) {
-            for (Evidencia e : dto.getListEvidencia()) {
+            int orden = 1;
+            int totalEvidencias = dto.getListEvidencia().size();
+            
+            for (int i = 0; i < totalEvidencias; i++) {
+                Evidencia e = dto.getListEvidencia().get(i);
                 e.setIndicador(indicadorGuardado);
                 e.setUsuarioCreacion(authService.getIdUserSession());
 
@@ -101,7 +128,22 @@ public class EvidenciaServiceImpl implements EvidenciaService {
                 e.setEstadoEvidencia(modelEstado);
 
                 e.setEstado(true);
-                evidenciaRepository.save(e);
+                Evidencia evidenciaGuardada = evidenciaRepository.save(e);
+                
+                // Guardar tipo y orden en BD local
+                try {
+                    String tipo = (i == totalEvidencias - 1) ? "final" : "inicial";
+                    evidenciaTipoService.guardarOActualizar(
+                        evidenciaGuardada.getIdEvidencia().longValue(),
+                        indicadorGuardado.getIdIndicador().longValue(),
+                        tipo,
+                        orden++
+                    );
+                    log.info("Tipo de evidencia guardado: ID={}, Tipo={}, Orden={}", 
+                        evidenciaGuardada.getIdEvidencia(), tipo, orden - 1);
+                } catch (Exception ex) {
+                    log.error("Error al guardar tipo de evidencia: {}", ex.getMessage());
+                }
             }
         }
     }
@@ -173,6 +215,21 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         }
         evidencia.setEstado(false);
         evidenciaRepository.save(evidencia);
+        
+        // Eliminar de BD local
+        try {
+            evidenciaTipoService.eliminarPorIdEvidencia(Long.valueOf(id));
+            comentarioEstadoService.eliminarPorIdEvidencia(Long.valueOf(id));
+            
+            // Reordenar evidencias del mismo indicador
+            if (evidencia.getIndicador() != null) {
+                evidenciaTipoService.reordenarEvidencias(Long.valueOf(evidencia.getIndicador().getIdIndicador()));
+            }
+            
+            log.info("Evidencia eliminada de BD local: ID={}", id);
+        } catch (Exception e) {
+            log.error("Error al eliminar evidencia de BD local: {}", e.getMessage());
+        }
     }
 
     @Override
