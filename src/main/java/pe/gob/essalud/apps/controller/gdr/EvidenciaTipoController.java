@@ -83,6 +83,8 @@ public class EvidenciaTipoController {
             }
             
             Long idEvidencia = Long.valueOf(request.get("idEvidencia").toString());
+            Long idIndicador = request.containsKey("idIndicador") ? 
+                               Long.valueOf(request.get("idIndicador").toString()) : null;
             String fechaStr = request.get("fechaPlazo").toString();
             
             if (fechaStr == null || fechaStr.trim().isEmpty()) {
@@ -93,7 +95,7 @@ public class EvidenciaTipoController {
             LocalDate fechaPlazo = LocalDate.parse(fechaStr);
             log.info("Actualizando fecha de plazo para evidencia {}: {}", idEvidencia, fechaPlazo);
             
-            EvidenciaTipo resultado = evidenciaTipoService.actualizarFechaPlazo(idEvidencia, fechaPlazo);
+            EvidenciaTipo resultado = evidenciaTipoService.actualizarFechaPlazo(idEvidencia, idIndicador, fechaPlazo);
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
             log.error("Error al actualizar fecha de plazo: {}", e.getMessage(), e);

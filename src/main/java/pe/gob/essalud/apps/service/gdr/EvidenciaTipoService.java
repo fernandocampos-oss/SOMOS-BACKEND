@@ -68,7 +68,7 @@ public class EvidenciaTipoService {
 
     // Actualizar solo la fecha de plazo
     @Transactional("gdrTransactionManager")
-    public EvidenciaTipo actualizarFechaPlazo(Long idEvidencia, LocalDate fechaPlazo) {
+    public EvidenciaTipo actualizarFechaPlazo(Long idEvidencia, Long idIndicador, LocalDate fechaPlazo) {
         Optional<EvidenciaTipo> existente = evidenciaTipoRepository.findByIdEvidencia(idEvidencia);
         
         if (existente.isPresent()) {
@@ -76,7 +76,11 @@ public class EvidenciaTipoService {
             evidenciaTipo.setFechaPlazo(fechaPlazo);
             return evidenciaTipoRepository.save(evidenciaTipo);
         } else {
-            throw new RuntimeException("No se encontró evidencia con ID: " + idEvidencia);
+            // Si no existe, crear el registro (evidencia final con orden 999 temporal)
+            log.warn("Evidencia {} no existe en BD local, creando registro con tipo 'final'", idEvidencia);
+            EvidenciaTipo nuevo = new EvidenciaTipo(idEvidencia, idIndicador, "final", 999);
+            nuevo.setFechaPlazo(fechaPlazo);
+            return evidenciaTipoRepository.save(nuevo);
         }
     }
 
