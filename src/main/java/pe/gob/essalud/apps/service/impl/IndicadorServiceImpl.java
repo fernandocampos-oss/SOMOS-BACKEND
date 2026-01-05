@@ -16,6 +16,7 @@ import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
 import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
+import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final EquipoRepository equipoRepository;
     private final GdrParametroRepository gdrParametroRepository;
     private final SentidoIndicadorService sentidoIndicadorService;
+    private final EvidenciaTipoService evidenciaTipoService;
 
     @Override
     @Transactional
@@ -76,6 +78,7 @@ public class IndicadorServiceImpl implements IndicadorService {
         }
 
         if (!requestDto.getListEvidencia().isEmpty()) {
+            int orden = 1;
             for (Evidencia i : requestDto.getListEvidencia()) {
                 i.setIndicador(indicadorGuardado);
                 i.setUsuarioCreacion(authService.getIdUserSession());
@@ -85,7 +88,24 @@ public class IndicadorServiceImpl implements IndicadorService {
                 i.setEstadoEvidencia(estadoEvidencia);
 
                 i.setEstado(true);
-                evidenciaRepository.save(i);
+                Evidencia evidenciaGuardada = evidenciaRepository.save(i);
+                
+                // Guardar evidencia_tipo en BD local - TEMPORALMENTE DESHABILITADO
+                /*
+                try {
+                    evidenciaTipoService.guardarOActualizar(
+                        evidenciaGuardada.getIdEvidencia().longValue(),
+                        indicadorGuardado.getIdIndicador().longValue(),
+                        "intermedia",
+                        orden++
+                    );
+                    log.info("Evidencia_tipo guardada: idEvidencia={}, orden={}", 
+                        evidenciaGuardada.getIdEvidencia(), orden-1);
+                } catch (Exception e) {
+                    log.error("Error al guardar evidencia_tipo: {}", e.getMessage());
+                    // No lanzar excepción para que no falle el registro principal
+                }
+                */
             }
         }
     }
