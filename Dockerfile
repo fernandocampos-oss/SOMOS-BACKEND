@@ -1,10 +1,10 @@
-FROM openjdk:17-jdk-alpine AS builder
+FROM eclipse-temurin:17-jdk-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN chmod +x ./mvnw
 RUN ./mvnw clean package -DskipTests
 
-FROM openjdk:17-jdk-slim-buster AS deploy
+FROM eclipse-temurin:17-jdk AS deploy
 
 ENV TZ=America/Lima
 ENV JAR_NAME=com.marcas-0.0.1-SNAPSHOT.jar
