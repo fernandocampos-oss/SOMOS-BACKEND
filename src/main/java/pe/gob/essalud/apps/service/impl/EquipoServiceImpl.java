@@ -21,7 +21,9 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.EquipoService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -241,6 +243,36 @@ public class EquipoServiceImpl implements EquipoService {
             return equipoRepository.listAllAvalibleEvaluador(codigosDeUnidades);
         }
     }
+
+    // ========================================
+    // TODO: ELIMINAR ANTES DE PRODUCCIÓN
+    // Método de debugging sin validaciones de seguridad
+    // ========================================
+    /*
+    @Override
+    public Map<String, Object> debugVotanteActual() {
+        Map<String, Object> debug = new HashMap<>();
+        
+        try {
+            Integer idSession = authService.getIdUserSession();
+            debug.put("idUserSession", idSession);
+            
+            Votante votante = equipoRepository.getVotanteByIdUsuario(idSession);
+            debug.put("votanteEncontrado", votante != null);
+            
+            if (votante != null) {
+                debug.put("votanteId", votante.getIdVotante());
+                debug.put("votanteNombre", votante.getNombres());
+                debug.put("votanteIdUsuario", votante.getIdUsuario());
+            }
+        } catch (Exception e) {
+            debug.put("error", e.getMessage());
+            debug.put("stackTrace", e.toString());
+        }
+        
+        return debug;
+    }
+    */
 
 
 }

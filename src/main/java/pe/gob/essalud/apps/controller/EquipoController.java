@@ -95,6 +95,14 @@ public class EquipoController {
         equipoService.modificarPerfilVotante(id, request);
     }
 
+    // TODO: ELIMINAR ANTES DE PRODUCCIÓN - Endpoint de debugging
+    /*
+    @GetMapping("/debug/votante-actual")
+    public ResponseEntity<Map<String, Object>> debugVotanteActual() {
+        return new ResponseEntity<>(equipoService.debugVotanteActual(), HttpStatus.OK);
+    }
+    */
+
     @PostMapping("/carga/excel/votante")
     public List<CargaMasivaVotanteDto> cargaMasivaVotante(@RequestBody List<CargaMasivaVotanteDto> listVotantes) {
         return equipoService.cargaMasivaVotante(listVotantes);

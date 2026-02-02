@@ -32,4 +32,8 @@ public interface PrioridadService {
 
     void eliminarPrioridad(int id);
 
+    // TODO: ELIMINAR ANTES DE PRODUCCIÓN - Métodos de testing
+    // String inicializarDatosPrueba();
+    // String limpiarVotantesDuplicados();
+
 }

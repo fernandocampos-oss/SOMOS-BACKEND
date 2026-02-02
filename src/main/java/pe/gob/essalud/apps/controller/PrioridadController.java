@@ -73,4 +73,25 @@ public class PrioridadController {
         prioridadService.eliminarPrioridad(id);
     }
 
+    // ========================================
+    // TODO: ELIMINAR ANTES DE PRODUCCIÓN - INICIO
+    // Endpoints de testing sin autenticación
+    // ========================================
+    /*
+    @PostMapping("/inicializar-datos-prueba")
+    public ResponseEntity<String> inicializarDatosPrueba() {
+        String resultado = prioridadService.inicializarDatosPrueba();
+        return ResponseEntity.ok(resultado);
+    }
+
+    @PostMapping("/limpiar-votantes-duplicados")
+    public ResponseEntity<String> limpiarVotantesDuplicados() {
+        String resultado = prioridadService.limpiarVotantesDuplicados();
+        return ResponseEntity.ok(resultado);
+    }
+    */
+    // ========================================
+    // TODO: ELIMINAR ANTES DE PRODUCCIÓN - FIN
+    // ========================================
+
 }

@@ -10,6 +10,7 @@ import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EquipoService {
 
@@ -29,4 +30,6 @@ public interface EquipoService {
     Usuario findUsuarioSctrByNumeroDocumento(String numDoc);
     List<TrabajadorResponseDto> listAllVotanteByUnidadOrganizativa();
     List<TrabajadorResponseDto> listAllAvalibleEvaluador();
+    // TODO: ELIMINAR ANTES DE PRODUCCIÓN
+    // Map<String, Object> debugVotanteActual();
 }
