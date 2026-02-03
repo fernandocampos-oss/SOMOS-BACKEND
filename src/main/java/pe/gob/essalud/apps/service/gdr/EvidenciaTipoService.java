@@ -38,6 +38,27 @@ public class EvidenciaTipoService {
             return evidenciaTipoRepository.save(nuevo);
         }
     }
+    
+    // Guardar o actualizar tipo de evidencia CON fecha de plazo
+    @Transactional("gdrTransactionManager")
+    public EvidenciaTipo guardarOActualizar(Long idEvidencia, Long idIndicador, String tipo, Integer orden, LocalDate fechaPlazo) {
+        Optional<EvidenciaTipo> existente = evidenciaTipoRepository.findByIdEvidencia(idEvidencia);
+
+        if (existente.isPresent()) {
+            // Actualizar
+            EvidenciaTipo evidenciaTipo = existente.get();
+            evidenciaTipo.setTipo(tipo);
+            evidenciaTipo.setOrden(orden);
+            evidenciaTipo.setIdIndicador(idIndicador);
+            evidenciaTipo.setFechaPlazo(fechaPlazo);
+            return evidenciaTipoRepository.save(evidenciaTipo);
+        } else {
+            // Crear nuevo
+            EvidenciaTipo nuevo = new EvidenciaTipo(idEvidencia, idIndicador, tipo, orden);
+            nuevo.setFechaPlazo(fechaPlazo);
+            return evidenciaTipoRepository.save(nuevo);
+        }
+    }
 
     // Obtener tipo de evidencia por ID de evidencia
     public Optional<EvidenciaTipo> obtenerPorIdEvidencia(Long idEvidencia) {
@@ -64,6 +85,40 @@ public class EvidenciaTipoService {
         }
         
         return resultado;
+    }
+    
+    // Obtener fechas de plazo final por lista de indicadores
+    public Map<Long, LocalDate> obtenerFechasPlazoFinalPorIndicadores(List<Long> idsIndicador) {
+        Map<Long, LocalDate> resultado = new HashMap<>();
+        
+        for (Long idIndicador : idsIndicador) {
+            Optional<EvidenciaTipo> evidenciaFinal = evidenciaTipoRepository.findFirstByIdIndicadorAndTipo(idIndicador, "final");
+            if (evidenciaFinal.isPresent() && evidenciaFinal.get().getFechaPlazo() != null) {
+                resultado.put(idIndicador, evidenciaFinal.get().getFechaPlazo());
+            }
+        }
+        
+        return resultado;
+    }
+    
+    // Guardar fecha de plazo final para un indicador (sin necesidad de evidencia existente)
+    @Transactional("gdrTransactionManager")
+    public EvidenciaTipo guardarFechaPlazoFinalPorIndicador(Long idIndicador, LocalDate fechaPlazo) {
+        // Buscar si ya existe un registro de evidencia final para este indicador
+        Optional<EvidenciaTipo> existente = evidenciaTipoRepository.findFirstByIdIndicadorAndTipo(idIndicador, "final");
+        
+        if (existente.isPresent()) {
+            // Actualizar la fecha existente
+            EvidenciaTipo evidenciaTipo = existente.get();
+            evidenciaTipo.setFechaPlazo(fechaPlazo);
+            return evidenciaTipoRepository.save(evidenciaTipo);
+        } else {
+            // Crear nuevo registro con idEvidencia = -idIndicador (placeholder único por indicador)
+            Long idEvidenciaPlaceholder = -idIndicador;
+            EvidenciaTipo nuevo = new EvidenciaTipo(idEvidenciaPlaceholder, idIndicador, "final", 999);
+            nuevo.setFechaPlazo(fechaPlazo);
+            return evidenciaTipoRepository.save(nuevo);
+        }
     }
 
     // Actualizar solo la fecha de plazo

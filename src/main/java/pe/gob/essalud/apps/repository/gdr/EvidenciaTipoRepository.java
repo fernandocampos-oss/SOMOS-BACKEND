@@ -16,6 +16,8 @@ public interface EvidenciaTipoRepository extends JpaRepository<EvidenciaTipo, Lo
     Optional<EvidenciaTipo> findByIdEvidencia(Long idEvidencia);
 
     List<EvidenciaTipo> findByIdIndicadorOrderByOrden(Long idIndicador);
+    
+    Optional<EvidenciaTipo> findFirstByIdIndicadorAndTipo(Long idIndicador, String tipo);
 
     @Query("SELECT et FROM EvidenciaTipo et WHERE et.idEvidencia IN :idsEvidencia")
     List<EvidenciaTipo> findByIdEvidenciaIn(@Param("idsEvidencia") List<Long> idsEvidencia);

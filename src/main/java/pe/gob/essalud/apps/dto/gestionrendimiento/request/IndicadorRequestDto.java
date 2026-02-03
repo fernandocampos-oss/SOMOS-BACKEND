@@ -15,4 +15,5 @@ public class IndicadorRequestDto {
     private Indicador indicador;
     private List<Evidencia> listEvidencia;
     private String sentidoIndicador;  // 'ascendente' o 'descendente'
+    private String fechaPlazoFinal;   // Fecha de plazo final para la evidencia final
 }

@@ -107,6 +107,26 @@ public class IndicadorServiceImpl implements IndicadorService {
                 }
                 */
             }
+            
+            // Guardar la fecha de plazo final si existe
+            if (requestDto.getFechaPlazoFinal() != null && !requestDto.getFechaPlazoFinal().isEmpty()) {
+                try {
+                    java.time.LocalDate fechaPlazo = java.time.LocalDate.parse(
+                        requestDto.getFechaPlazoFinal().substring(0, 10)
+                    );
+                    
+                    // Guardar fecha de plazo final por indicador
+                    evidenciaTipoService.guardarFechaPlazoFinalPorIndicador(
+                        indicadorGuardado.getIdIndicador().longValue(),
+                        fechaPlazo
+                    );
+                    log.info("Fecha plazo final guardada: indicador={}, fecha={}", 
+                        indicadorGuardado.getIdIndicador(), fechaPlazo);
+                } catch (Exception e) {
+                    log.error("Error al guardar fecha de plazo final: {}", e.getMessage(), e);
+                    // No lanzar excepción para que no falle el registro principal
+                }
+            }
         }
     }
 

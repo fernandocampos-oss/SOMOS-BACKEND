@@ -49,6 +49,14 @@ public class EvidenciaTipoController {
         Map<Long, Map<String, Object>> resultado = evidenciaTipoService.obtenerMultiples(idsEvidencia);
         return ResponseEntity.ok(resultado);
     }
+    
+    @PostMapping("/fechas-plazo-final")
+    public ResponseEntity<Map<Long, LocalDate>> obtenerFechasPlazoFinalPorIndicadores(@RequestBody List<Long> idsIndicador) {
+        log.info("Obteniendo fechas de plazo final para {} indicadores", idsIndicador.size());
+        Map<Long, LocalDate> resultado = evidenciaTipoService.obtenerFechasPlazoFinalPorIndicadores(idsIndicador);
+        log.info("Fechas de plazo final encontradas: {}", resultado.size());
+        return ResponseEntity.ok(resultado);
+    }
 
     @DeleteMapping("/eliminar/{idEvidencia}")
     public ResponseEntity<Void> eliminarPorIdEvidencia(@PathVariable Long idEvidencia) {
