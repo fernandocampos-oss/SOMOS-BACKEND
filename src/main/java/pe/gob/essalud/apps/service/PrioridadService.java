@@ -35,6 +35,6 @@ public interface PrioridadService {
     // TODO: ELIMINAR ANTES DE PRODUCCIÓN - Métodos de testing
     // String inicializarDatosPrueba();
     // String limpiarVotantesDuplicados();
-    String migrarAgregarEstadoPrioridad();
+    // String migrarAgregarEstadoPrioridad();
 
 }

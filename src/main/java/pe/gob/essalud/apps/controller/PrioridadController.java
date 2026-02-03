@@ -89,13 +89,13 @@ public class PrioridadController {
         String resultado = prioridadService.limpiarVotantesDuplicados();
         return ResponseEntity.ok(resultado);
     }
-    */
     
     @PostMapping("/migrar-agregar-estado")
     public ResponseEntity<String> migrarAgregarEstado() {
         String resultado = prioridadService.migrarAgregarEstadoPrioridad();
         return ResponseEntity.ok(resultado);
     }
+    */
     // ========================================
     // TODO: ELIMINAR ANTES DE PRODUCCIÓN - FIN
     // ========================================

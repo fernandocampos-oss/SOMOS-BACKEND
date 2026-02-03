@@ -395,6 +395,11 @@ public class PrioridadServiceImpl implements PrioridadService {
         prioridadRepository.save(prioridad);
     }
     
+    // ========================================
+    // TODO: ELIMINAR ANTES DE PRODUCCIÓN - INICIO
+    // Métodos de testing con IDs hardcodeados y sin validaciones de seguridad
+    // ========================================
+    /*
     @Override
     @Transactional
     public String migrarAgregarEstadoPrioridad() {
