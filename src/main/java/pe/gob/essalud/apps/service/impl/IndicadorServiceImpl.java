@@ -397,10 +397,25 @@ public class IndicadorServiceImpl implements IndicadorService {
     public void eliminarIndicador(int id) {
         Indicador indicador = indicadorRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("El indicador no se encuentra"));
+        
+        // Obtener evidencias activas
         List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(indicador.getIdIndicador());
-        if (!evidencias.isEmpty()) {
-            throw new ValidationException("El indicador tiene evidencia registrada");
+        
+        // Verificar si alguna evidencia tiene archivo adjunto
+        boolean tieneArchivosAdjuntos = evidencias.stream()
+                .anyMatch(e -> org.apache.commons.lang3.StringUtils.isNotBlank(e.getSustentoRutaFile()));
+        
+        if (tieneArchivosAdjuntos) {
+            throw new ValidationException("El indicador tiene evidencias con archivos adjuntos. Debe eliminar los archivos primero.");
         }
+        
+        // Marcar todas las evidencias como inactivas (estado = false)
+        for (Evidencia evidencia : evidencias) {
+            evidencia.setEstado(false);
+            evidenciaRepository.save(evidencia);
+        }
+        
+        // Marcar el indicador como inactivo
         indicador.setEstado(false);
         indicadorRepository.save(indicador);
     }

@@ -32,9 +32,15 @@ public class Prioridad {
     @Column(name = "fecha_asignacion")
     private LocalDateTime fechaAsignacion;
 
+    @Column(name = "estado")
+    private Boolean estado = true;
+
     @PrePersist
     private void prePersist() {
         this.fechaAsignacion = LocalDateTime.now(ZoneId.of("America/Lima"));
+        if (this.estado == null) {
+            this.estado = true;
+        }
     }
 
 }

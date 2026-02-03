@@ -28,6 +28,8 @@ import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PrioridadService;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +40,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class PrioridadServiceImpl implements PrioridadService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final PrioridadRepository prioridadRepository;
     private final ActividadRepository actividadRepository;
@@ -365,11 +370,50 @@ public class PrioridadServiceImpl implements PrioridadService {
     public void eliminarPrioridad(int id) {
         Prioridad prioridad = prioridadRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("La prioridad no se encuentra"));
+        
+        // Obtener todos los indicadores de la prioridad
         List<Indicador> indicadores = indicadorRepository.getListIndicadoresByPrioridad(prioridad.getIdPrioridad());
-        if (!indicadores.isEmpty()) {
-            throw new ValidationException("La prioridad tiene indicador registrado");
+        
+        // Eliminar en cascada: indicadores y sus evidencias (soft delete)
+        for (Indicador indicador : indicadores) {
+            // Obtener evidencias del indicador
+            List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(indicador.getIdIndicador());
+            
+            // Marcar evidencias como inactivas
+            for (Evidencia evidencia : evidencias) {
+                evidencia.setEstado(false);
+                evidenciaRepository.save(evidencia);
+            }
+            
+            // Marcar indicador como inactivo
+            indicador.setEstado(false);
+            indicadorRepository.save(indicador);
         }
-        prioridadRepository.delete(prioridad);
+        
+        // Marcar prioridad como inactiva (soft delete)
+        prioridad.setEstado(false);
+        prioridadRepository.save(prioridad);
+    }
+    
+    @Override
+    @Transactional
+    public String migrarAgregarEstadoPrioridad() {
+        try {
+            // Ejecutar SQL nativo para agregar columna estado si no existe
+            entityManager.createNativeQuery(
+                "ALTER TABLE prioridad ADD COLUMN IF NOT EXISTS estado BOOLEAN DEFAULT true"
+            ).executeUpdate();
+            
+            // Actualizar registros existentes
+            entityManager.createNativeQuery(
+                "UPDATE prioridad SET estado = true WHERE estado IS NULL"
+            ).executeUpdate();
+            
+            return "Migración exitosa: columna 'estado' agregada a tabla 'prioridad'";
+        } catch (Exception e) {
+            log.error("Error en migración: ", e);
+            return "Error en migración: " + e.getMessage();
+        }
     }
     
     // ========================================
