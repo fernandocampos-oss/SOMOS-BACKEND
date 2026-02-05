@@ -14,8 +14,9 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE evidencia SET sustento_descripcion=?, sustento_ruta_file=?, sustento_extension_file=?, sustento_fecha_registro=?, sustento_comentario=? WHERE id_evidencia=?", nativeQuery = true)
-    Integer crearEvidencia(@Param("sustentoDescripcion") String sustentoDescripcion,
+    @Query(value = "UPDATE evidencia SET descripcion=?, sustento_descripcion=?, sustento_ruta_file=?, sustento_extension_file=?, sustento_fecha_registro=?, sustento_comentario=? WHERE id_evidencia=?", nativeQuery = true)
+    Integer crearEvidencia(@Param("descripcion") String descripcion,
+                           @Param("sustentoDescripcion") String sustentoDescripcion,
                            @Param("rutaFile") String rutaFile,
                            @Param("extension") String extension,
                            @Param("sustentoFechaRegistro") LocalDateTime sustentoFechaRegistro,
@@ -26,4 +27,3 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
     List<Evidencia> listEvidenciaByIdIndicador(@Param("idIndicador") int idIndicador);
 
 }
-
