@@ -146,6 +146,24 @@ public class EvidenciaServiceImpl implements EvidenciaService {
                 }
             }
         }
+        
+        // Guardar la fecha de plazo final si existe
+        if (dto.getFechaPlazoFinal() != null && !dto.getFechaPlazoFinal().isEmpty()) {
+            try {
+                java.time.LocalDate fechaPlazo = java.time.LocalDate.parse(
+                    dto.getFechaPlazoFinal().substring(0, 10)
+                );
+                
+                evidenciaTipoService.guardarFechaPlazoFinalPorIndicador(
+                    indicadorGuardado.getIdIndicador().longValue(),
+                    fechaPlazo
+                );
+                log.info("Fecha plazo final guardada: indicador={}, fecha={}", 
+                    indicadorGuardado.getIdIndicador(), fechaPlazo);
+            } catch (Exception e) {
+                log.error("Error al guardar fecha de plazo final: {}", e.getMessage(), e);
+            }
+        }
     }
 
     @Transactional
