@@ -4,15 +4,19 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comentario_estado")
+@Table(name = "comentario_estado", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"id_evidencia", "tipo_comentario"}))
 public class ComentarioEstado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_evidencia", nullable = false, unique = true)
+    @Column(name = "id_evidencia", nullable = false)
     private Long idEvidencia;
+
+    @Column(name = "tipo_comentario", length = 20, nullable = false)
+    private String tipoComentario = "individual"; // 'individual' o 'final'
 
     @Column(name = "estado_dropdown", length = 50)
     private String estadoDropdown; // 'logrado', 'proceso', 'no_presento'
@@ -43,6 +47,14 @@ public class ComentarioEstado {
 
     public ComentarioEstado(Long idEvidencia, String estadoDropdown, String comentarioAdicional) {
         this.idEvidencia = idEvidencia;
+        this.tipoComentario = "individual";
+        this.estadoDropdown = estadoDropdown;
+        this.comentarioAdicional = comentarioAdicional;
+    }
+
+    public ComentarioEstado(Long idEvidencia, String tipoComentario, String estadoDropdown, String comentarioAdicional) {
+        this.idEvidencia = idEvidencia;
+        this.tipoComentario = tipoComentario != null ? tipoComentario : "individual";
         this.estadoDropdown = estadoDropdown;
         this.comentarioAdicional = comentarioAdicional;
     }
@@ -62,6 +74,14 @@ public class ComentarioEstado {
 
     public void setIdEvidencia(Long idEvidencia) {
         this.idEvidencia = idEvidencia;
+    }
+
+    public String getTipoComentario() {
+        return tipoComentario;
+    }
+
+    public void setTipoComentario(String tipoComentario) {
+        this.tipoComentario = tipoComentario;
     }
 
     public String getEstadoDropdown() {

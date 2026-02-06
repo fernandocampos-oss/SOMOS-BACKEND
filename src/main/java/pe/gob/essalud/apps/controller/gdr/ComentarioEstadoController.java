@@ -22,10 +22,11 @@ public class ComentarioEstadoController {
     @PostMapping("/guardar")
     public ResponseEntity<ComentarioEstado> guardarOActualizar(@RequestBody Map<String, Object> request) {
         Long idEvidencia = Long.valueOf(request.get("idEvidencia").toString());
+        String tipoComentario = request.get("tipoComentario") != null ? request.get("tipoComentario").toString() : "individual";
         String estadoDropdown = request.get("estadoDropdown") != null ? request.get("estadoDropdown").toString() : null;
         String comentarioAdicional = request.get("comentarioAdicional") != null ? request.get("comentarioAdicional").toString() : null;
 
-        ComentarioEstado resultado = comentarioEstadoService.guardarOActualizar(idEvidencia, estadoDropdown, comentarioAdicional);
+        ComentarioEstado resultado = comentarioEstadoService.guardarOActualizar(idEvidencia, tipoComentario, estadoDropdown, comentarioAdicional);
         return ResponseEntity.ok(resultado);
     }
 
@@ -36,9 +37,34 @@ public class ComentarioEstadoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/obtener/{idEvidencia}/{tipoComentario}")
+    public ResponseEntity<ComentarioEstado> obtenerPorIdEvidenciaYTipo(@PathVariable Long idEvidencia, @PathVariable String tipoComentario) {
+        return comentarioEstadoService.obtenerPorIdEvidenciaYTipo(idEvidencia, tipoComentario)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/batch")
     public ResponseEntity<Map<Long, Map<String, Object>>> obtenerMultiples(@RequestBody List<Long> idsEvidencia) {
         Map<Long, Map<String, Object>> resultado = comentarioEstadoService.obtenerMultiples(idsEvidencia);
+        return ResponseEntity.ok(resultado);
+    }
+
+    @PostMapping("/batch-all")
+    public ResponseEntity<Map<String, Map<String, Object>>> obtenerTodosMultiples(@RequestBody List<Long> idsEvidencia) {
+        Map<String, Map<String, Object>> resultado = comentarioEstadoService.obtenerTodosMultiples(idsEvidencia);
+        return ResponseEntity.ok(resultado);
+    }
+
+    @PostMapping("/batch-por-tipo")
+    public ResponseEntity<Map<Long, Map<String, Object>>> obtenerMultiplesPorTipo(@RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        List<Long> idsEvidencia = ((List<Number>) request.get("idsEvidencia")).stream()
+            .map(Number::longValue)
+            .collect(java.util.stream.Collectors.toList());
+        String tipoComentario = request.get("tipoComentario") != null ? request.get("tipoComentario").toString() : "individual";
+        
+        Map<Long, Map<String, Object>> resultado = comentarioEstadoService.obtenerMultiplesPorTipo(idsEvidencia, tipoComentario);
         return ResponseEntity.ok(resultado);
     }
 

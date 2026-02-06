@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +16,14 @@ import java.util.List;
 
 /**
  * ================================================================
- * TODO: ELIMINAR DESPUÉS DE EJECUTAR EN PRODUCCIÓN
  * Controller temporal para ejecutar migraciones de BD
+ * Solo disponible en perfiles: local, dev
  * ================================================================
  */
 @Slf4j
 @RestController
 @RequestMapping("migracion")
+@Profile({"local", "dev"})
 public class MigracionController {
 
     private final DataSource gdrDataSource;
@@ -118,12 +120,15 @@ public class MigracionController {
         try {
             jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS comentario_estado (" +
                 "id SERIAL PRIMARY KEY, " +
-                "id_evidencia INTEGER NOT NULL UNIQUE, " +
+                "id_evidencia INTEGER NOT NULL, " +
+                "tipo_comentario VARCHAR(20) NOT NULL DEFAULT 'individual', " +
                 "estado_dropdown VARCHAR(50), " +
                 "comentario_adicional TEXT, " +
                 "fecha_creacion TIMESTAMP DEFAULT NOW(), " +
-                "fecha_modificacion TIMESTAMP DEFAULT NOW())");
+                "fecha_modificacion TIMESTAMP DEFAULT NOW(), " +
+                "UNIQUE(id_evidencia, tipo_comentario))");
             jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_comentario_estado_evidencia ON comentario_estado(id_evidencia)");
+            jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_comentario_estado_evidencia_tipo ON comentario_estado(id_evidencia, tipo_comentario)");
             resultados.add("OK comentario_estado: CREADA");
             exitosas++;
         } catch (Exception e) {
@@ -204,6 +209,87 @@ public class MigracionController {
         }
 
         return ResponseEntity.ok(new MigracionResponse("INFO", "Estado de tablas", resultados));
+    }
+
+    /**
+     * POST /api/migracion/agregar-tipo-comentario
+     * Agrega campo tipo_comentario a tabla comentario_estado
+     * Migra datos existentes con prefijo 'final_' al nuevo formato
+     */
+    @PostMapping("/agregar-tipo-comentario")
+    public ResponseEntity<MigracionResponse> agregarTipoComentario() {
+        List<String> resultados = new ArrayList<>();
+        
+        JdbcTemplate jdbcTemplate;
+        try {
+            jdbcTemplate = new JdbcTemplate(gdrDataSource);
+            jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+            resultados.add("OK Conexion a BD exitosa");
+        } catch (Exception e) {
+            resultados.add("ERROR Conexion BD: " + e.getMessage());
+            return ResponseEntity.ok(new MigracionResponse("ERROR", "No se pudo conectar", resultados));
+        }
+
+        // Paso 1: Verificar si la columna ya existe
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'comentario_estado' AND column_name = 'tipo_comentario'",
+                Integer.class);
+            if (count != null && count > 0) {
+                resultados.add("INFO tipo_comentario: Ya existe, saltando creación");
+            } else {
+                // Agregar columna
+                jdbcTemplate.execute("ALTER TABLE comentario_estado ADD COLUMN tipo_comentario VARCHAR(20) DEFAULT 'individual'");
+                resultados.add("OK tipo_comentario: Columna agregada");
+            }
+        } catch (Exception e) {
+            resultados.add("ERROR agregando columna: " + e.getMessage());
+            return ResponseEntity.ok(new MigracionResponse("ERROR", "Fallo agregando columna", resultados));
+        }
+
+        // Paso 2: Migrar datos con prefijo 'final_' al nuevo formato
+        try {
+            int actualizados = jdbcTemplate.update(
+                "UPDATE comentario_estado SET tipo_comentario = 'final', estado_dropdown = SUBSTRING(estado_dropdown FROM 7) WHERE estado_dropdown LIKE 'final_%'");
+            resultados.add("OK Migrados " + actualizados + " registros con prefijo 'final_'");
+        } catch (Exception e) {
+            resultados.add("WARN Error migrando datos: " + e.getMessage());
+        }
+
+        // Paso 3: Asegurar que todos tengan tipo_comentario
+        try {
+            int actualizados = jdbcTemplate.update(
+                "UPDATE comentario_estado SET tipo_comentario = 'individual' WHERE tipo_comentario IS NULL OR tipo_comentario = ''");
+            resultados.add("OK Normalizados " + actualizados + " registros sin tipo");
+        } catch (Exception e) {
+            resultados.add("WARN Error normalizando: " + e.getMessage());
+        }
+
+        // Paso 4: Eliminar constraint UNIQUE antiguo de id_evidencia
+        try {
+            jdbcTemplate.execute("ALTER TABLE comentario_estado DROP CONSTRAINT IF EXISTS comentario_estado_id_evidencia_key");
+            resultados.add("OK Constraint antiguo eliminado (o no existía)");
+        } catch (Exception e) {
+            resultados.add("INFO Constraint: " + e.getMessage());
+        }
+
+        // Paso 5: Crear índice único compuesto
+        try {
+            jdbcTemplate.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_comentario_estado_evidencia_tipo ON comentario_estado(id_evidencia, tipo_comentario)");
+            resultados.add("OK Indice único (id_evidencia, tipo_comentario) creado");
+        } catch (Exception e) {
+            resultados.add("WARN Indice: " + e.getMessage());
+        }
+
+        // Verificar resultado final
+        try {
+            Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM comentario_estado", Integer.class);
+            resultados.add("INFO Total registros en comentario_estado: " + count);
+        } catch (Exception e) {
+            resultados.add("INFO No se pudo contar registros");
+        }
+
+        return ResponseEntity.ok(new MigracionResponse("OK", "Migracion completada", resultados));
     }
 
     @Data
