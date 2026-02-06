@@ -6,6 +6,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -22,10 +23,23 @@ import javax.sql.DataSource;
 )
 public class GdrDBConfig {
 
+    /**
+     * Para perfil LOCAL: usa BD GDR separada (localhost)
+     */
     @Bean(name = "gdrDataSource")
+    @Profile("local")
     @ConfigurationProperties(prefix = "gdr.datasource")
-    public DataSource gdrDataSource() {
+    public DataSource gdrDataSourceLocal() {
         return DataSourceBuilder.create().build();
+    }
+
+    /**
+     * Para perfiles DEV/PROD: usa la misma BD que spring.datasource
+     */
+    @Bean(name = "gdrDataSource")
+    @Profile({"dev", "prod"})
+    public DataSource gdrDataSourceRemote(@Qualifier("dataSource1") DataSource mainDataSource) {
+        return mainDataSource;
     }
 
     @Bean(name = "gdrEntityManagerFactory")

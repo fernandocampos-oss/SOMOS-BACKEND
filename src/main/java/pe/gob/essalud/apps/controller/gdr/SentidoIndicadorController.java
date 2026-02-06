@@ -1,5 +1,6 @@
 package pe.gob.essalud.apps.controller.gdr;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/gdr/sentido-indicador")
 @CrossOrigin(origins = "*")
@@ -34,7 +36,9 @@ public class SentidoIndicadorController {
     // Obtener sentidos para múltiples indicadores
     @PostMapping("/batch")
     public ResponseEntity<Map<Long, String>> obtenerSentidosPorIndicadores(@RequestBody List<Long> idIndicadores) {
+        log.info("=== /batch: Recibidos {} IDs de indicadores: {}", idIndicadores.size(), idIndicadores);
         Map<Long, String> sentidos = sentidoIndicadorService.obtenerSentidosPorIndicadores(idIndicadores);
+        log.info("=== /batch: Retornando {} sentidos: {}", sentidos.size(), sentidos);
         return ResponseEntity.ok(sentidos);
     }
 
@@ -65,10 +69,40 @@ public class SentidoIndicadorController {
         return ResponseEntity.ok("Sentido eliminado correctamente");
     }
 
-    // Obtener todos
+    // Obtener todos (para diagnóstico)
     @GetMapping
     public ResponseEntity<List<SentidoIndicador>> obtenerTodos() {
+        log.info("=== Obteniendo todos los sentidos de la BD ===");
         List<SentidoIndicador> sentidos = sentidoIndicadorService.obtenerTodos();
+        log.info("Total de sentidos en BD: {}", sentidos.size());
+        for (SentidoIndicador s : sentidos) {
+            log.info("  - ID: {}, idIndicador: {}, sentido: {}", s.getId(), s.getIdIndicador(), s.getSentido());
+        }
         return ResponseEntity.ok(sentidos);
+    }
+    
+    // Endpoint de prueba para insertar manualmente (GET para probar desde navegador)
+    @GetMapping("/test-insert/{idIndicador}/{sentido}")
+    public ResponseEntity<?> testInsert(@PathVariable Long idIndicador, @PathVariable String sentido) {
+        log.info("=== TEST INSERT: idIndicador={}, sentido={} ===", idIndicador, sentido);
+        try {
+            SentidoIndicador resultado = sentidoIndicadorService.guardarOActualizar(idIndicador, sentido);
+            log.info("Resultado exitoso: id={}, idIndicador={}, sentido={}", 
+                resultado.getId(), resultado.getIdIndicador(), resultado.getSentido());
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            log.error("Error completo en test insert:", e);
+            
+            // Obtener causa raíz
+            Throwable causa = e;
+            while (causa.getCause() != null) {
+                causa = causa.getCause();
+            }
+            
+            String mensajeError = "Error: " + e.getClass().getSimpleName() + " - " + e.getMessage() 
+                + " | Causa raíz: " + causa.getClass().getSimpleName() + " - " + causa.getMessage();
+            
+            return ResponseEntity.status(500).body(mensajeError);
+        }
     }
 }

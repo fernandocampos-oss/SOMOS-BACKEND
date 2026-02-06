@@ -110,4 +110,35 @@ public class EvidenciaTipoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    // Endpoint de prueba para insertar fecha de plazo
+    @GetMapping("/test-fecha/{idIndicador}/{fecha}")
+    public ResponseEntity<?> testFecha(@PathVariable Long idIndicador, @PathVariable String fecha) {
+        log.info("=== TEST FECHA: idIndicador={}, fecha={} ===", idIndicador, fecha);
+        try {
+            LocalDate fechaPlazo = LocalDate.parse(fecha);
+            EvidenciaTipo resultado = evidenciaTipoService.guardarFechaPlazoFinalPorIndicador(idIndicador, fechaPlazo);
+            log.info("Resultado exitoso: id={}, idIndicador={}, fechaPlazo={}", 
+                resultado.getId(), resultado.getIdIndicador(), resultado.getFechaPlazo());
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            log.error("Error completo en test fecha:", e);
+            Throwable causa = e;
+            while (causa.getCause() != null) {
+                causa = causa.getCause();
+            }
+            String mensajeError = "Error: " + e.getClass().getSimpleName() + " - " + e.getMessage() 
+                + " | Causa raíz: " + causa.getClass().getSimpleName() + " - " + causa.getMessage();
+            return ResponseEntity.status(500).body(mensajeError);
+        }
+    }
+
+    // Endpoint para obtener todas las evidencias tipo (diagnóstico)
+    @GetMapping("/all")
+    public ResponseEntity<?> obtenerTodas() {
+        log.info("=== Obteniendo todas las evidencias tipo ===");
+        List<EvidenciaTipo> todas = evidenciaTipoService.obtenerTodas();
+        log.info("Total: {}", todas.size());
+        return ResponseEntity.ok(todas);
+    }
 }

@@ -18,7 +18,7 @@ import pe.gob.essalud.apps.service.IndicadorService;
 import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
 import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,16 +40,28 @@ public class IndicadorServiceImpl implements IndicadorService {
 
     @Override
     @Transactional
-    public void registrarIndicador(IndicadorRequestDto requestDto) {
+    public Integer registrarIndicador(IndicadorRequestDto requestDto) {
+        log.info("=== INICIO registrarIndicador ===");
+        log.info("Datos recibidos: sentidoIndicador={}, fechaPlazoFinal={}, prioridadNombre={}", 
+            requestDto.getSentidoIndicador(), requestDto.getFechaPlazoFinal(), requestDto.getPrioridadNombre());
+        
         Prioridad prioridad = new Prioridad();
         prioridad.setAnio(DateUtil.getYearCurrent());
         prioridad.setActividad(requestDto.getActividad());
-        System.out.println("Flack: " + requestDto.getIndicador().getFlDesPrioridad());
-        if(requestDto.getIndicador().getFlDesPrioridad().equalsIgnoreCase("1")) {
-        	System.out.println("Reemplaza valor.");
+        
+        String flDesPrioridad = requestDto.getIndicador().getFlDesPrioridad();
+        log.info("flDesPrioridad: {}", flDesPrioridad);
+        
+        // Usar prioridadNombre del DTO si existe, sino usar desPrioridad del indicador
+        if("1".equals(flDesPrioridad)) {
+        	log.info("Reemplaza valor con desPrioridad: {}", requestDto.getIndicador().getDesPrioridad());
         	prioridad.setDescripcion(requestDto.getIndicador().getDesPrioridad());
+        } else if (requestDto.getPrioridadNombre() != null && !requestDto.getPrioridadNombre().isEmpty()) {
+            log.info("Usando prioridadNombre del DTO: {}", requestDto.getPrioridadNombre());
+            prioridad.setDescripcion(requestDto.getPrioridadNombre());
         }
         Prioridad prioridadGuardado = prioridadRepository.save(prioridad);
+        log.info("Prioridad guardada: ID={}", prioridadGuardado.getIdPrioridad());
 
         Indicador model = requestDto.getIndicador();
         model.setAnio(DateUtil.getYearCurrent());
@@ -61,23 +73,11 @@ public class IndicadorServiceImpl implements IndicadorService {
         model.setCodUnidad(authService.getCodUnidadSession());
         
         Indicador indicadorGuardado = indicadorRepository.save(model);
+        log.info("Indicador guardado: ID={}", indicadorGuardado.getIdIndicador());
 
-        // Guardar sentido del indicador en BD local
-        if (requestDto.getSentidoIndicador() != null && !requestDto.getSentidoIndicador().isEmpty()) {
-            try {
-                sentidoIndicadorService.guardarOActualizar(
-                    indicadorGuardado.getIdIndicador().longValue(), 
-                    requestDto.getSentidoIndicador()
-                );
-                log.info("Sentido del indicador guardado: ID={}, Sentido={}", 
-                    indicadorGuardado.getIdIndicador(), requestDto.getSentidoIndicador());
-            } catch (Exception e) {
-                log.error("Error al guardar sentido del indicador: {}", e.getMessage());
-                // No lanzar excepción para que no falle el registro principal
-            }
-        }
-
-        if (!requestDto.getListEvidencia().isEmpty()) {
+        // Procesar evidencias si existen
+        if (requestDto.getListEvidencia() != null && !requestDto.getListEvidencia().isEmpty()) {
+            log.info("Procesando {} evidencias...", requestDto.getListEvidencia().size());
             int orden = 1;
             for (Evidencia i : requestDto.getListEvidencia()) {
                 i.setIndicador(indicadorGuardado);
@@ -89,14 +89,14 @@ public class IndicadorServiceImpl implements IndicadorService {
 
                 i.setEstado(true);
                 Evidencia evidenciaGuardada = evidenciaRepository.save(i);
+                log.info("Evidencia guardada: ID={}", evidenciaGuardada.getIdEvidencia());
                 
-                // Guardar evidencia_tipo en BD local - TEMPORALMENTE DESHABILITADO
-                /*
+                // Guardar evidencia_tipo en BD local
                 try {
                     evidenciaTipoService.guardarOActualizar(
                         evidenciaGuardada.getIdEvidencia().longValue(),
                         indicadorGuardado.getIdIndicador().longValue(),
-                        "intermedia",
+                        "inicial",
                         orden++
                     );
                     log.info("Evidencia_tipo guardada: idEvidencia={}, orden={}", 
@@ -105,29 +105,11 @@ public class IndicadorServiceImpl implements IndicadorService {
                     log.error("Error al guardar evidencia_tipo: {}", e.getMessage());
                     // No lanzar excepción para que no falle el registro principal
                 }
-                */
-            }
-            
-            // Guardar la fecha de plazo final si existe
-            if (requestDto.getFechaPlazoFinal() != null && !requestDto.getFechaPlazoFinal().isEmpty()) {
-                try {
-                    java.time.LocalDate fechaPlazo = java.time.LocalDate.parse(
-                        requestDto.getFechaPlazoFinal().substring(0, 10)
-                    );
-                    
-                    // Guardar fecha de plazo final por indicador
-                    evidenciaTipoService.guardarFechaPlazoFinalPorIndicador(
-                        indicadorGuardado.getIdIndicador().longValue(),
-                        fechaPlazo
-                    );
-                    log.info("Fecha plazo final guardada: indicador={}, fecha={}", 
-                        indicadorGuardado.getIdIndicador(), fechaPlazo);
-                } catch (Exception e) {
-                    log.error("Error al guardar fecha de plazo final: {}", e.getMessage(), e);
-                    // No lanzar excepción para que no falle el registro principal
-                }
             }
         }
+        
+        log.info("=== FIN registrarIndicador, retornando ID={} ===", indicadorGuardado.getIdIndicador());
+        return indicadorGuardado.getIdIndicador();
     }
 
     @Override

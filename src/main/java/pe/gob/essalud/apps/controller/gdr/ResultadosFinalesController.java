@@ -21,7 +21,7 @@ public class ResultadosFinalesController {
     private final ResultadosFinalesService resultadosFinalesService;
 
     @PostMapping("/guardar")
-    public ResponseEntity<ResultadosFinales> guardarOActualizar(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> guardarOActualizar(@RequestBody Map<String, Object> request) {
         try {
             Long idVotante = Long.parseLong(request.get("idVotante").toString());
             Integer anio = Integer.parseInt(request.get("anio").toString());
@@ -45,7 +45,10 @@ public class ResultadosFinalesController {
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
             log.error("Error al guardar resultados finales: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.status(500).body(Map.of(
+                "error", e.getClass().getSimpleName(),
+                "message", e.getMessage() != null ? e.getMessage() : "Error desconocido"
+            ));
         }
     }
 

@@ -1,4 +1,5 @@
 # Configuración para producción (usa Config Server)
+# GDR usa la MISMA BD (configurado en GdrDBConfig.java con @Profile)
 spring:
   config:
     import: configserver:${CONFIG_SERVER_URL:https://appsqa.essalud.gob.pe/config-service}

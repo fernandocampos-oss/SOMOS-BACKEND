@@ -88,7 +88,12 @@ public class EvidenciaServiceImpl implements EvidenciaService {
 
     @Transactional
     @Override
-    public void registrarIndicadorExistPrioridad(PrioridadExistRequestDto dto) {
+    public Integer registrarIndicadorExistPrioridad(PrioridadExistRequestDto dto) {
+        log.info("=== INICIO registrarIndicadorExistPrioridad ===");
+        log.info("Datos recibidos: sentidoIndicador={}, fechaPlazoFinal={}", 
+            dto.getSentidoIndicador(), dto.getFechaPlazoFinal());
+        log.info("Lista evidencias: {}", dto.getListEvidencia() != null ? dto.getListEvidencia().size() : "NULL");
+        
         Indicador model = dto.getIndicador();
         model.setAnio(DateUtil.getYearCurrent());
         model.setEstado(true);
@@ -98,23 +103,11 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         model.setCodRed(authService.getCodRedSession());
         model.setCodUnidad(authService.getCodUnidadSession());
         Indicador indicadorGuardado = indicadorRepository.save(model);
+        log.info("Indicador guardado: ID={}", indicadorGuardado.getIdIndicador());
 
-        // Guardar sentido del indicador en BD local
-        if (dto.getSentidoIndicador() != null && !dto.getSentidoIndicador().isEmpty()) {
-            try {
-                sentidoIndicadorService.guardarOActualizar(
-                    indicadorGuardado.getIdIndicador().longValue(), 
-                    dto.getSentidoIndicador()
-                );
-                log.info("Sentido del indicador guardado: ID={}, Sentido={}", 
-                    indicadorGuardado.getIdIndicador(), dto.getSentidoIndicador());
-            } catch (Exception e) {
-                log.error("Error al guardar sentido del indicador: {}", e.getMessage());
-                // No lanzar excepción para que no falle el registro principal
-            }
-        }
-
-        if (!dto.getListEvidencia().isEmpty()) {
+        // Procesar evidencias si existen
+        if (dto.getListEvidencia() != null && !dto.getListEvidencia().isEmpty()) {
+            log.info("Procesando {} evidencias iniciales...", dto.getListEvidencia().size());
             int orden = 1;
             int totalEvidencias = dto.getListEvidencia().size();
             
@@ -129,42 +122,32 @@ public class EvidenciaServiceImpl implements EvidenciaService {
 
                 e.setEstado(true);
                 Evidencia evidenciaGuardada = evidenciaRepository.save(e);
+                log.info("Evidencia guardada: ID={}", evidenciaGuardada.getIdEvidencia());
                 
                 // Guardar tipo y orden en BD local
                 try {
                     String tipo = (i == totalEvidencias - 1) ? "final" : "inicial";
+                    log.info("Guardando tipo evidencia: idEvidencia={}, idIndicador={}, tipo={}, orden={}", 
+                        evidenciaGuardada.getIdEvidencia(), indicadorGuardado.getIdIndicador(), tipo, orden);
                     evidenciaTipoService.guardarOActualizar(
                         evidenciaGuardada.getIdEvidencia().longValue(),
                         indicadorGuardado.getIdIndicador().longValue(),
                         tipo,
                         orden++
                     );
-                    log.info("Tipo de evidencia guardado: ID={}, Tipo={}, Orden={}", 
-                        evidenciaGuardada.getIdEvidencia(), tipo, orden - 1);
+                    log.info("Tipo de evidencia guardado exitosamente");
                 } catch (Exception ex) {
-                    log.error("Error al guardar tipo de evidencia: {}", ex.getMessage());
+                    log.error("ERROR al guardar tipo de evidencia: {} - {}", ex.getClass().getName(), ex.getMessage(), ex);
                 }
             }
+        } else {
+            log.info("No hay evidencias iniciales para procesar");
         }
         
-        // Guardar la fecha de plazo final si existe
-        if (dto.getFechaPlazoFinal() != null && !dto.getFechaPlazoFinal().isEmpty()) {
-            try {
-                java.time.LocalDate fechaPlazo = java.time.LocalDate.parse(
-                    dto.getFechaPlazoFinal().substring(0, 10)
-                );
-                
-                evidenciaTipoService.guardarFechaPlazoFinalPorIndicador(
-                    indicadorGuardado.getIdIndicador().longValue(),
-                    fechaPlazo
-                );
-                log.info("Fecha plazo final guardada: indicador={}, fecha={}", 
-                    indicadorGuardado.getIdIndicador(), fechaPlazo);
-            } catch (Exception e) {
-                log.error("Error al guardar fecha de plazo final: {}", e.getMessage(), e);
-            }
-        }
+        log.info("=== FIN registrarIndicadorExistPrioridad, retornando ID={} ===", indicadorGuardado.getIdIndicador());
+        return indicadorGuardado.getIdIndicador();
     }
+    
 
     @Transactional
     @Override

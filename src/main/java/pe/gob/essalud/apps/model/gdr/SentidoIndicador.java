@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sentido_indicador", schema = "public")
+@Table(name = "sentido_indicador")
 public class SentidoIndicador {
 
     @Id

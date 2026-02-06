@@ -23,19 +23,32 @@ public class EvidenciaTipoService {
     // Guardar o actualizar tipo de evidencia
     @Transactional("gdrTransactionManager")
     public EvidenciaTipo guardarOActualizar(Long idEvidencia, Long idIndicador, String tipo, Integer orden) {
-        Optional<EvidenciaTipo> existente = evidenciaTipoRepository.findByIdEvidencia(idEvidencia);
+        log.info("guardarOActualizar: idEvidencia={}, idIndicador={}, tipo={}, orden={}", 
+            idEvidencia, idIndicador, tipo, orden);
+        try {
+            Optional<EvidenciaTipo> existente = evidenciaTipoRepository.findByIdEvidencia(idEvidencia);
 
-        if (existente.isPresent()) {
-            // Actualizar
-            EvidenciaTipo evidenciaTipo = existente.get();
-            evidenciaTipo.setTipo(tipo);
-            evidenciaTipo.setOrden(orden);
-            evidenciaTipo.setIdIndicador(idIndicador);
-            return evidenciaTipoRepository.save(evidenciaTipo);
-        } else {
-            // Crear nuevo
-            EvidenciaTipo nuevo = new EvidenciaTipo(idEvidencia, idIndicador, tipo, orden);
-            return evidenciaTipoRepository.save(nuevo);
+            if (existente.isPresent()) {
+                // Actualizar
+                log.info("Actualizando registro existente");
+                EvidenciaTipo evidenciaTipo = existente.get();
+                evidenciaTipo.setTipo(tipo);
+                evidenciaTipo.setOrden(orden);
+                evidenciaTipo.setIdIndicador(idIndicador);
+                EvidenciaTipo saved = evidenciaTipoRepository.save(evidenciaTipo);
+                log.info("Registro actualizado exitosamente: id={}", saved.getId());
+                return saved;
+            } else {
+                // Crear nuevo
+                log.info("Creando nuevo registro");
+                EvidenciaTipo nuevo = new EvidenciaTipo(idEvidencia, idIndicador, tipo, orden);
+                EvidenciaTipo saved = evidenciaTipoRepository.save(nuevo);
+                log.info("Registro creado exitosamente: id={}", saved.getId());
+                return saved;
+            }
+        } catch (Exception e) {
+            log.error("ERROR en guardarOActualizar: {} - {}", e.getClass().getName(), e.getMessage(), e);
+            throw e;
         }
     }
     
@@ -64,6 +77,11 @@ public class EvidenciaTipoService {
     public Optional<EvidenciaTipo> obtenerPorIdEvidencia(Long idEvidencia) {
         return evidenciaTipoRepository.findByIdEvidencia(idEvidencia);
     }
+    
+    // Obtener todos los registros
+    public List<EvidenciaTipo> obtenerTodas() {
+        return evidenciaTipoRepository.findAll();
+    }
 
     // Obtener todas las evidencias de un indicador ordenadas
     public List<EvidenciaTipo> obtenerPorIndicador(Long idIndicador) {
@@ -89,35 +107,56 @@ public class EvidenciaTipoService {
     
     // Obtener fechas de plazo final por lista de indicadores
     public Map<Long, LocalDate> obtenerFechasPlazoFinalPorIndicadores(List<Long> idsIndicador) {
+        log.info("=== obtenerFechasPlazoFinalPorIndicadores: {} IDs ===", idsIndicador.size());
+        log.info("IDs solicitados: {}", idsIndicador);
+        
         Map<Long, LocalDate> resultado = new HashMap<>();
         
         for (Long idIndicador : idsIndicador) {
             Optional<EvidenciaTipo> evidenciaFinal = evidenciaTipoRepository.findFirstByIdIndicadorAndTipo(idIndicador, "final");
-            if (evidenciaFinal.isPresent() && evidenciaFinal.get().getFechaPlazo() != null) {
-                resultado.put(idIndicador, evidenciaFinal.get().getFechaPlazo());
+            log.info("Buscando idIndicador={}, encontrado={}", idIndicador, evidenciaFinal.isPresent());
+            if (evidenciaFinal.isPresent()) {
+                log.info("  -> fechaPlazo={}", evidenciaFinal.get().getFechaPlazo());
+                if (evidenciaFinal.get().getFechaPlazo() != null) {
+                    resultado.put(idIndicador, evidenciaFinal.get().getFechaPlazo());
+                }
             }
         }
         
+        log.info("Resultado final: {}", resultado);
         return resultado;
     }
     
     // Guardar fecha de plazo final para un indicador (sin necesidad de evidencia existente)
     @Transactional("gdrTransactionManager")
     public EvidenciaTipo guardarFechaPlazoFinalPorIndicador(Long idIndicador, LocalDate fechaPlazo) {
-        // Buscar si ya existe un registro de evidencia final para este indicador
-        Optional<EvidenciaTipo> existente = evidenciaTipoRepository.findFirstByIdIndicadorAndTipo(idIndicador, "final");
-        
-        if (existente.isPresent()) {
-            // Actualizar la fecha existente
-            EvidenciaTipo evidenciaTipo = existente.get();
-            evidenciaTipo.setFechaPlazo(fechaPlazo);
-            return evidenciaTipoRepository.save(evidenciaTipo);
-        } else {
-            // Crear nuevo registro con idEvidencia = -idIndicador (placeholder único por indicador)
-            Long idEvidenciaPlaceholder = -idIndicador;
-            EvidenciaTipo nuevo = new EvidenciaTipo(idEvidenciaPlaceholder, idIndicador, "final", 999);
-            nuevo.setFechaPlazo(fechaPlazo);
-            return evidenciaTipoRepository.save(nuevo);
+        log.info("guardarFechaPlazoFinalPorIndicador: idIndicador={}, fechaPlazo={}", idIndicador, fechaPlazo);
+        try {
+            // Buscar si ya existe un registro de evidencia final para este indicador
+            Optional<EvidenciaTipo> existente = evidenciaTipoRepository.findFirstByIdIndicadorAndTipo(idIndicador, "final");
+            log.info("Registro existente encontrado: {}", existente.isPresent());
+            
+            if (existente.isPresent()) {
+                // Actualizar la fecha existente
+                log.info("Actualizando fecha en registro existente");
+                EvidenciaTipo evidenciaTipo = existente.get();
+                evidenciaTipo.setFechaPlazo(fechaPlazo);
+                EvidenciaTipo saved = evidenciaTipoRepository.save(evidenciaTipo);
+                log.info("Fecha actualizada exitosamente: id={}", saved.getId());
+                return saved;
+            } else {
+                // Crear nuevo registro con idEvidencia = -idIndicador (placeholder único por indicador)
+                Long idEvidenciaPlaceholder = -idIndicador;
+                log.info("Creando nuevo registro con placeholder: idEvidencia={}", idEvidenciaPlaceholder);
+                EvidenciaTipo nuevo = new EvidenciaTipo(idEvidenciaPlaceholder, idIndicador, "final", 999);
+                nuevo.setFechaPlazo(fechaPlazo);
+                EvidenciaTipo saved = evidenciaTipoRepository.save(nuevo);
+                log.info("Registro creado exitosamente: id={}", saved.getId());
+                return saved;
+            }
+        } catch (Exception e) {
+            log.error("ERROR en guardarFechaPlazoFinalPorIndicador: {} - {}", e.getClass().getName(), e.getMessage(), e);
+            throw e;
         }
     }
 

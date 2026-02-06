@@ -1,5 +1,6 @@
 # Configuración adicional para perfil DEV
-# La BD principal viene del Config Server, aquí solo agregamos la BD local para GDR
+# La BD principal viene del Config Server
+# GDR usa la MISMA BD (configurado en GdrDBConfig.java con @Profile)
 
 spring:
   config:
@@ -9,14 +10,6 @@ spring:
       username: ${CONFIG_SERVER_USERNAME}
       password: ${CONFIG_SERVER_PASSWORD}
 
-gdr:
-  datasource:
-    jdbc-url: jdbc:postgresql://localhost:5432/GDR
-    username: postgres
-    password: 123456
-    driver-class-name: org.postgresql.Driver
-
-# URL de la Plataforma Integral (PIGRH) - QA debe configurar en Config Server
-# Esta propiedad se debe agregar en el Config Server para cada ambiente
+# URL de la Plataforma Integral (PIGRH)
 plataforma-integral:
   url: ${PIGRH_URL:https://pigrh.essalud.gob.pe/verificar-sso}
