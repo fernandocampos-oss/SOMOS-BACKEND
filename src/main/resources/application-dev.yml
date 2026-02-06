@@ -15,3 +15,8 @@ gdr:
     username: postgres
     password: 123456
     driver-class-name: org.postgresql.Driver
+
+# URL de la Plataforma Integral (PIGRH) - QA debe configurar en Config Server
+# Esta propiedad se debe agregar en el Config Server para cada ambiente
+plataforma-integral:
+  url: ${PIGRH_URL:https://pigrh.essalud.gob.pe/verificar-sso}

@@ -30,6 +30,4 @@ public interface EquipoService {
     Usuario findUsuarioSctrByNumeroDocumento(String numDoc);
     List<TrabajadorResponseDto> listAllVotanteByUnidadOrganizativa();
     List<TrabajadorResponseDto> listAllAvalibleEvaluador();
-    // TODO: ELIMINAR ANTES DE PRODUCCIÓN
-    // Map<String, Object> debugVotanteActual();
 }

@@ -6,3 +6,7 @@ spring:
     config:
       username: ${CONFIG_SERVER_USERNAME}
       password: ${CONFIG_SERVER_PASSWORD}
+
+# URL de la Plataforma Integral (PIGRH)
+plataforma-integral:
+  url: ${PIGRH_URL:https://pigrh.essalud.gob.pe/verificar-sso}

@@ -74,6 +74,10 @@ auth0:
 
 upload-path: C:/temp/uploads
 
+# URL de la Plataforma Integral (PIGRH)
+plataforma-integral:
+  url: http://localhost:4201/verificar-sso
+
 elecciones:
   anio: 2025
   mes: 1
