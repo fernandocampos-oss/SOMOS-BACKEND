@@ -14,4 +14,6 @@ public class PrioridadExistRequestDto {
     private Votante votante;
     private Indicador indicador;
     private List<Evidencia> listEvidencia;
+    private String sentidoIndicador;
+    private String fechaPlazoFinal;
 }

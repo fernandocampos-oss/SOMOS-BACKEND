@@ -11,7 +11,7 @@ public interface EvidenciaService {
 
     void registrarEvidenciaExistIndicador(IndicadorExistRequestDto dto);
 
-    void registrarIndicadorExistPrioridad(PrioridadExistRequestDto dto);
+    Integer registrarIndicadorExistPrioridad(PrioridadExistRequestDto dto);
 
     long crearSustentoEvidencia(EvidenciaSustentoRequestDto request);
 

@@ -14,13 +14,13 @@ import java.util.Optional;
 
 public interface IndicadorRepository extends JpaRepository<Indicador, Integer> {
 
-    @Query(value = "SELECT * from indicador i WHERE i.id_votante=? AND i.id_prioridad=? ORDER BY i.id_indicador ASC ", nativeQuery = true)
+    @Query(value = "SELECT * from indicador i WHERE i.id_votante=? AND i.id_prioridad=? AND i.estado = true ORDER BY i.id_indicador ASC ", nativeQuery = true)
     List<Indicador> getListIndicadoresByUsuarioAndPrioridad(@Param("idVotante") int idVotante, @Param("idPrioridad") int idPrioridad);
 
-    @Query(value = "SELECT * from indicador i WHERE i.id_prioridad=? ORDER BY i.id_indicador ASC ", nativeQuery = true)
+    @Query(value = "SELECT * from indicador i WHERE i.id_prioridad=? AND i.estado = true ORDER BY i.id_indicador ASC ", nativeQuery = true)
     List<Indicador> getListIndicadoresByPrioridad(@Param("idPrioridad") int idPrioridad);
 
-    @Query(value = "SELECT SUM(i.peso) FROM indicador i WHERE i.anio=? and i.id_votante=? ", nativeQuery = true)
+    @Query(value = "SELECT SUM(i.peso) FROM indicador i WHERE i.anio=? and i.id_votante=? AND i.estado = true", nativeQuery = true)
     Optional<Integer> sumaTotalPesoAllIndicadorByTrabajador(@Param("anioActual") int anioActual, @Param("idVotante") int idVotante);
 
     @Query(value = "SELECT DISTINCT id_votante from indicador i WHERE i.anio =:anio AND i.cod_red IN (:listCodRed) AND i.cod_unidad =:codUnidad", nativeQuery = true)

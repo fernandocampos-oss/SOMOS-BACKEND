@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface IndicadorService {
 
-    void registrarIndicador(IndicadorRequestDto requestDto);
+    Integer registrarIndicador(IndicadorRequestDto requestDto);
 
     List<PendienteDto> listPendientesTrabajadorByUser();
 
