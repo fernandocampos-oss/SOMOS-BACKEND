@@ -2,6 +2,10 @@ spring:
   application:
     name: marcaciones-service
   profiles:
-    # Para desarrollo local: -Dspring.profiles.active=local
-    # Para producción: -Dspring.profiles.active=prod
-    active: ${SPRING_PROFILES_ACTIVE:local}
+    active: ${PROFILES:default}
+  config:
+    import: configserver:${CONFIG_SERVER_URL}
+  cloud:
+    config:
+      username: ${CONFIG_SERVER_USERNAME}
+      password: ${CONFIG_SERVER_PASSWORD}

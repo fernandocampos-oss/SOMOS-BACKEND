@@ -36,7 +36,7 @@ public class PersonalTokenServiceImpl implements PersonalTokenService {
     private final JwtService jwtService;
     private final HttpServletRequest request;
     
-    @Value("${plataforma-integral.url:http://localhost:4201/verificar-sso}")
+    @Value("${plataforma-integral.url}")
     private String plataformaIntegralUrl;
     
     // Almacén temporal de tokens (en producción usar Redis)
