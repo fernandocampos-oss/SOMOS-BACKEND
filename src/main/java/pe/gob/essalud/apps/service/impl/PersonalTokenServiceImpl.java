@@ -141,9 +141,8 @@ public class PersonalTokenServiceImpl implements PersonalTokenService {
         // Limpiar tokens expirados
         limpiarTokensExpirados();
         
-        String urlCompleta = plataformaIntegralUrl + "?token=" + token;
-        
-        return new PersonalTokenResponseDto(token, urlCompleta, TOKEN_EXPIRATION_SECONDS);
+        // Devolver URL base sin token
+        return new PersonalTokenResponseDto(token, plataformaIntegralUrl, TOKEN_EXPIRATION_SECONDS);
     }
     
     @Override
