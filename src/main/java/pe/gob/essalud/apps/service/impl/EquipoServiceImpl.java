@@ -126,10 +126,23 @@ public class EquipoServiceImpl implements EquipoService {
 
     @Override
     public Votante getVotanteByIdUsuario() {
-        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
-        if (votante!= null && votante.getIdSegmento().equals(3)){
+        // Buscar primero por número de documento del usuario logueado
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById((long) authService.getIdUserSession());
+        Votante votante = null;
+        
+        if (usuarioOpt.isPresent()) {
+            String numeroDocumento = usuarioOpt.get().getNumeroDocumento();
+            votante = equipoRepository.getVotanteByNumeroDocumento(numeroDocumento);
+        }
+        
+        // Fallback: buscar por id_usuario (compatibilidad)
+        if (votante == null) {
+            votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        }
+        
+        if (votante != null && votante.getIdSegmento() != null && votante.getIdSegmento().equals(3)) {
             Integer esEvaluador = equipoRepository.getEsEvaluadorDelGrupo(votante.getIdVotante());
-            if (esEvaluador>0){
+            if (esEvaluador > 0) {
                 votante.setIdSegmento(5);
             }
         }

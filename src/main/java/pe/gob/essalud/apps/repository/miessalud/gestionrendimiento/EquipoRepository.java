@@ -79,4 +79,7 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     List<TrabajadorResponseDto> listAllAvalibleEvaluador(
             @Param("codigosUnidad") List<String> codigosUnidad);
 
+    @Query("SELECT v FROM Votante v WHERE v.numeroDocumento = :numeroDocumento")
+    Votante getVotanteByNumeroDocumento(@Param("numeroDocumento") String numeroDocumento);
+
 }
