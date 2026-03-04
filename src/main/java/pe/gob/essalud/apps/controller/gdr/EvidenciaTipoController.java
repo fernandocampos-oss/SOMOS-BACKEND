@@ -80,6 +80,26 @@ public class EvidenciaTipoController {
         }
     }
 
+    @PostMapping("/actualizar-fecha-plazo-final/{idIndicador}")
+    public ResponseEntity<EvidenciaTipo> actualizarFechaPlazoFinal(
+            @PathVariable Long idIndicador,
+            @RequestBody Map<String, String> request) {
+        try {
+            log.info("Actualizando fecha plazo final para indicador: {}", idIndicador);
+            String fechaStr = request.get("fechaPlazo");
+            if (fechaStr == null || fechaStr.trim().isEmpty()) {
+                log.error("La fecha de plazo está vacía");
+                return ResponseEntity.badRequest().build();
+            }
+            LocalDate fechaPlazo = LocalDate.parse(fechaStr.substring(0, 10));
+            EvidenciaTipo resultado = evidenciaTipoService.guardarFechaPlazoFinalPorIndicador(idIndicador, fechaPlazo);
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            log.error("Error al actualizar fecha plazo final: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PostMapping("/actualizar-fecha-plazo")
     public ResponseEntity<EvidenciaTipo> actualizarFechaPlazo(@RequestBody Map<String, Object> request) {
         try {
