@@ -19,6 +19,7 @@ import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
 import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
 
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +90,7 @@ public class IndicadorServiceImpl implements IndicadorService {
 
                 i.setEstado(true);
                 Evidencia evidenciaGuardada = evidenciaRepository.save(i);
-                log.info("Evidencia guardada: ID={}", evidenciaGuardada.getIdEvidencia());
+                log.info("Evidencia inicial guardada: ID={}", evidenciaGuardada.getIdEvidencia());
                 
                 // Guardar evidencia_tipo en BD local
                 try {
@@ -103,9 +104,46 @@ public class IndicadorServiceImpl implements IndicadorService {
                         evidenciaGuardada.getIdEvidencia(), orden-1);
                 } catch (Exception e) {
                     log.error("Error al guardar evidencia_tipo: {}", e.getMessage());
-                    // No lanzar excepción para que no falle el registro principal
                 }
             }
+        }
+        
+        // SIEMPRE crear la evidencia final con descripcion 'SUSTENTO FINAL'
+        log.info("Creando evidencia final obligatoria...");
+        Evidencia evidenciaFinal = new Evidencia();
+        evidenciaFinal.setDescripcion("SUSTENTO FINAL");
+        evidenciaFinal.setIndicador(indicadorGuardado);
+        evidenciaFinal.setUsuarioCreacion(authService.getIdUserSession());
+        
+        EstadoEvidencia estadoFinal = new EstadoEvidencia();
+        estadoFinal.setIdEstadoEvidencia(EstadoEvidenciaConstant.REGISTRADO);
+        evidenciaFinal.setEstadoEvidencia(estadoFinal);
+        evidenciaFinal.setEstado(true);
+        
+        // Si hay fecha de plazo final, asignarla
+        if (requestDto.getFechaPlazoFinal() != null && !requestDto.getFechaPlazoFinal().isEmpty()) {
+            try {
+                LocalDateTime fechaPlazo = LocalDateTime.parse(requestDto.getFechaPlazoFinal());
+                evidenciaFinal.setPlazo(fechaPlazo);
+            } catch (Exception ex) {
+                log.warn("No se pudo parsear fechaPlazoFinal: {}", requestDto.getFechaPlazoFinal());
+            }
+        }
+        
+        Evidencia evidenciaFinalGuardada = evidenciaRepository.save(evidenciaFinal);
+        log.info("Evidencia FINAL guardada: ID={}", evidenciaFinalGuardada.getIdEvidencia());
+        
+        // Guardar tipo 'final' en BD local
+        try {
+            int ordenFinal = (requestDto.getListEvidencia() != null ? requestDto.getListEvidencia().size() : 0) + 1;
+            evidenciaTipoService.guardarOActualizar(
+                evidenciaFinalGuardada.getIdEvidencia().longValue(),
+                indicadorGuardado.getIdIndicador().longValue(),
+                "final",
+                ordenFinal
+            );
+        } catch (Exception ex) {
+            log.error("ERROR al guardar tipo de evidencia final: {} - {}", ex.getClass().getName(), ex.getMessage());
         }
         
         log.info("=== FIN registrarIndicador, retornando ID={} ===", indicadorGuardado.getIdIndicador());

@@ -30,4 +30,6 @@ public interface EquipoService {
     Usuario findUsuarioSctrByNumeroDocumento(String numDoc);
     List<TrabajadorResponseDto> listAllVotanteByUnidadOrganizativa();
     List<TrabajadorResponseDto> listAllAvalibleEvaluador();
+    Votante findVotanteByNumeroDocumento(String numeroDocumento);
+    Votante findVotanteById(Integer idVotante);
 }

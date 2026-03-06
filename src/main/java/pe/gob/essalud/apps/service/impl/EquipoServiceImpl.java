@@ -257,4 +257,14 @@ public class EquipoServiceImpl implements EquipoService {
         }
     }
 
+    @Override
+    public Votante findVotanteByNumeroDocumento(String numeroDocumento) {
+        return equipoRepository.getVotanteByNumeroDocumento(numeroDocumento);
+    }
+
+    @Override
+    public Votante findVotanteById(Integer idVotante) {
+        return equipoRepository.getVotanteByIdVotante(idVotante);
+    }
+
 }

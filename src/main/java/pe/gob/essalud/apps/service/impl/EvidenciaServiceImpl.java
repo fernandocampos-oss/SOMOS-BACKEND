@@ -109,9 +109,8 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         if (dto.getListEvidencia() != null && !dto.getListEvidencia().isEmpty()) {
             log.info("Procesando {} evidencias iniciales...", dto.getListEvidencia().size());
             int orden = 1;
-            int totalEvidencias = dto.getListEvidencia().size();
             
-            for (int i = 0; i < totalEvidencias; i++) {
+            for (int i = 0; i < dto.getListEvidencia().size(); i++) {
                 Evidencia e = dto.getListEvidencia().get(i);
                 e.setIndicador(indicadorGuardado);
                 e.setUsuarioCreacion(authService.getIdUserSession());
@@ -122,17 +121,16 @@ public class EvidenciaServiceImpl implements EvidenciaService {
 
                 e.setEstado(true);
                 Evidencia evidenciaGuardada = evidenciaRepository.save(e);
-                log.info("Evidencia guardada: ID={}", evidenciaGuardada.getIdEvidencia());
+                log.info("Evidencia inicial guardada: ID={}", evidenciaGuardada.getIdEvidencia());
                 
-                // Guardar tipo y orden en BD local
+                // Guardar tipo y orden en BD local - todas son iniciales
                 try {
-                    String tipo = (i == totalEvidencias - 1) ? "final" : "inicial";
-                    log.info("Guardando tipo evidencia: idEvidencia={}, idIndicador={}, tipo={}, orden={}", 
-                        evidenciaGuardada.getIdEvidencia(), indicadorGuardado.getIdIndicador(), tipo, orden);
+                    log.info("Guardando tipo evidencia: idEvidencia={}, idIndicador={}, tipo=inicial, orden={}", 
+                        evidenciaGuardada.getIdEvidencia(), indicadorGuardado.getIdIndicador(), orden);
                     evidenciaTipoService.guardarOActualizar(
                         evidenciaGuardada.getIdEvidencia().longValue(),
                         indicadorGuardado.getIdIndicador().longValue(),
-                        tipo,
+                        "inicial",
                         orden++
                     );
                     log.info("Tipo de evidencia guardado exitosamente");
@@ -142,6 +140,44 @@ public class EvidenciaServiceImpl implements EvidenciaService {
             }
         } else {
             log.info("No hay evidencias iniciales para procesar");
+        }
+        
+        // SIEMPRE crear la evidencia final con descripcion 'SUSTENTO FINAL'
+        log.info("Creando evidencia final obligatoria...");
+        Evidencia evidenciaFinal = new Evidencia();
+        evidenciaFinal.setDescripcion("SUSTENTO FINAL");
+        evidenciaFinal.setIndicador(indicadorGuardado);
+        evidenciaFinal.setUsuarioCreacion(authService.getIdUserSession());
+        
+        EstadoEvidencia estadoFinal = new EstadoEvidencia();
+        estadoFinal.setIdEstadoEvidencia(EstadoEvidenciaConstant.REGISTRADO);
+        evidenciaFinal.setEstadoEvidencia(estadoFinal);
+        evidenciaFinal.setEstado(true);
+        
+        // Si hay fecha de plazo final, asignarla
+        if (dto.getFechaPlazoFinal() != null && !dto.getFechaPlazoFinal().isEmpty()) {
+            try {
+                LocalDateTime fechaPlazo = LocalDateTime.parse(dto.getFechaPlazoFinal());
+                evidenciaFinal.setPlazo(fechaPlazo);
+            } catch (Exception ex) {
+                log.warn("No se pudo parsear fechaPlazoFinal: {}", dto.getFechaPlazoFinal());
+            }
+        }
+        
+        Evidencia evidenciaFinalGuardada = evidenciaRepository.save(evidenciaFinal);
+        log.info("Evidencia FINAL guardada: ID={}", evidenciaFinalGuardada.getIdEvidencia());
+        
+        // Guardar tipo 'final' en BD local
+        try {
+            int ordenFinal = (dto.getListEvidencia() != null ? dto.getListEvidencia().size() : 0) + 1;
+            evidenciaTipoService.guardarOActualizar(
+                evidenciaFinalGuardada.getIdEvidencia().longValue(),
+                indicadorGuardado.getIdIndicador().longValue(),
+                "final",
+                ordenFinal
+            );
+        } catch (Exception ex) {
+            log.error("ERROR al guardar tipo de evidencia final: {} - {}", ex.getClass().getName(), ex.getMessage(), ex);
         }
         
         log.info("=== FIN registrarIndicadorExistPrioridad, retornando ID={} ===", indicadorGuardado.getIdIndicador());
