@@ -165,4 +165,108 @@ public class GestionEvaluadoresController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    // ==================== ASIGNAR TRABAJADORES ====================
+
+    /**
+     * Listar trabajadores asignados a un evaluador
+     */
+    @GetMapping("/{idEvaluador}/trabajadores")
+    public ResponseEntity<?> listarTrabajadores(@PathVariable Integer idEvaluador) {
+        try {
+            log.info("Listando trabajadores del evaluador: {}", idEvaluador);
+            List<Map<String, Object>> trabajadores = gestionEvaluadoresService.listarTrabajadoresPorEvaluador(idEvaluador);
+            return ResponseEntity.ok(trabajadores);
+        } catch (Exception e) {
+            log.error("Error al listar trabajadores: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Buscar trabajador por DNI para asignar
+     */
+    @GetMapping("/{idEvaluador}/buscar-trabajador/{dni}")
+    public ResponseEntity<?> buscarTrabajadorParaAsignar(
+            @PathVariable Integer idEvaluador,
+            @PathVariable String dni) {
+        try {
+            log.info("Buscando trabajador {} para evaluador {}", dni, idEvaluador);
+            Map<String, Object> resultado = gestionEvaluadoresService.buscarTrabajadorParaAsignar(dni, idEvaluador);
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            log.error("Error al buscar trabajador: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Asignar trabajador a evaluador
+     */
+    @PostMapping("/{idEvaluador}/asignar/{dniTrabajador}")
+    public ResponseEntity<?> asignarTrabajador(
+            @PathVariable Integer idEvaluador,
+            @PathVariable String dniTrabajador) {
+        try {
+            log.info("Asignando trabajador {} a evaluador {}", dniTrabajador, idEvaluador);
+            Map<String, Object> resultado = gestionEvaluadoresService.asignarTrabajador(idEvaluador, dniTrabajador);
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            log.error("Error al asignar trabajador: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Desasignar trabajador de evaluador
+     */
+    @DeleteMapping("/trabajador/{idEquipo}")
+    public ResponseEntity<?> desasignarTrabajador(@PathVariable Integer idEquipo) {
+        try {
+            log.info("Desasignando trabajador - idEquipo: {}", idEquipo);
+            gestionEvaluadoresService.desasignarTrabajador(idEquipo);
+            Map<String, String> response = new HashMap<>();
+            response.put("mensaje", "Trabajador desasignado correctamente");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("mensaje", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (Exception e) {
+            log.error("Error al desasignar trabajador: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Validar carga masiva de asignaciones trabajadores (preview)
+     */
+    @PostMapping("/trabajadores/carga-masiva/validar")
+    public ResponseEntity<?> validarCargaMasivaTrabajadores(@RequestBody Map<String, List<String[]>> request) {
+        try {
+            List<String[]> filas = request.get("filas");
+            log.info("Validando carga masiva de {} asignaciones", filas.size());
+            Map<String, Object> response = gestionEvaluadoresService.validarCargaMasivaTrabajadores(filas);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error al validar carga masiva: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Confirmar carga masiva de asignaciones trabajadores
+     */
+    @PostMapping("/trabajadores/carga-masiva/confirmar")
+    public ResponseEntity<?> confirmarCargaMasivaTrabajadores(@RequestBody Map<String, List<String[]>> request) {
+        try {
+            List<String[]> filas = request.get("filas");
+            log.info("Confirmando carga masiva de {} asignaciones", filas.size());
+            Map<String, Object> response = gestionEvaluadoresService.confirmarCargaMasivaTrabajadores(filas);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error al confirmar carga masiva: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

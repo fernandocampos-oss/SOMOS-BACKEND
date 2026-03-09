@@ -15,6 +15,7 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.response.CargaMasivaEvaluadorR
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvaluadorListResponseDto;
 import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.Votante;
+import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.VotanteRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EquipoRepository;
@@ -349,5 +350,356 @@ public class GestionEvaluadoresService {
         
         log.info("Segmento actualizado para votante {} a segmento {}", 
                 request.getIdVotante(), request.getNuevoSegmento());
+    }
+
+    // ==================== ASIGNAR TRABAJADORES ====================
+
+    /**
+     * Listar trabajadores asignados a un evaluador
+     */
+    public List<Map<String, Object>> listarTrabajadoresPorEvaluador(Integer idEvaluador) {
+        log.info("Listando trabajadores del evaluador: {}", idEvaluador);
+        List<Equipo> equipos = equipoRepository.findTrabajadoresByEvaluador(idEvaluador);
+        
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        for (Equipo equipo : equipos) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("idEquipo", equipo.getIdEquipo());
+            item.put("idVotante", equipo.getIntegrante().getIdVotante());
+            item.put("numeroDocumento", equipo.getIntegrante().getNumeroDocumento());
+            item.put("nombreCompleto", (equipo.getIntegrante().getNombres() + " " + equipo.getIntegrante().getApellidos()).trim());
+            resultado.add(item);
+        }
+        
+        return resultado;
+    }
+
+    /**
+     * Buscar trabajador por DNI para asignar
+     */
+    public Map<String, Object> buscarTrabajadorParaAsignar(String dni, Integer idEvaluador) {
+        log.info("Buscando trabajador {} para evalaudor {}", dni, idEvaluador);
+        
+        Map<String, Object> resultado = new HashMap<>();
+        
+        // Buscar en usuario
+        Usuario usuario = usuarioRepository.findDocumento(dni);
+        if (usuario == null) {
+            resultado.put("encontrado", false);
+            resultado.put("mensaje", "DNI no encontrado en el sistema");
+            return resultado;
+        }
+        
+        resultado.put("encontrado", true);
+        resultado.put("dni", usuario.getNumeroDocumento());
+        resultado.put("nombreCompleto", (usuario.getNombres() + " " + usuario.getApellidos()).trim());
+        
+        // Verificar si existe en votante
+        Optional<Votante> votanteOpt = votanteRepository.findByNumeroDocumento(dni);
+        Integer idVotante = null;
+        if (votanteOpt.isPresent()) {
+            idVotante = votanteOpt.get().getIdVotante();
+            
+            // Verificar si es el mismo evaluador
+            if (idVotante.equals(idEvaluador)) {
+                resultado.put("puedeAsignar", false);
+                resultado.put("mensaje", "Un evaluador no puede ser trabajador de sí mismo");
+                return resultado;
+            }
+            
+            // Verificar si ya tiene evaluador asignado
+            Equipo equipoExistente = equipoRepository.findEvaluadorByTrabajador(idVotante);
+            if (equipoExistente != null) {
+                resultado.put("puedeAsignar", false);
+                resultado.put("mensaje", "Este trabajador ya tiene un evaluador asignado: " + 
+                        equipoExistente.getJefe().getNumeroDocumento() + " - " +
+                        equipoExistente.getJefe().getNombres() + " " + equipoExistente.getJefe().getApellidos());
+                resultado.put("evaluadorActual", equipoExistente.getJefe().getNumeroDocumento());
+                return resultado;
+            }
+        }
+        
+        resultado.put("idVotante", idVotante);
+        resultado.put("puedeAsignar", true);
+        return resultado;
+    }
+
+    /**
+     * Asignar trabajador a evaluador
+     */
+    @Transactional("transactionManager1")
+    public Map<String, Object> asignarTrabajador(Integer idEvaluador, String dniTrabajador) {
+        log.info("Asignando trabajador {} a evaluador {}", dniTrabajador, idEvaluador);
+        
+        Map<String, Object> resultado = new HashMap<>();
+        
+        // Verificar que el evaluador existe
+        Votante evaluador = votanteRepository.findById(idEvaluador)
+                .orElseThrow(() -> new RuntimeException("Evaluador no encontrado"));
+        
+        // Buscar usuario trabajador
+        Usuario usuario = usuarioRepository.findDocumento(dniTrabajador);
+        if (usuario == null) {
+            resultado.put("exito", false);
+            resultado.put("mensaje", "Trabajador no encontrado");
+            return resultado;
+        }
+        
+        // Obtener o crear votante para el trabajador
+        Optional<Votante> votanteOpt = votanteRepository.findByNumeroDocumento(dniTrabajador);
+        Votante trabajador;
+        
+        if (votanteOpt.isPresent()) {
+            trabajador = votanteOpt.get();
+            
+            // Verificar que no sea el mismo
+            if (trabajador.getIdVotante().equals(idEvaluador)) {
+                resultado.put("exito", false);
+                resultado.put("mensaje", "Un evaluador no puede ser trabajador de sí mismo");
+                return resultado;
+            }
+            
+            // Verificar si ya tiene evaluador
+            Equipo equipoExistente = equipoRepository.findEvaluadorByTrabajador(trabajador.getIdVotante());
+            if (equipoExistente != null) {
+                resultado.put("exito", false);
+                resultado.put("mensaje", "Este trabajador ya tiene un evaluador asignado");
+                return resultado;
+            }
+        } else {
+            // Crear nuevo votante
+            int maxId = equipoRepository.getCantidadRegistro();
+            trabajador = new Votante();
+            trabajador.setIdVotante(maxId + 1);
+            trabajador.setNumeroDocumento(usuario.getNumeroDocumento());
+            trabajador.setNombres(usuario.getNombres());
+            trabajador.setApellidos(usuario.getApellidos());
+            trabajador.setIdSegmento(2); // Segmento operador/trabajador
+            trabajador.setIdUsuario((int) usuario.getIdUsuario());
+            votanteRepository.save(trabajador);
+        }
+        
+        // Crear asignación en equipo
+        Equipo equipo = new Equipo();
+        equipo.setJefe(evaluador);
+        equipo.setIntegrante(trabajador);
+        equipo.setEsActivo(true);
+        equipoRepository.save(equipo);
+        
+        resultado.put("exito", true);
+        resultado.put("mensaje", "Trabajador asignado correctamente");
+        resultado.put("idEquipo", equipo.getIdEquipo());
+        
+        log.info("Trabajador {} asignado a evaluador {} - idEquipo: {}", 
+                dniTrabajador, idEvaluador, equipo.getIdEquipo());
+        return resultado;
+    }
+
+    /**
+     * Desasignar trabajador (quitar del equipo)
+     */
+    @Transactional("transactionManager1")
+    public void desasignarTrabajador(Integer idEquipo) {
+        log.info("Desasignando trabajador - idEquipo: {}", idEquipo);
+        int result = equipoRepository.eliminarTrabajador(idEquipo);
+        if (result == 0) {
+            throw new RuntimeException("No se encontró la asignación");
+        }
+    }
+
+    /**
+     * Validar carga masiva de asignaciones (evaluador|trabajador)
+     */
+    public Map<String, Object> validarCargaMasivaTrabajadores(List<String[]> filas) {
+        log.info("Validando carga masiva de trabajadores: {} filas", filas.size());
+        
+        List<Map<String, Object>> validos = new ArrayList<>();
+        List<Map<String, Object>> errores = new ArrayList<>();
+        
+        for (int i = 0; i < filas.size(); i++) {
+            int numFila = i + 1;
+            String[] fila = filas.get(i);
+            
+            if (fila.length < 2) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("fila", numFila);
+                error.put("dniEvaluador", fila.length > 0 ? fila[0] : "");
+                error.put("dniTrabajador", "");
+                error.put("mensaje", "Formato inválido - se requieren 2 columnas");
+                errores.add(error);
+                continue;
+            }
+            
+            String dniEvaluador = fila[0] != null ? fila[0].trim() : "";
+            String dniTrabajador = fila[1] != null ? fila[1].trim() : "";
+            
+            Map<String, Object> item = new HashMap<>();
+            item.put("fila", numFila);
+            item.put("dniEvaluador", dniEvaluador);
+            item.put("dniTrabajador", dniTrabajador);
+            
+            // Validar DNI evaluador
+            if (!dniEvaluador.matches("\\d{8}")) {
+                item.put("mensaje", "DNI evaluador inválido");
+                errores.add(item);
+                continue;
+            }
+            
+            // Validar DNI trabajador
+            if (!dniTrabajador.matches("\\d{8}")) {
+                item.put("mensaje", "DNI trabajador inválido");
+                errores.add(item);
+                continue;
+            }
+            
+            // Verificar que no sean iguales
+            if (dniEvaluador.equals(dniTrabajador)) {
+                item.put("mensaje", "El evaluador no puede ser su propio trabajador");
+                errores.add(item);
+                continue;
+            }
+            
+            // Buscar evaluador (debe existir en votante con segmento 3)
+            Optional<Votante> evaluadorOpt = votanteRepository.findByIdSegmentoAndNumeroDocumento(SEGMENTO_EVALUADOR, dniEvaluador);
+            if (!evaluadorOpt.isPresent()) {
+                item.put("mensaje", "DNI evaluador no es un evaluador registrado");
+                errores.add(item);
+                continue;
+            }
+            
+            Votante evaluador = evaluadorOpt.get();
+            item.put("nombreEvaluador", (evaluador.getNombres() + " " + evaluador.getApellidos()).trim());
+            
+            // Buscar trabajador en usuario
+            Usuario usuarioTrabajador = usuarioRepository.findDocumento(dniTrabajador);
+            if (usuarioTrabajador == null) {
+                item.put("mensaje", "DNI trabajador no encontrado en el sistema");
+                errores.add(item);
+                continue;
+            }
+            
+            item.put("nombreTrabajador", (usuarioTrabajador.getNombres() + " " + usuarioTrabajador.getApellidos()).trim());
+            
+            // Verificar si trabajador ya tiene evaluador
+            Optional<Votante> trabajadorOpt = votanteRepository.findByNumeroDocumento(dniTrabajador);
+            if (trabajadorOpt.isPresent()) {
+                Equipo equipoExistente = equipoRepository.findEvaluadorByTrabajador(trabajadorOpt.get().getIdVotante());
+                if (equipoExistente != null) {
+                    item.put("yaAsignado", true);
+                    item.put("evaluadorActual", equipoExistente.getJefe().getNumeroDocumento());
+                    item.put("nombreEvaluadorActual", 
+                            (equipoExistente.getJefe().getNombres() + " " + equipoExistente.getJefe().getApellidos()).trim());
+                    item.put("mensaje", "Ya tiene evaluador: " + equipoExistente.getJefe().getNumeroDocumento());
+                } else {
+                    item.put("yaAsignado", false);
+                }
+            } else {
+                item.put("yaAsignado", false);
+            }
+            
+            validos.add(item);
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalFilas", filas.size());
+        response.put("totalValidos", validos.size());
+        response.put("totalErrores", errores.size());
+        response.put("validos", validos);
+        response.put("errores", errores);
+        
+        return response;
+    }
+
+    /**
+     * Confirmar carga masiva de asignaciones
+     */
+    @Transactional("transactionManager1")
+    public Map<String, Object> confirmarCargaMasivaTrabajadores(List<String[]> filas) {
+        log.info("Confirmando carga masiva de trabajadores: {} filas", filas.size());
+        
+        int procesados = 0;
+        int asignados = 0;
+        int yaAsignados = 0;
+        int errores = 0;
+        
+        for (String[] fila : filas) {
+            if (fila.length < 2) {
+                errores++;
+                continue;
+            }
+            
+            String dniEvaluador = fila[0].trim();
+            String dniTrabajador = fila[1].trim();
+            
+            try {
+                // Obtener evaluador
+                Optional<Votante> evaluadorOpt = votanteRepository.findByIdSegmentoAndNumeroDocumento(SEGMENTO_EVALUADOR, dniEvaluador);
+                if (!evaluadorOpt.isPresent()) {
+                    errores++;
+                    continue;
+                }
+                
+                Votante evaluador = evaluadorOpt.get();
+                
+                // Obtener o crear trabajador
+                Optional<Votante> trabajadorOpt = votanteRepository.findByNumeroDocumento(dniTrabajador);
+                Votante trabajador;
+                
+                if (trabajadorOpt.isPresent()) {
+                    trabajador = trabajadorOpt.get();
+                    
+                    // Verificar si ya tiene evaluador
+                    Equipo equipoExistente = equipoRepository.findEvaluadorByTrabajador(trabajador.getIdVotante());
+                    if (equipoExistente != null) {
+                        yaAsignados++;
+                        procesados++;
+                        continue;
+                    }
+                } else {
+                    // Crear votante
+                    Usuario usuario = usuarioRepository.findDocumento(dniTrabajador);
+                    if (usuario == null) {
+                        errores++;
+                        continue;
+                    }
+                    
+                    int maxId = equipoRepository.getCantidadRegistro();
+                    trabajador = new Votante();
+                    trabajador.setIdVotante(maxId + 1);
+                    trabajador.setNumeroDocumento(usuario.getNumeroDocumento());
+                    trabajador.setNombres(usuario.getNombres());
+                    trabajador.setApellidos(usuario.getApellidos());
+                    trabajador.setIdSegmento(2);
+                    trabajador.setIdUsuario((int) usuario.getIdUsuario());
+                    votanteRepository.save(trabajador);
+                }
+                
+                // Crear asignación
+                Equipo equipo = new Equipo();
+                equipo.setJefe(evaluador);
+                equipo.setIntegrante(trabajador);
+                equipo.setEsActivo(true);
+                equipoRepository.save(equipo);
+                
+                asignados++;
+                procesados++;
+                
+            } catch (Exception e) {
+                log.error("Error en fila {}: {}", fila[0] + "|" + fila[1], e.getMessage());
+                errores++;
+            }
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalProcesados", procesados);
+        response.put("totalAsignados", asignados);
+        response.put("totalYaAsignados", yaAsignados);
+        response.put("totalErrores", errores);
+        response.put("exito", errores == 0);
+        
+        log.info("Carga masiva completada: {} procesados, {} asignados, {} ya asignados, {} errores",
+                procesados, asignados, yaAsignados, errores);
+        
+        return response;
     }
 }
