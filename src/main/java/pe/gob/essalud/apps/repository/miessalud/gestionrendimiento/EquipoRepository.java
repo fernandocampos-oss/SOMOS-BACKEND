@@ -82,4 +82,12 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Query("SELECT v FROM Votante v WHERE v.numeroDocumento = :numeroDocumento")
     Votante getVotanteByNumeroDocumento(@Param("numeroDocumento") String numeroDocumento);
 
+    // Obtener IDs de evaluadores (jefes) que tienen trabajadores asignados activos
+    @Query(value = "SELECT DISTINCT e.id_jefe FROM equipo e WHERE e.es_activo = TRUE", nativeQuery = true)
+    List<Integer> findJefesConTrabajadores();
+
+    // Contar trabajadores activos por jefe
+    @Query(value = "SELECT COUNT(*) FROM equipo e WHERE e.id_jefe = :idJefe AND e.es_activo = TRUE", nativeQuery = true)
+    int countTrabajadoresByJefe(@Param("idJefe") Integer idJefe);
+
 }
