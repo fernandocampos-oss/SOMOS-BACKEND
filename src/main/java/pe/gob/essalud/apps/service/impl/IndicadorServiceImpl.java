@@ -15,8 +15,10 @@ import pe.gob.essalud.apps.repository.miessalud.GdrParametroRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
+import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
+import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,19 +35,33 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final EvidenciaRepository evidenciaRepository;
     private final EquipoRepository equipoRepository;
     private final GdrParametroRepository gdrParametroRepository;
+    private final SentidoIndicadorService sentidoIndicadorService;
+    private final EvidenciaTipoService evidenciaTipoService;
 
     @Override
     @Transactional
-    public void registrarIndicador(IndicadorRequestDto requestDto) {
+    public Integer registrarIndicador(IndicadorRequestDto requestDto) {
+        log.info("=== INICIO registrarIndicador ===");
+        log.info("Datos recibidos: sentidoIndicador={}, fechaPlazoFinal={}, prioridadNombre={}", 
+            requestDto.getSentidoIndicador(), requestDto.getFechaPlazoFinal(), requestDto.getPrioridadNombre());
+        
         Prioridad prioridad = new Prioridad();
         prioridad.setAnio(DateUtil.getYearCurrent());
         prioridad.setActividad(requestDto.getActividad());
-        System.out.println("Flack: " + requestDto.getIndicador().getFlDesPrioridad());
-        if(requestDto.getIndicador().getFlDesPrioridad().equalsIgnoreCase("1")) {
-        	System.out.println("Reemplaza valor.");
+        
+        String flDesPrioridad = requestDto.getIndicador().getFlDesPrioridad();
+        log.info("flDesPrioridad: {}", flDesPrioridad);
+        
+        // Usar prioridadNombre del DTO si existe, sino usar desPrioridad del indicador
+        if("1".equals(flDesPrioridad)) {
+        	log.info("Reemplaza valor con desPrioridad: {}", requestDto.getIndicador().getDesPrioridad());
         	prioridad.setDescripcion(requestDto.getIndicador().getDesPrioridad());
+        } else if (requestDto.getPrioridadNombre() != null && !requestDto.getPrioridadNombre().isEmpty()) {
+            log.info("Usando prioridadNombre del DTO: {}", requestDto.getPrioridadNombre());
+            prioridad.setDescripcion(requestDto.getPrioridadNombre());
         }
         Prioridad prioridadGuardado = prioridadRepository.save(prioridad);
+        log.info("Prioridad guardada: ID={}", prioridadGuardado.getIdPrioridad());
 
         Indicador model = requestDto.getIndicador();
         model.setAnio(DateUtil.getYearCurrent());
@@ -57,8 +73,12 @@ public class IndicadorServiceImpl implements IndicadorService {
         model.setCodUnidad(authService.getCodUnidadSession());
         
         Indicador indicadorGuardado = indicadorRepository.save(model);
+        log.info("Indicador guardado: ID={}", indicadorGuardado.getIdIndicador());
 
-        if (!requestDto.getListEvidencia().isEmpty()) {
+        // Procesar evidencias si existen
+        if (requestDto.getListEvidencia() != null && !requestDto.getListEvidencia().isEmpty()) {
+            log.info("Procesando {} evidencias...", requestDto.getListEvidencia().size());
+            int orden = 1;
             for (Evidencia i : requestDto.getListEvidencia()) {
                 i.setIndicador(indicadorGuardado);
                 i.setUsuarioCreacion(authService.getIdUserSession());
@@ -68,9 +88,28 @@ public class IndicadorServiceImpl implements IndicadorService {
                 i.setEstadoEvidencia(estadoEvidencia);
 
                 i.setEstado(true);
-                evidenciaRepository.save(i);
+                Evidencia evidenciaGuardada = evidenciaRepository.save(i);
+                log.info("Evidencia guardada: ID={}", evidenciaGuardada.getIdEvidencia());
+                
+                // Guardar evidencia_tipo en BD local
+                try {
+                    evidenciaTipoService.guardarOActualizar(
+                        evidenciaGuardada.getIdEvidencia().longValue(),
+                        indicadorGuardado.getIdIndicador().longValue(),
+                        "inicial",
+                        orden++
+                    );
+                    log.info("Evidencia_tipo guardada: idEvidencia={}, orden={}", 
+                        evidenciaGuardada.getIdEvidencia(), orden-1);
+                } catch (Exception e) {
+                    log.error("Error al guardar evidencia_tipo: {}", e.getMessage());
+                    // No lanzar excepción para que no falle el registro principal
+                }
             }
         }
+        
+        log.info("=== FIN registrarIndicador, retornando ID={} ===", indicadorGuardado.getIdIndicador());
+        return indicadorGuardado.getIdIndicador();
     }
 
     @Override
@@ -360,10 +399,25 @@ public class IndicadorServiceImpl implements IndicadorService {
     public void eliminarIndicador(int id) {
         Indicador indicador = indicadorRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("El indicador no se encuentra"));
+        
+        // Obtener evidencias activas
         List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(indicador.getIdIndicador());
-        if (!evidencias.isEmpty()) {
-            throw new ValidationException("El indicador tiene evidencia registrada");
+        
+        // Verificar si alguna evidencia tiene archivo adjunto
+        boolean tieneArchivosAdjuntos = evidencias.stream()
+                .anyMatch(e -> org.apache.commons.lang3.StringUtils.isNotBlank(e.getSustentoRutaFile()));
+        
+        if (tieneArchivosAdjuntos) {
+            throw new ValidationException("El indicador tiene evidencias con archivos adjuntos. Debe eliminar los archivos primero.");
         }
+        
+        // Marcar todas las evidencias como inactivas (estado = false)
+        for (Evidencia evidencia : evidencias) {
+            evidencia.setEstado(false);
+            evidenciaRepository.save(evidencia);
+        }
+        
+        // Marcar el indicador como inactivo
         indicador.setEstado(false);
         indicadorRepository.save(indicador);
     }

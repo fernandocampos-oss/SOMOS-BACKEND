@@ -72,5 +72,4 @@ public class PrioridadController {
     public void eliminarPrioridad(@PathVariable int id) {
         prioridadService.eliminarPrioridad(id);
     }
-
 }

@@ -21,7 +21,9 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.EquipoService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -241,6 +243,5 @@ public class EquipoServiceImpl implements EquipoService {
             return equipoRepository.listAllAvalibleEvaluador(codigosDeUnidades);
         }
     }
-
 
 }

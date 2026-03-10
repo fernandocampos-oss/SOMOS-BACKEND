@@ -10,6 +10,7 @@ import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Equipo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EquipoService {
 

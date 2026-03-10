@@ -1,11 +1,13 @@
 package pe.gob.essalud.apps.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +17,10 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 import pe.gob.essalud.apps.service.EvidenciaService;
+import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
+import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
 
+@Slf4j
 @RestController
 @RequestMapping(EvidenciaController.TAREA)
 @RequiredArgsConstructor
@@ -23,6 +28,8 @@ public class EvidenciaController {
 
     static final String TAREA = "evidencias";
     private final EvidenciaService evidenciaService;
+    private final SentidoIndicadorService sentidoIndicadorService;
+    private final EvidenciaTipoService evidenciaTipoService;
 
     @PostMapping("/registrar/exist-indicador")
     public void registrarEvidenciaExistIndicador(@Valid @RequestBody IndicadorExistRequestDto dto) {
@@ -31,7 +38,32 @@ public class EvidenciaController {
 
     @PostMapping("/registrar/exist-prioridad")
     public void registrarIndicadorExistPrioridad(@Valid @RequestBody PrioridadExistRequestDto dto) {
-        evidenciaService.registrarIndicadorExistPrioridad(dto);
+        // Guardar indicador y obtener el ID
+        Integer idIndicador = evidenciaService.registrarIndicadorExistPrioridad(dto);
+        log.info("Indicador en prioridad existente registrado con ID: {}", idIndicador);
+        
+        // Guardar sentido del indicador en transacción separada
+        if (dto.getSentidoIndicador() != null && !dto.getSentidoIndicador().isEmpty()) {
+            try {
+                log.info("Guardando sentido del indicador: {} para ID: {}", dto.getSentidoIndicador(), idIndicador);
+                sentidoIndicadorService.guardarOActualizar(idIndicador.longValue(), dto.getSentidoIndicador());
+                log.info("Sentido guardado exitosamente");
+            } catch (Exception e) {
+                log.error("Error al guardar sentido: {}", e.getMessage(), e);
+            }
+        }
+        
+        // Guardar fecha de plazo final en transacción separada
+        if (dto.getFechaPlazoFinal() != null && !dto.getFechaPlazoFinal().isEmpty()) {
+            try {
+                LocalDate fechaPlazo = LocalDate.parse(dto.getFechaPlazoFinal().substring(0, 10));
+                log.info("Guardando fecha plazo final: {} para ID: {}", fechaPlazo, idIndicador);
+                evidenciaTipoService.guardarFechaPlazoFinalPorIndicador(idIndicador.longValue(), fechaPlazo);
+                log.info("Fecha plazo guardada exitosamente");
+            } catch (Exception e) {
+                log.error("Error al guardar fecha plazo: {}", e.getMessage(), e);
+            }
+        }
     }
 
     @PostMapping("/registrar/sustento")

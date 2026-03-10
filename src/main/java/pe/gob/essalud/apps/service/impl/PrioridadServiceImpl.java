@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pe.gob.essalud.apps.client.EmailServiceClient;
 import pe.gob.essalud.apps.common.util.DateUtil;
 import pe.gob.essalud.apps.dto.emailservice.RecuperarClaveWebRequestDto;
@@ -16,15 +17,21 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.response.reporteGdrResponse.Re
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.RedPersonal;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.Votante;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.repository.miessalud.RedPersonalRepository;
 import pe.gob.essalud.apps.repository.miessalud.UnidadOrganizativaRepository;
+import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.VotanteRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PrioridadService;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +40,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class PrioridadServiceImpl implements PrioridadService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final PrioridadRepository prioridadRepository;
     private final ActividadRepository actividadRepository;
@@ -43,6 +53,8 @@ public class PrioridadServiceImpl implements PrioridadService {
     private final UnidadOrganizativaRepository unidadOrganizativaRepository;
     private final RedPersonalRepository redPersonalRepository;
     private final VotanteRepository votanteRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final TipoValorMetaRepository tipoValorMetaRepository;
     private final EmailServiceClient _emailServiceClient;
 
     @Override
@@ -358,11 +370,29 @@ public class PrioridadServiceImpl implements PrioridadService {
     public void eliminarPrioridad(int id) {
         Prioridad prioridad = prioridadRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("La prioridad no se encuentra"));
+        
+        // Obtener todos los indicadores de la prioridad
         List<Indicador> indicadores = indicadorRepository.getListIndicadoresByPrioridad(prioridad.getIdPrioridad());
-        if (!indicadores.isEmpty()) {
-            throw new ValidationException("La prioridad tiene indicador registrado");
+        
+        // Eliminar en cascada: indicadores y sus evidencias (soft delete)
+        for (Indicador indicador : indicadores) {
+            // Obtener evidencias del indicador
+            List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(indicador.getIdIndicador());
+            
+            // Marcar evidencias como inactivas
+            for (Evidencia evidencia : evidencias) {
+                evidencia.setEstado(false);
+                evidenciaRepository.save(evidencia);
+            }
+            
+            // Marcar indicador como inactivo
+            indicador.setEstado(false);
+            indicadorRepository.save(indicador);
         }
-        prioridadRepository.delete(prioridad);
+        
+        // Marcar prioridad como inactiva (soft delete)
+        prioridad.setEstado(false);
+        prioridadRepository.save(prioridad);
     }
-
+    
 }

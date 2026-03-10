@@ -16,7 +16,7 @@ import java.util.Optional;
 
 public interface PrioridadRepository extends JpaRepository<Prioridad, Integer> {
 
-    @Query(value = "SELECT * from prioridad p WHERE p.anio=? and p.id_prioridad IN (SELECT DISTINCT id_prioridad from indicador i WHERE i.id_votante=?) ORDER BY p.id_prioridad ASC ", nativeQuery = true)
+    @Query(value = "SELECT * from prioridad p WHERE p.anio=? and p.estado = true and p.id_prioridad IN (SELECT DISTINCT id_prioridad from indicador i WHERE i.id_votante=? AND i.estado = true) ORDER BY p.id_prioridad ASC ", nativeQuery = true)
     List<Prioridad> getListIdPrioridadesByTrabajador(@Param("anioActual") Number anioActual, @Param("idTrabajador") Number idTrabajador);
 
     @Query(value = "SELECT u.id_usuario as idUsuario, u.nombres as nombres, u.apellidos as apellidos, u.cargo as puesto, u.cod_unidad as unidad, u.numero_documento as numeroDocumento, u.correo as email, u.sexo as genero, u.fecha_nacimiento as fechaNacimiento, u.regimen as regimen FROM usuario u WHERE u.id_usuario=:idUsuario ", nativeQuery = true)
