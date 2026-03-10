@@ -27,11 +27,16 @@ import pe.gob.essalud.apps.repository.miessalud.VotanteRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PrioridadService;
+import pe.gob.essalud.apps.repository.gdr.SegmentoGdrRepository;
+import pe.gob.essalud.apps.model.gdr.SegmentoGdr;
+import pe.gob.essalud.apps.repository.gdr.ReunionEstablecimientoMetasRepository;
+import pe.gob.essalud.apps.model.gdr.ReunionEstablecimientoMetas;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +61,69 @@ public class PrioridadServiceImpl implements PrioridadService {
     private final UsuarioRepository usuarioRepository;
     private final TipoValorMetaRepository tipoValorMetaRepository;
     private final EmailServiceClient _emailServiceClient;
+    private final SegmentoGdrRepository segmentoGdrRepository;
+    private final ReunionEstablecimientoMetasRepository reunionMetasRepository;
+
+    /**
+     * Obtener segmento desde la tabla segmento_gdr, si no existe usa fallback basado en idSegmento
+     */
+    private String obtenerSegmento(String numeroDocumento, Integer idSegmento) {
+        if (numeroDocumento != null) {
+            Optional<SegmentoGdr> segmentoGdr = segmentoGdrRepository.findByNumeroDocumento(numeroDocumento);
+            if (segmentoGdr.isPresent()) {
+                return segmentoGdr.get().getSegmento();
+            }
+        }
+        // Fallback al valor anterior
+        if (idSegmento != null) {
+            if (idSegmento == 1) return "DIRECTIVO";
+            if (idSegmento == 3) return "EJECUTOR";
+        }
+        return "";
+    }
+
+    /**
+     * Obtener datos de reunión establecimiento de metas para el Excel (ExcelDto)
+     */
+    private void llenarDatosReunionExcelDto(ExcelDto dto, Long idVotanteEvaluado, Long idVotanteEvaluador) {
+        try {
+            String periodo = String.valueOf(DateUtil.getYearCurrent());
+            log.info("llenarDatosReunionExcelDto: evaluado={}, evaluador={}, periodo={}", idVotanteEvaluado, idVotanteEvaluador, periodo);
+            
+            Optional<ReunionEstablecimientoMetas> reunionOpt = reunionMetasRepository
+                .findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(idVotanteEvaluado, idVotanteEvaluador, periodo);
+            
+            log.info("llenarDatosReunionExcelDto: reunionOpt.isPresent={}", reunionOpt.isPresent());
+            
+            if (reunionOpt.isPresent()) {
+                ReunionEstablecimientoMetas reunion = reunionOpt.get();
+                log.info("llenarDatosReunionExcelDto: asistio={}, fechaReunion={}", reunion.getAsistio(), reunion.getFechaReunion());
+                // Asistió: S=Sí, cualquier otro valor (N, -)=No
+                if ("S".equals(reunion.getAsistio())) {
+                    dto.setReunionAsistio("Sí");
+                    // Fecha de reunión solo si asistió
+                    if (reunion.getFechaReunion() != null) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        dto.setReunionFecha(reunion.getFechaReunion().format(formatter));
+                    } else {
+                        dto.setReunionFecha("-");
+                    }
+                } else {
+                    dto.setReunionAsistio("No");
+                    dto.setReunionFecha("-");
+                }
+            } else {
+                // Sin registro = No asistió
+                dto.setReunionAsistio("No");
+                dto.setReunionFecha("-");
+            }
+            log.info("llenarDatosReunionExcelDto: reunionAsistio={}, reunionFecha={}", dto.getReunionAsistio(), dto.getReunionFecha());
+        } catch (Exception e) {
+            log.error("Error al llenar datos de reunión: {}", e.getMessage(), e);
+            dto.setReunionAsistio("No");
+            dto.setReunionFecha("-");
+        }
+    }
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
@@ -165,20 +233,14 @@ public class PrioridadServiceImpl implements PrioridadService {
             UnidadOrganizativa unidadEvaluador = prioridadRepository.getUnidadByCod(evaluador.getUnidad());
             modelExcelDto.setEvaluadorCodUnidad(unidadEvaluador.getDescripcion());
             modelExcelDto.setEvaluadorNumeroDocumento(evaluador.getNumeroDocumento());
-            if (votanteJefe.getIdSegmento() == 1) {
-                modelExcelDto.setEvaluadorSegmento("DIRECTIVO");
-            }
+            modelExcelDto.setEvaluadorSegmento(obtenerSegmento(evaluador.getNumeroDocumento(), votanteJefe.getIdSegmento()));
             EvaluadorResponseDto evaluado = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
             modelExcelDto.setEvaluadoNombreCompleto(e.getIntegrante().getApellidos() + " " + e.getIntegrante().getNombres());
             modelExcelDto.setEvaluadoPuesto(evaluado.getPuesto());
             UnidadOrganizativa unidadEvaluado = prioridadRepository.getUnidadByCod(evaluado.getUnidad());
             modelExcelDto.setEvaluadoCodUnidad(unidadEvaluado.getDescripcion());
-            if (e.getIntegrante().getIdSegmento() == 1) {
-                modelExcelDto.setEvaluadoSegmento("DIRECTIVO");
-            }
-            if (e.getIntegrante().getIdSegmento() == 3) {
-                modelExcelDto.setEvaluadoSegmento("EJECUTOR");
-            }
+            modelExcelDto.setEvaluadoNumeroDocumento(e.getIntegrante().getNumeroDocumento());
+            modelExcelDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
 
             List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), e.getIntegrante().getIdVotante());
             List<ExcelPrioridadDto> listExcelPrioridadDto = new ArrayList<>();
@@ -222,6 +284,10 @@ public class PrioridadServiceImpl implements PrioridadService {
                 listExcelPrioridadDto.add(modelExcelPrioridadDto);
             }
             modelExcelDto.setListPrioridad(listExcelPrioridadDto);
+            
+            // Llenar datos de reunión establecimiento de metas
+            llenarDatosReunionExcelDto(modelExcelDto, (long) e.getIntegrante().getIdVotante(), (long) votanteJefe.getIdVotante());
+            
             listExcelDto.add(modelExcelDto);
         }
 
