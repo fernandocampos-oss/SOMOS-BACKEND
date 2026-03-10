@@ -22,7 +22,8 @@ public class ResultadosFinalesService {
 
     @Transactional("gdrTransactionManager")
     public ResultadosFinales guardarOActualizar(Long idVotante, Integer anio, String rendimientoDistinguido, 
-                                                 String accionesCapacitacion, String otrasAcciones, LocalDate fechaReunion) {
+                                                 String accionesCapacitacion, String otrasAcciones, LocalDate fechaReunion,
+                                                 String permanenciaSeisMeses) {
         Optional<ResultadosFinales> existente = resultadosFinalesRepository.findByIdVotanteAndAnio(idVotante, anio);
 
         ResultadosFinales resultados;
@@ -40,6 +41,7 @@ public class ResultadosFinalesService {
         resultados.setAccionesCapacitacion(accionesCapacitacion);
         resultados.setOtrasAcciones(otrasAcciones);
         resultados.setFechaReunion(fechaReunion);
+        resultados.setPermanenciaSeisMeses(permanenciaSeisMeses);
 
         return resultadosFinalesRepository.save(resultados);
     }

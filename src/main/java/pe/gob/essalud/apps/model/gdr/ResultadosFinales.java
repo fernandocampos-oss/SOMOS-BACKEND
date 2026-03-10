@@ -38,6 +38,9 @@ public class ResultadosFinales {
     @Column(name = "fecha_reunion")
     private LocalDate fechaReunion;
 
+    @Column(name = "permanencia_seis_meses", length = 10)
+    private String permanenciaSeisMeses;
+
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 
