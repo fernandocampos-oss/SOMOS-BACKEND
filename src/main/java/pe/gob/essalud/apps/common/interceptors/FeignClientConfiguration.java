@@ -28,6 +28,8 @@ public class FeignClientConfiguration {
     @Value("${feign-clients.plaza-sap-service.key}")
     private String plazaSapServiceKey;
 
+    @Value("${feign-clients.material-sap-service.key}")
+    private String materialSapServiceKey;
 
     private void _addHeader(RequestTemplate template, Class<? extends java.lang.annotation.Annotation> interfaceClass, String key) {
         if (template.feignTarget() != null && template.feignTarget().type().isAnnotationPresent(interfaceClass)) {
@@ -44,6 +46,7 @@ public class FeignClientConfiguration {
             _addHeader(template, BasicAuthForBoletaSapService.class, boletaSapServiceKey);
             _addHeader(template, BasicAuthForEmailService.class, emailServiceKey);
             _addHeader(template, BasicAuthForPlazaSapService.class, plazaSapServiceKey);
+            _addHeader(template, BasicAuthForMaterialSapService.class, materialSapServiceKey);
         };
     }
 }
