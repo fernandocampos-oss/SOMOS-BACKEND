@@ -150,6 +150,8 @@ public class PrioridadServiceImpl implements PrioridadService {
             modelMainDto.setIdVotante(e.getIntegrante().getIdVotante());
             modelMainDto.setTrabajadorNombre(e.getIntegrante().getNombres());
             modelMainDto.setTrabajadorApellido(e.getIntegrante().getApellidos());
+            // Obtener segmento del trabajador desde tabla segmento_gdr
+            modelMainDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
             EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
             modelMainDto.setEmail(usuario.getEmail());
             int porcentajeTotal = 0;
