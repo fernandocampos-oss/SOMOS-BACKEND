@@ -17,8 +17,14 @@ import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.IndicadorService;
 import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
 import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
+import pe.gob.essalud.apps.repository.gdr.SegmentoGdrRepository;
+import pe.gob.essalud.apps.model.gdr.SegmentoGdr;
+import pe.gob.essalud.apps.repository.gdr.ReunionEstablecimientoMetasRepository;
+import pe.gob.essalud.apps.model.gdr.ReunionEstablecimientoMetas;
 
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +43,69 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final GdrParametroRepository gdrParametroRepository;
     private final SentidoIndicadorService sentidoIndicadorService;
     private final EvidenciaTipoService evidenciaTipoService;
+    private final SegmentoGdrRepository segmentoGdrRepository;
+    private final ReunionEstablecimientoMetasRepository reunionMetasRepository;
+
+    /**
+     * Obtener segmento desde la tabla segmento_gdr, si no existe usa fallback basado en idSegmento
+     */
+    private String obtenerSegmento(String numeroDocumento, Integer idSegmento) {
+        if (numeroDocumento != null) {
+            Optional<SegmentoGdr> segmentoGdr = segmentoGdrRepository.findByNumeroDocumento(numeroDocumento);
+            if (segmentoGdr.isPresent()) {
+                return segmentoGdr.get().getSegmento();
+            }
+        }
+        // Fallback al valor anterior
+        if (idSegmento != null) {
+            if (idSegmento == 1) return "DIRECTIVO";
+            if (idSegmento == 3) return "EJECUTOR";
+        }
+        return "";
+    }
+
+    /**
+     * Obtener datos de reunión establecimiento de metas para el Excel
+     */
+    private void llenarDatosReunion(ExcelTrabajadorDto dto, Long idVotanteEvaluado, Long idVotanteEvaluador) {
+        try {
+            String periodo = String.valueOf(DateUtil.getYearCurrent());
+            log.info("llenarDatosReunion: evaluado={}, evaluador={}, periodo={}", idVotanteEvaluado, idVotanteEvaluador, periodo);
+            
+            Optional<ReunionEstablecimientoMetas> reunionOpt = reunionMetasRepository
+                .findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(idVotanteEvaluado, idVotanteEvaluador, periodo);
+            
+            log.info("llenarDatosReunion: reunionOpt.isPresent={}", reunionOpt.isPresent());
+            
+            if (reunionOpt.isPresent()) {
+                ReunionEstablecimientoMetas reunion = reunionOpt.get();
+                log.info("llenarDatosReunion: asistio={}, fechaReunion={}", reunion.getAsistio(), reunion.getFechaReunion());
+                // Asistió: S=Sí, cualquier otro valor (N, -)=No
+                if ("S".equals(reunion.getAsistio())) {
+                    dto.setReunionAsistio("Sí");
+                    // Fecha de reunión solo si asistió
+                    if (reunion.getFechaReunion() != null) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        dto.setReunionFecha(reunion.getFechaReunion().format(formatter));
+                    } else {
+                        dto.setReunionFecha("-");
+                    }
+                } else {
+                    dto.setReunionAsistio("No");
+                    dto.setReunionFecha("-");
+                }
+            } else {
+                // Sin registro = No asistió
+                dto.setReunionAsistio("No");
+                dto.setReunionFecha("-");
+            }
+            log.info("llenarDatosReunion: reunionAsistio={}, reunionFecha={}", dto.getReunionAsistio(), dto.getReunionFecha());
+        } catch (Exception e) {
+            log.error("Error al llenar datos de reunión: {}", e.getMessage(), e);
+            dto.setReunionAsistio("No");
+            dto.setReunionFecha("-");
+        }
+    }
 
     @Override
     @Transactional
@@ -89,7 +158,7 @@ public class IndicadorServiceImpl implements IndicadorService {
 
                 i.setEstado(true);
                 Evidencia evidenciaGuardada = evidenciaRepository.save(i);
-                log.info("Evidencia guardada: ID={}", evidenciaGuardada.getIdEvidencia());
+                log.info("Evidencia inicial guardada: ID={}", evidenciaGuardada.getIdEvidencia());
                 
                 // Guardar evidencia_tipo en BD local
                 try {
@@ -103,9 +172,46 @@ public class IndicadorServiceImpl implements IndicadorService {
                         evidenciaGuardada.getIdEvidencia(), orden-1);
                 } catch (Exception e) {
                     log.error("Error al guardar evidencia_tipo: {}", e.getMessage());
-                    // No lanzar excepción para que no falle el registro principal
                 }
             }
+        }
+        
+        // SIEMPRE crear la evidencia final con descripcion 'SUSTENTO FINAL'
+        log.info("Creando evidencia final obligatoria...");
+        Evidencia evidenciaFinal = new Evidencia();
+        evidenciaFinal.setDescripcion("SUSTENTO FINAL");
+        evidenciaFinal.setIndicador(indicadorGuardado);
+        evidenciaFinal.setUsuarioCreacion(authService.getIdUserSession());
+        
+        EstadoEvidencia estadoFinal = new EstadoEvidencia();
+        estadoFinal.setIdEstadoEvidencia(EstadoEvidenciaConstant.REGISTRADO);
+        evidenciaFinal.setEstadoEvidencia(estadoFinal);
+        evidenciaFinal.setEstado(true);
+        
+        // Si hay fecha de plazo final, asignarla
+        if (requestDto.getFechaPlazoFinal() != null && !requestDto.getFechaPlazoFinal().isEmpty()) {
+            try {
+                LocalDateTime fechaPlazo = LocalDateTime.parse(requestDto.getFechaPlazoFinal());
+                evidenciaFinal.setPlazo(fechaPlazo);
+            } catch (Exception ex) {
+                log.warn("No se pudo parsear fechaPlazoFinal: {}", requestDto.getFechaPlazoFinal());
+            }
+        }
+        
+        Evidencia evidenciaFinalGuardada = evidenciaRepository.save(evidenciaFinal);
+        log.info("Evidencia FINAL guardada: ID={}", evidenciaFinalGuardada.getIdEvidencia());
+        
+        // Guardar tipo 'final' en BD local
+        try {
+            int ordenFinal = (requestDto.getListEvidencia() != null ? requestDto.getListEvidencia().size() : 0) + 1;
+            evidenciaTipoService.guardarOActualizar(
+                evidenciaFinalGuardada.getIdEvidencia().longValue(),
+                indicadorGuardado.getIdIndicador().longValue(),
+                "final",
+                ordenFinal
+            );
+        } catch (Exception ex) {
+            log.error("ERROR al guardar tipo de evidencia final: {} - {}", ex.getClass().getName(), ex.getMessage());
         }
         
         log.info("=== FIN registrarIndicador, retornando ID={} ===", indicadorGuardado.getIdIndicador());
@@ -238,22 +344,19 @@ public class IndicadorServiceImpl implements IndicadorService {
         mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
         UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
         mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
-        if (votanteTrabajador.getIdSegmento() == 1) {
-            mainDto.setEvaluadoSegmento("DIRECTIVO");
-        }
-        if (votanteTrabajador.getIdSegmento() == 3) {
-            mainDto.setEvaluadoSegmento("EJECUTOR");
-        }
+        mainDto.setEvaluadoNumeroDocumento(votanteTrabajador.getNumeroDocumento());
+        mainDto.setEvaluadoSegmento(obtenerSegmento(votanteTrabajador.getNumeroDocumento(), votanteTrabajador.getIdSegmento()));
         Equipo JefeEquipo = equipoRepository.getJefeByIdIntegrante(votanteTrabajador.getIdVotante());
         EvaluadorResponseDto jefe = prioridadRepository.findUsuarioById(JefeEquipo.getJefe().getIdUsuario());
         UnidadOrganizativa unidadJefe = prioridadRepository.getUnidadByCod(jefe.getUnidad());
         mainDto.setEvaluadorCodUnidad(unidadJefe.getDescripcion());
         mainDto.setEvaluadorNombreCompleto(JefeEquipo.getJefe().getApellidos() + " " + JefeEquipo.getJefe().getNombres());
         mainDto.setEvaluadorPuesto(jefe.getPuesto());
-        if (JefeEquipo.getJefe().getIdSegmento() == 1) {
-            mainDto.setEvaluadorSegmento("DIRECTIVO");
-        }
+        mainDto.setEvaluadorSegmento(obtenerSegmento(JefeEquipo.getJefe().getNumeroDocumento(), JefeEquipo.getJefe().getIdSegmento()));
         mainDto.setEvaluadorNumeroDocumento(jefe.getNumeroDocumento());
+
+        // Datos de reunión establecimiento de metas
+        llenarDatosReunion(mainDto, (long) votanteTrabajador.getIdVotante(), (long) JefeEquipo.getJefe().getIdVotante());
 
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), votanteTrabajador.getIdVotante());
 
@@ -312,21 +415,15 @@ public class IndicadorServiceImpl implements IndicadorService {
         mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
         UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
         mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
-        if (votanteTrabajador.getIdSegmento() == 1) {
-            mainDto.setEvaluadoSegmento("DIRECTIVO");
-        }
-        if (votanteTrabajador.getIdSegmento() == 3) {
-            mainDto.setEvaluadoSegmento("EJECUTOR");
-        }
+        mainDto.setEvaluadoNumeroDocumento(votanteTrabajador.getNumeroDocumento());
+        mainDto.setEvaluadoSegmento(obtenerSegmento(votanteTrabajador.getNumeroDocumento(), votanteTrabajador.getIdSegmento()));
         Equipo JefeEquipo = equipoRepository.getJefeByIdIntegrante(votanteTrabajador.getIdVotante());
         EvaluadorResponseDto jefe = prioridadRepository.findUsuarioById(JefeEquipo.getJefe().getIdUsuario());
         UnidadOrganizativa unidadJefe = prioridadRepository.getUnidadByCod(jefe.getUnidad());
         mainDto.setEvaluadorCodUnidad(unidadJefe.getDescripcion());
         mainDto.setEvaluadorNombreCompleto(JefeEquipo.getJefe().getApellidos() + " " + JefeEquipo.getJefe().getNombres());
         mainDto.setEvaluadorPuesto(jefe.getPuesto());
-        if (JefeEquipo.getJefe().getIdSegmento() == 1) {
-            mainDto.setEvaluadorSegmento("DIRECTIVO");
-        }
+        mainDto.setEvaluadorSegmento(obtenerSegmento(JefeEquipo.getJefe().getNumeroDocumento(), JefeEquipo.getJefe().getIdSegmento()));
         mainDto.setEvaluadorNumeroDocumento(jefe.getNumeroDocumento());
 
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), votanteTrabajador.getIdVotante());
@@ -373,6 +470,10 @@ public class IndicadorServiceImpl implements IndicadorService {
             listPrioridadDto.add(modelPrioridadDto);
         }
         mainDto.setListPrioridad(listPrioridadDto);
+        
+        // Llenar datos de reunión establecimiento de metas
+        llenarDatosReunion(mainDto, (long) votanteTrabajador.getIdVotante(), (long) JefeEquipo.getJefe().getIdVotante());
+        
         return mainDto;
     }
 

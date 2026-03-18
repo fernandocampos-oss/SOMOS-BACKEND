@@ -25,4 +25,8 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, Integer> {
     @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador AND t.estado = true ORDER BY t.idEvidencia ASC ")
     List<Evidencia> listEvidenciaByIdIndicador(@Param("idIndicador") int idIndicador);
 
+    // Obtener evidencia final por idIndicador (descripcion = 'SUSTENTO FINAL')
+    @Query("SELECT t FROM Evidencia t WHERE t.indicador.idIndicador = :idIndicador AND t.descripcion = 'SUSTENTO FINAL' AND t.estado = true")
+    Evidencia findEvidenciaFinalByIdIndicador(@Param("idIndicador") int idIndicador);
+
 }

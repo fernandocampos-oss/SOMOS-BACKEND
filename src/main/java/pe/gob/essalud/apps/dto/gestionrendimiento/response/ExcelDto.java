@@ -16,6 +16,11 @@ public class ExcelDto {
     private String evaluadoPuesto;
     private String evaluadoCodUnidad;
     private String evaluadoSegmento;
+    private String evaluadoNumeroDocumento;
+
+    // Datos de reunión establecimiento de metas
+    private String reunionAsistio;     // "Sí", "No" o "-"
+    private String reunionFecha;       // "dd/MM/yyyy" o "-"
 
     private List<ExcelPrioridadDto> listPrioridad;
 }

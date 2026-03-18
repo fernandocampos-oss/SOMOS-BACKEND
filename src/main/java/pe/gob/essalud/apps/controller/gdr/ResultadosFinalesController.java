@@ -36,9 +36,12 @@ public class ResultadosFinalesController {
             if (request.get("fechaReunion") != null && !request.get("fechaReunion").toString().isEmpty()) {
                 fechaReunion = LocalDate.parse(request.get("fechaReunion").toString());
             }
+            
+            String permanenciaSeisMeses = request.get("permanenciaSeisMeses") != null 
+                ? request.get("permanenciaSeisMeses").toString() : "SI";
 
             ResultadosFinales resultado = resultadosFinalesService.guardarOActualizar(
-                idVotante, anio, rendimientoDistinguido, accionesCapacitacion, otrasAcciones, fechaReunion
+                idVotante, anio, rendimientoDistinguido, accionesCapacitacion, otrasAcciones, fechaReunion, permanenciaSeisMeses
             );
 
             log.info("Resultados finales guardados exitosamente para votante {} año {}", idVotante, anio);

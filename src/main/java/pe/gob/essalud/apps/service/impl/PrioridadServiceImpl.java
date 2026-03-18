@@ -27,14 +27,28 @@ import pe.gob.essalud.apps.repository.miessalud.VotanteRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.service.AuthService;
 import pe.gob.essalud.apps.service.PrioridadService;
+import pe.gob.essalud.apps.repository.gdr.SegmentoGdrRepository;
+import pe.gob.essalud.apps.model.gdr.SegmentoGdr;
+import pe.gob.essalud.apps.repository.gdr.ReunionEstablecimientoMetasRepository;
+import pe.gob.essalud.apps.model.gdr.ReunionEstablecimientoMetas;
+import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
+import pe.gob.essalud.apps.service.gdr.ValorAlcanzadoPrioridadService;
+import pe.gob.essalud.apps.repository.gdr.ComentarioEstadoRepository;
+import pe.gob.essalud.apps.model.gdr.ComentarioEstado;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +70,72 @@ public class PrioridadServiceImpl implements PrioridadService {
     private final UsuarioRepository usuarioRepository;
     private final TipoValorMetaRepository tipoValorMetaRepository;
     private final EmailServiceClient _emailServiceClient;
+    private final SegmentoGdrRepository segmentoGdrRepository;
+    private final ReunionEstablecimientoMetasRepository reunionMetasRepository;
+    private final SentidoIndicadorService sentidoIndicadorService;
+    private final ValorAlcanzadoPrioridadService valorAlcanzadoPrioridadService;
+    private final ComentarioEstadoRepository comentarioEstadoRepository;
+
+    /**
+     * Obtener segmento desde la tabla segmento_gdr, si no existe usa fallback basado en idSegmento
+     */
+    private String obtenerSegmento(String numeroDocumento, Integer idSegmento) {
+        if (numeroDocumento != null) {
+            Optional<SegmentoGdr> segmentoGdr = segmentoGdrRepository.findByNumeroDocumento(numeroDocumento);
+            if (segmentoGdr.isPresent()) {
+                return segmentoGdr.get().getSegmento();
+            }
+        }
+        // Fallback al valor anterior
+        if (idSegmento != null) {
+            if (idSegmento == 1) return "DIRECTIVO";
+            if (idSegmento == 3) return "EJECUTOR";
+        }
+        return "";
+    }
+
+    /**
+     * Obtener datos de reunión establecimiento de metas para el Excel (ExcelDto)
+     */
+    private void llenarDatosReunionExcelDto(ExcelDto dto, Long idVotanteEvaluado, Long idVotanteEvaluador) {
+        try {
+            String periodo = String.valueOf(DateUtil.getYearCurrent());
+            log.info("llenarDatosReunionExcelDto: evaluado={}, evaluador={}, periodo={}", idVotanteEvaluado, idVotanteEvaluador, periodo);
+            
+            Optional<ReunionEstablecimientoMetas> reunionOpt = reunionMetasRepository
+                .findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(idVotanteEvaluado, idVotanteEvaluador, periodo);
+            
+            log.info("llenarDatosReunionExcelDto: reunionOpt.isPresent={}", reunionOpt.isPresent());
+            
+            if (reunionOpt.isPresent()) {
+                ReunionEstablecimientoMetas reunion = reunionOpt.get();
+                log.info("llenarDatosReunionExcelDto: asistio={}, fechaReunion={}", reunion.getAsistio(), reunion.getFechaReunion());
+                // Asistió: S=Sí, cualquier otro valor (N, -)=No
+                if ("S".equals(reunion.getAsistio())) {
+                    dto.setReunionAsistio("Sí");
+                    // Fecha de reunión solo si asistió
+                    if (reunion.getFechaReunion() != null) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        dto.setReunionFecha(reunion.getFechaReunion().format(formatter));
+                    } else {
+                        dto.setReunionFecha("-");
+                    }
+                } else {
+                    dto.setReunionAsistio("No");
+                    dto.setReunionFecha("-");
+                }
+            } else {
+                // Sin registro = No asistió
+                dto.setReunionAsistio("No");
+                dto.setReunionFecha("-");
+            }
+            log.info("llenarDatosReunionExcelDto: reunionAsistio={}, reunionFecha={}", dto.getReunionAsistio(), dto.getReunionFecha());
+        } catch (Exception e) {
+            log.error("Error al llenar datos de reunión: {}", e.getMessage(), e);
+            dto.setReunionAsistio("No");
+            dto.setReunionFecha("-");
+        }
+    }
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
@@ -70,6 +150,8 @@ public class PrioridadServiceImpl implements PrioridadService {
             modelMainDto.setIdVotante(e.getIntegrante().getIdVotante());
             modelMainDto.setTrabajadorNombre(e.getIntegrante().getNombres());
             modelMainDto.setTrabajadorApellido(e.getIntegrante().getApellidos());
+            // Obtener segmento del trabajador desde tabla segmento_gdr
+            modelMainDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
             EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
             modelMainDto.setEmail(usuario.getEmail());
             int porcentajeTotal = 0;
@@ -165,28 +247,74 @@ public class PrioridadServiceImpl implements PrioridadService {
             UnidadOrganizativa unidadEvaluador = prioridadRepository.getUnidadByCod(evaluador.getUnidad());
             modelExcelDto.setEvaluadorCodUnidad(unidadEvaluador.getDescripcion());
             modelExcelDto.setEvaluadorNumeroDocumento(evaluador.getNumeroDocumento());
-            if (votanteJefe.getIdSegmento() == 1) {
-                modelExcelDto.setEvaluadorSegmento("DIRECTIVO");
-            }
+            modelExcelDto.setEvaluadorSegmento(obtenerSegmento(evaluador.getNumeroDocumento(), votanteJefe.getIdSegmento()));
             EvaluadorResponseDto evaluado = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
             modelExcelDto.setEvaluadoNombreCompleto(e.getIntegrante().getApellidos() + " " + e.getIntegrante().getNombres());
             modelExcelDto.setEvaluadoPuesto(evaluado.getPuesto());
             UnidadOrganizativa unidadEvaluado = prioridadRepository.getUnidadByCod(evaluado.getUnidad());
             modelExcelDto.setEvaluadoCodUnidad(unidadEvaluado.getDescripcion());
-            if (e.getIntegrante().getIdSegmento() == 1) {
-                modelExcelDto.setEvaluadoSegmento("DIRECTIVO");
-            }
-            if (e.getIntegrante().getIdSegmento() == 3) {
-                modelExcelDto.setEvaluadoSegmento("EJECUTOR");
-            }
+            modelExcelDto.setEvaluadoNumeroDocumento(e.getIntegrante().getNumeroDocumento());
+            modelExcelDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
 
             List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), e.getIntegrante().getIdVotante());
+            
+            // Obtener IDs para batch queries
+            List<Long> idsPrioridades = prioridades.stream()
+                .map(p -> (long) p.getIdPrioridad())
+                .collect(Collectors.toList());
+            
+            // Obtener valores alcanzados en batch
+            Map<Long, BigDecimal> valoresAlcanzados = !idsPrioridades.isEmpty() 
+                ? valorAlcanzadoPrioridadService.obtenerMultiples(idsPrioridades)
+                : Map.of();
+            
+            // Recolectar IDs de indicadores para obtener sentidos
+            List<Long> idsIndicadores = new ArrayList<>();
+            for (Prioridad p : prioridades) {
+                List<Indicador> indicadores = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(
+                    e.getIntegrante().getIdVotante(), p.getIdPrioridad());
+                for (Indicador i : indicadores) {
+                    idsIndicadores.add((long) i.getIdIndicador());
+                }
+            }
+            
+            // Obtener sentidos en batch
+            Map<Long, String> sentidosMap = !idsIndicadores.isEmpty() 
+                ? sentidoIndicadorService.obtenerSentidosPorIndicadores(idsIndicadores)
+                : Map.of();
+            
+            // Recolectar IDs de evidencias para obtener comentarios
+            List<Long> idsEvidencias = new ArrayList<>();
+            for (Long idIndicador : idsIndicadores) {
+                List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(idIndicador.intValue());
+                for (Evidencia ev : evidencias) {
+                    idsEvidencias.add((long) ev.getIdEvidencia());
+                }
+            }
+            
+            // Obtener comentarios de estado en batch (todos los tipos)
+            Map<Long, ComentarioEstado> comentariosIndividualesMap = new java.util.HashMap<>();
+            Map<Long, ComentarioEstado> comentariosFinalesMap = new java.util.HashMap<>();
+            if (!idsEvidencias.isEmpty()) {
+                List<ComentarioEstado> todosComentarios = comentarioEstadoRepository.findByIdEvidenciaIn(idsEvidencias);
+                for (ComentarioEstado c : todosComentarios) {
+                    if ("final".equals(c.getTipoComentario())) {
+                        comentariosFinalesMap.put(c.getIdEvidencia(), c);
+                    } else {
+                        comentariosIndividualesMap.put(c.getIdEvidencia(), c);
+                    }
+                }
+            }
+            
             List<ExcelPrioridadDto> listExcelPrioridadDto = new ArrayList<>();
             for (Prioridad p : prioridades) {
                 ExcelPrioridadDto modelExcelPrioridadDto = new ExcelPrioridadDto();
                 modelExcelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
                 modelExcelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
                 modelExcelPrioridadDto.setPrioridadNombre(p.getDescripcion());
+                
+                // Obtener valor alcanzado para esta prioridad
+                BigDecimal valorAlcanzadoPrioridad = valoresAlcanzados.getOrDefault((long) p.getIdPrioridad(), BigDecimal.ZERO);
 
                 List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(e.getIntegrante().getIdVotante(), p.getIdPrioridad());
 
@@ -198,6 +326,18 @@ public class PrioridadServiceImpl implements PrioridadService {
                     modelExcelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
                     modelExcelIndicadorDto.setValorMeta(i.getValorMeta());
                     modelExcelIndicadorDto.setPeso(i.getPeso());
+                    
+                    // Sentido del indicador
+                    String sentido = sentidosMap.getOrDefault((long) i.getIdIndicador(), "ascendente");
+                    modelExcelIndicadorDto.setSentido("ascendente".equalsIgnoreCase(sentido) ? "Ascendente" : "Descendente");
+                    
+                    // Valor alcanzado (por prioridad, compartido entre indicadores de la misma prioridad)
+                    modelExcelIndicadorDto.setValorAlcanzado(valorAlcanzadoPrioridad);
+                    
+                    // Calcular puntaje por meta
+                    BigDecimal puntaje = calcularPuntajePorMeta(sentido, valorAlcanzadoPrioridad, 
+                        BigDecimal.valueOf(i.getValorMeta()), BigDecimal.valueOf(i.getPeso()));
+                    modelExcelIndicadorDto.setPuntajePorMeta(puntaje);
 
                     List<Evidencia> listEvidencia = evidenciaRepository.listEvidenciaByIdIndicador(i.getIdIndicador());
 
@@ -212,9 +352,27 @@ public class PrioridadServiceImpl implements PrioridadService {
                         modelExcelEvidenciaDto.setSustentoDescripcion(t.getSustentoDescripcion());
                         modelExcelEvidenciaDto.setSustentoFechaRegistro(t.getSustentoFechaRegistro());
                         modelExcelEvidenciaDto.setSustentoExtensionFile(t.getSustentoExtensionFile());
+                        
+                        // Identificar si es SUSTENTO FINAL (comparación exacta como en frontend)
+                        boolean esFinal = "SUSTENTO FINAL".equals(t.getDescripcion());
+                        modelExcelEvidenciaDto.setEsEvidenciaFinal(esFinal);
+                        
+                        // Obtener estado y comentario adicional de la tabla comentario_estado
+                        // Usar el mapa correcto según si es evidencia final o individual
+                        ComentarioEstado comentarioEstado = esFinal 
+                            ? comentariosFinalesMap.get((long) t.getIdEvidencia())
+                            : comentariosIndividualesMap.get((long) t.getIdEvidencia());
+                        if (comentarioEstado != null) {
+                            modelExcelEvidenciaDto.setEstadoDropdown(comentarioEstado.getEstadoDropdown());
+                            modelExcelEvidenciaDto.setComentarioAdicional(comentarioEstado.getComentarioAdicional());
+                        }
 
                         listExcelEvidenciaDto.add(modelExcelEvidenciaDto);
                     }
+                    
+                    // Ordenar: evidencias normales primero, SUSTENTO FINAL al último
+                    listExcelEvidenciaDto.sort(Comparator.comparing(ExcelEvidenciaDto::isEsEvidenciaFinal));
+                    
                     modelExcelIndicadorDto.setListEvidencia(listExcelEvidenciaDto);
                     listExcelIndicadorDto.add(modelExcelIndicadorDto);
                 }
@@ -222,10 +380,54 @@ public class PrioridadServiceImpl implements PrioridadService {
                 listExcelPrioridadDto.add(modelExcelPrioridadDto);
             }
             modelExcelDto.setListPrioridad(listExcelPrioridadDto);
+            
+            // Llenar datos de reunión establecimiento de metas
+            llenarDatosReunionExcelDto(modelExcelDto, (long) e.getIntegrante().getIdVotante(), (long) votanteJefe.getIdVotante());
+            
             listExcelDto.add(modelExcelDto);
         }
 
         return listExcelDto;
+    }
+    
+    /**
+     * Calcular puntaje por meta según fórmula del frontend
+     * Ascendente: (valorAlcanzado / valorMeta) * 100 * (peso/100)
+     * Descendente: ((1 - (valorAlcanzado / valorMeta)) + 1) * 100 * (peso/100)
+     * El puntaje máximo es peso * 100 / 100 = peso
+     */
+    private BigDecimal calcularPuntajePorMeta(String sentido, BigDecimal valorAlcanzado, BigDecimal valorMeta, BigDecimal peso) {
+        if (valorAlcanzado == null || valorMeta == null || valorMeta.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        
+        BigDecimal puntaje;
+        BigDecimal pesoDecimal = peso.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+        BigDecimal maxPuntaje = peso; // Puntaje máximo = peso
+        
+        if ("ascendente".equalsIgnoreCase(sentido)) {
+            // (valorAlcanzado / valorMeta) * 100 * (peso/100) = (valorAlcanzado / valorMeta) * peso
+            puntaje = valorAlcanzado.divide(valorMeta, 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .multiply(pesoDecimal);
+        } else {
+            // Descendente: ((1 - (valorAlcanzado / valorMeta)) + 1) * 100 * (peso/100)
+            BigDecimal ratio = valorAlcanzado.divide(valorMeta, 4, RoundingMode.HALF_UP);
+            // Si el ratio es mayor a 2, puntaje es 0
+            if (ratio.compareTo(BigDecimal.valueOf(2)) > 0) {
+                return BigDecimal.ZERO;
+            }
+            puntaje = BigDecimal.ONE.subtract(ratio).add(BigDecimal.ONE)
+                .multiply(BigDecimal.valueOf(100))
+                .multiply(pesoDecimal);
+        }
+        
+        // No puede exceder el puntaje máximo
+        if (puntaje.compareTo(maxPuntaje) > 0) {
+            puntaje = maxPuntaje;
+        }
+        
+        return puntaje.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override

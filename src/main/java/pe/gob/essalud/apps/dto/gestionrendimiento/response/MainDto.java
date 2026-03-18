@@ -11,5 +11,6 @@ public class MainDto {
     private String trabajadorApellido;
     private String email;
     private int pesoTotal;
+    private String evaluadoSegmento;
     private List<MainPrioridadDto> listPrioridad;
 }

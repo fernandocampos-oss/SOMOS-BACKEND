@@ -109,4 +109,14 @@ public class EquipoController {
         return equipoService.findUsuarioSctrByNumeroDocumento(numDoc);
     }
 
+    @GetMapping("/buscar/votante/dni")
+    public Votante findVotanteByNumeroDocumento(@RequestParam("dni") String dni) {
+        return equipoService.findVotanteByNumeroDocumento(dni);
+    }
+
+    @GetMapping("/buscar/votante/id/{idVotante}")
+    public Votante findVotanteById(@PathVariable Integer idVotante) {
+        return equipoService.findVotanteById(idVotante);
+    }
+
 }
