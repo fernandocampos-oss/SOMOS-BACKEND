@@ -236,7 +236,7 @@ public class PrioridadServiceImpl implements PrioridadService {
         EvaluadorResponseDto evaluador = prioridadRepository.findUsuarioById(authService.getIdUserSession());
         Votante votanteJefe = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
 
-        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(votanteJefe.getIdVotante());
 
         List<ExcelDto> listExcelDto = new ArrayList<>();
         for (Equipo e : trabajadoresPorJefe) {
