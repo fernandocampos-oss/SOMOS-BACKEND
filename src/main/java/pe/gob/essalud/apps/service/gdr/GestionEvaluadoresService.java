@@ -20,6 +20,7 @@ import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.repository.miessalud.VotanteRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.EquipoRepository;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,7 @@ public class GestionEvaluadoresService {
     private final VotanteRepository votanteRepository;
     private final UsuarioRepository usuarioRepository;
     private final EquipoRepository equipoRepository;
+    private final ReunionEstablecimientoMetasService reunionMetasService;
 
     /**
      * Lista evaluadores paginado (solo DNI y nombre - sin consultar tabla usuario)
@@ -427,7 +429,6 @@ public class GestionEvaluadoresService {
     /**
      * Asignar trabajador a evaluador
      */
-    @Transactional("transactionManager1")
     public Map<String, Object> asignarTrabajador(Integer idEvaluador, String dniTrabajador) {
         log.info("Asignando trabajador {} a evaluador {}", dniTrabajador, idEvaluador);
         
@@ -485,7 +486,20 @@ public class GestionEvaluadoresService {
         equipo.setIntegrante(trabajador);
         equipo.setEsActivo(true);
         equipoRepository.save(equipo);
-        
+
+        // Sincronizar con reunion_establecimiento_metas para que aparezca en Seguimiento Trabajador
+        String periodoActual = String.valueOf(LocalDate.now().getYear());
+        try {
+            reunionMetasService.obtenerOCrear(
+                    trabajador.getIdVotante().longValue(),
+                    idEvaluador.longValue(),
+                    periodoActual);
+            log.info("reunion_establecimiento_metas sincronizada: evaluado={}, evaluador={}, periodo={}",
+                    trabajador.getIdVotante(), idEvaluador, periodoActual);
+        } catch (Exception e) {
+            log.error("Error sincronizando reunion_establecimiento_metas: {}", e.getMessage(), e);
+        }
+
         resultado.put("exito", true);
         resultado.put("mensaje", "Trabajador asignado correctamente");
         resultado.put("idEquipo", equipo.getIdEquipo());
@@ -613,7 +627,6 @@ public class GestionEvaluadoresService {
     /**
      * Confirmar carga masiva de asignaciones
      */
-    @Transactional("transactionManager1")
     public Map<String, Object> confirmarCargaMasivaTrabajadores(List<String[]> filas) {
         log.info("Confirmando carga masiva de trabajadores: {} filas", filas.size());
         
@@ -621,6 +634,7 @@ public class GestionEvaluadoresService {
         int asignados = 0;
         int yaAsignados = 0;
         int errores = 0;
+        String periodoActual = String.valueOf(LocalDate.now().getYear());
         
         for (String[] fila : filas) {
             if (fila.length < 2) {
@@ -680,6 +694,17 @@ public class GestionEvaluadoresService {
                 equipo.setIntegrante(trabajador);
                 equipo.setEsActivo(true);
                 equipoRepository.save(equipo);
+
+                // Sincronizar con reunion_establecimiento_metas
+                try {
+                    reunionMetasService.obtenerOCrear(
+                            trabajador.getIdVotante().longValue(),
+                            evaluador.getIdVotante().longValue(),
+                            periodoActual);
+                } catch (Exception ex) {
+                    log.error("Error sincronizando reunion_metas para evaluado={}, evaluador={}: {}",
+                            trabajador.getIdVotante(), evaluador.getIdVotante(), ex.getMessage());
+                }
                 
                 asignados++;
                 procesados++;

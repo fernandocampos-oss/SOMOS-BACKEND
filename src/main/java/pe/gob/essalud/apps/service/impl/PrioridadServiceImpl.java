@@ -139,7 +139,19 @@ public class PrioridadServiceImpl implements PrioridadService {
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
-        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        // Lookup robusto: buscar primero por numeroDocumento, fallback por id_usuario
+        Votante votante = null;
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById((long) authService.getIdUserSession());
+        if (usuarioOpt.isPresent()) {
+            votante = equipoRepository.getVotanteByNumeroDocumento(usuarioOpt.get().getNumeroDocumento());
+        }
+        if (votante == null) {
+            votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        }
+        if (votante == null) {
+            log.warn("No se encontró votante para id_usuario={}", authService.getIdUserSession());
+            return new ArrayList<>();
+        }
 //        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
         List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(votante.getIdVotante());
 
@@ -153,7 +165,7 @@ public class PrioridadServiceImpl implements PrioridadService {
             // Obtener segmento del trabajador desde tabla segmento_gdr
             modelMainDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
             EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
-            modelMainDto.setEmail(usuario.getEmail());
+            modelMainDto.setEmail(usuario != null ? usuario.getEmail() : null);
             int porcentajeTotal = 0;
 
             List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), e.getIntegrante().getIdVotante());

@@ -51,7 +51,7 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Query(value = "SELECT MAX(id_votante) FROM Votante", nativeQuery = true)
     int getCantidadRegistro();
 
-    @Query(value = "SELECT count(*) from equipo e WHERE e.id_evaluador=? ", nativeQuery = true)
+    @Query(value = "SELECT count(*) FROM equipo WHERE id_jefe = ? AND es_activo = TRUE", nativeQuery = true)
     int getEsEvaluadorDelGrupo(@Param("idEvaluador") Integer idEvaluador);
 
     @Transactional
