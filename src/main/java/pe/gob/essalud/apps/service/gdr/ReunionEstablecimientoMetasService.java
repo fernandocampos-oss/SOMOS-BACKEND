@@ -33,13 +33,40 @@ public class ReunionEstablecimientoMetasService {
                         idVotanteEvaluado, idVotanteEvaluador, periodo);
         
         if (existente.isPresent()) {
-            log.info("Reunión existente encontrada con ID: {}", existente.get().getIdReunion());
-            return existente.get();
+            ReunionEstablecimientoMetas reunion = existente.get();
+            log.info("Reunión existente encontrada con ID: {}", reunion.getIdReunion());
+            // Si existe pero no está confirmada, verificar si hay otra confirmada para este trabajador
+            // (caso: segundo evaluador asignado antes del fix, o registro creado vacío)
+            if (!Boolean.TRUE.equals(reunion.getConfirmado())) {
+                Optional<ReunionEstablecimientoMetas> confirmadaExistente =
+                        repository.findFirstConfirmadaByEvaluadoAndPeriodo(idVotanteEvaluado, periodo);
+                if (confirmadaExistente.isPresent()) {
+                    ReunionEstablecimientoMetas fuente = confirmadaExistente.get();
+                    reunion.setConfirmado(true);
+                    reunion.setAsistio(fuente.getAsistio());
+                    reunion.setFechaReunion(fuente.getFechaReunion());
+                    reunion.setFechaConfirmacion(fuente.getFechaConfirmacion());
+                    log.info("Sincronizando estado confirmado de reunión ID={} al evaluador actual", fuente.getIdReunion());
+                    return repository.save(reunion);
+                }
+            }
+            return reunion;
         }
         
-        // Crear nueva
+        // Crear nueva: si el trabajador ya tiene una reunión confirmada por otro evaluador,
+        // heredar ese estado para que el segundo evaluador vea el formato como ya registrado
         ReunionEstablecimientoMetas nueva = new ReunionEstablecimientoMetas(
                 idVotanteEvaluado, idVotanteEvaluador, periodo);
+        Optional<ReunionEstablecimientoMetas> confirmadaExistente =
+                repository.findFirstConfirmadaByEvaluadoAndPeriodo(idVotanteEvaluado, periodo);
+        if (confirmadaExistente.isPresent()) {
+            ReunionEstablecimientoMetas fuente = confirmadaExistente.get();
+            nueva.setConfirmado(true);
+            nueva.setAsistio(fuente.getAsistio());
+            nueva.setFechaReunion(fuente.getFechaReunion());
+            nueva.setFechaConfirmacion(fuente.getFechaConfirmacion());
+            log.info("Heredando estado confirmado de reunión ID={} al nuevo evaluador", fuente.getIdReunion());
+        }
         ReunionEstablecimientoMetas guardada = repository.save(nueva);
         log.info("Nueva reunión creada con ID: {}", guardada.getIdReunion());
         return guardada;
@@ -138,7 +165,6 @@ public class ReunionEstablecimientoMetasService {
     public ReunionEstablecimientoMetas reiniciarConfirmacion(Long idReunion, String dniMaestroGdr) {
         log.info("Reiniciando confirmación reunión={} por maestro={}", idReunion, dniMaestroGdr);
         
-        // Verificar que sea Maestro GDR
         if (!maestroGdrService.esMaestroGdrPorDni(dniMaestroGdr)) {
             throw new RuntimeException("Solo un Maestro GDR puede reiniciar confirmaciones");
         }
@@ -150,12 +176,14 @@ public class ReunionEstablecimientoMetasService {
             throw new RuntimeException("La reunión no está confirmada");
         }
         
-        reunion.setConfirmado(false);
-        reunion.setReiniciadoPor(dniMaestroGdr);
-        reunion.setFechaReinicio(LocalDateTime.now());
+        // Resetear TODOS los registros del evaluado en ese periodo (cubre multi-evaluador)
+        Long idEvaluado = reunion.getIdVotanteEvaluado();
+        String periodo = reunion.getPeriodo();
+        repository.reiniciarConfirmacionPorEvaluadoYPeriodo(idEvaluado, periodo, dniMaestroGdr);
         
-        ReunionEstablecimientoMetas guardada = repository.save(reunion);
-        log.info("Confirmación reiniciada exitosamente para reunión: {}", idReunion);
+        ReunionEstablecimientoMetas guardada = repository.findById(idReunion)
+                .orElseThrow(() -> new RuntimeException("Reunión no encontrada: " + idReunion));
+        log.info("Confirmación reiniciada para evaluado={}, periodo={}", idEvaluado, periodo);
         return guardada;
     }
 

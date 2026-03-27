@@ -28,10 +28,23 @@ public interface ReunionEstablecimientoMetasRepository extends JpaRepository<Reu
             Long idVotanteEvaluador, String periodo);
 
     /**
-     * Buscar todas las reuniones de un evaluado en un periodo
+     * Buscar todas las reuniones de un evaluado en un periodo, ordenadas por id_reunion ASC
+     * (el primero es el evaluador más antiguo = evaluador principal para procesos)
      */
+    @Query("SELECT r FROM ReunionEstablecimientoMetas r " +
+           "WHERE r.idVotanteEvaluado = :idEvaluado AND r.periodo = :periodo " +
+           "ORDER BY r.idReunion ASC")
     List<ReunionEstablecimientoMetas> findByIdVotanteEvaluadoAndPeriodo(
-            Long idVotanteEvaluado, String periodo);
+            @Param("idEvaluado") Long idVotanteEvaluado, @Param("periodo") String periodo);
+
+    /**
+     * Buscar la primera reunión confirmada de un evaluado en un periodo (cualquier evaluador)
+     */
+    @Query("SELECT r FROM ReunionEstablecimientoMetas r " +
+           "WHERE r.idVotanteEvaluado = :idEvaluado AND r.periodo = :periodo AND r.confirmado = true " +
+           "ORDER BY r.idReunion ASC")
+    Optional<ReunionEstablecimientoMetas> findFirstConfirmadaByEvaluadoAndPeriodo(
+            @Param("idEvaluado") Long idVotanteEvaluado, @Param("periodo") String periodo);
 
     /**
      * Verificar si existe una reunión para la combinación
@@ -76,6 +89,7 @@ public interface ReunionEstablecimientoMetasRepository extends JpaRepository<Reu
 
     /**
      * Reiniciar la confirmación (solo Maestro GDR puede hacer esto)
+     * Resetea TODOS los registros del evaluado en ese periodo (multi-evaluador)
      */
     @Modifying
     @Query("UPDATE ReunionEstablecimientoMetas r SET " +
@@ -83,9 +97,10 @@ public interface ReunionEstablecimientoMetasRepository extends JpaRepository<Reu
            "r.reiniciadoPor = :reiniciadoPor, " +
            "r.fechaReinicio = CURRENT_TIMESTAMP, " +
            "r.fechaModificacion = CURRENT_TIMESTAMP " +
-           "WHERE r.idReunion = :idReunion")
-    int reiniciarConfirmacion(@Param("idReunion") Long idReunion,
-                              @Param("reiniciadoPor") String reiniciadoPor);
+           "WHERE r.idVotanteEvaluado = :idEvaluado AND r.periodo = :periodo")
+    int reiniciarConfirmacionPorEvaluadoYPeriodo(@Param("idEvaluado") Long idVotanteEvaluado,
+                                                  @Param("periodo") String periodo,
+                                                  @Param("reiniciadoPor") String reiniciadoPor);
 
     /**
      * Contar reuniones confirmadas por periodo
