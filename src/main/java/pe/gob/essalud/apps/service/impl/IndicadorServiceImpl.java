@@ -9,7 +9,9 @@ import pe.gob.essalud.apps.dto.gestionrendimiento.request.IndicadorRequestDto;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.*;
 import pe.gob.essalud.apps.exceptions.ValidationException;
 import pe.gob.essalud.apps.model.miessalud.UnidadOrganizativa;
+import pe.gob.essalud.apps.model.miessalud.Usuario;
 import pe.gob.essalud.apps.model.miessalud.Votante;
+import pe.gob.essalud.apps.repository.miessalud.UsuarioRepository;
 import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.*;
 import pe.gob.essalud.apps.repository.miessalud.GdrParametroRepository;
 import pe.gob.essalud.apps.repository.miessalud.gestionrendimiento.*;
@@ -45,6 +47,7 @@ public class IndicadorServiceImpl implements IndicadorService {
     private final EvidenciaTipoService evidenciaTipoService;
     private final SegmentoGdrRepository segmentoGdrRepository;
     private final ReunionEstablecimientoMetasRepository reunionMetasRepository;
+    private final UsuarioRepository usuarioRepository;
 
     /**
      * Obtener segmento desde la tabla segmento_gdr, si no existe usa fallback basado en idSegmento
@@ -220,8 +223,18 @@ public class IndicadorServiceImpl implements IndicadorService {
 
     @Override
     public List<PendienteDto> listPendientesTrabajadorByUser() {
-
-        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        Votante votante = null;
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById((long) authService.getIdUserSession());
+        if (usuarioOpt.isPresent()) {
+            votante = equipoRepository.getVotanteByNumeroDocumento(usuarioOpt.get().getNumeroDocumento());
+        }
+        if (votante == null) {
+            votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        }
+        if (votante == null) {
+            log.warn("No se encontró votante para id_usuario={}", authService.getIdUserSession());
+            return new ArrayList<>();
+        }
 
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), votante.getIdVotante());
         String aux = "";

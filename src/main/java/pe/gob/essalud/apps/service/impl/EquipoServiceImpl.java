@@ -84,9 +84,11 @@ public class EquipoServiceImpl implements EquipoService {
 
     @Override
     public List<Equipo> getListTrabajadoresByIdUsuarioJefe() {
-        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        Votante votante = getVotanteByIdUsuario();
+        if (votante == null) {
+            return new ArrayList<>();
+        }
         return equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(votante.getIdVotante());
-//        return equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
     }
     @Override
     public String getListEvaluadorByIdUsuarioJefe() {

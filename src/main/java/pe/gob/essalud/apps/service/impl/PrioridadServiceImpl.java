@@ -139,7 +139,19 @@ public class PrioridadServiceImpl implements PrioridadService {
 
     @Override
     public List<MainDto> listGestionarIndicadoresPrincipalJefe() {
-        Votante votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        // Lookup robusto: buscar primero por numeroDocumento, fallback por id_usuario
+        Votante votante = null;
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById((long) authService.getIdUserSession());
+        if (usuarioOpt.isPresent()) {
+            votante = equipoRepository.getVotanteByNumeroDocumento(usuarioOpt.get().getNumeroDocumento());
+        }
+        if (votante == null) {
+            votante = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        }
+        if (votante == null) {
+            log.warn("No se encontró votante para id_usuario={}", authService.getIdUserSession());
+            return new ArrayList<>();
+        }
 //        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
         List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(votante.getIdVotante());
 
@@ -153,7 +165,7 @@ public class PrioridadServiceImpl implements PrioridadService {
             // Obtener segmento del trabajador desde tabla segmento_gdr
             modelMainDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
             EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
-            modelMainDto.setEmail(usuario.getEmail());
+            modelMainDto.setEmail(usuario != null ? usuario.getEmail() : null);
             int porcentajeTotal = 0;
 
             List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), e.getIntegrante().getIdVotante());
@@ -233,26 +245,43 @@ public class PrioridadServiceImpl implements PrioridadService {
     @Override
     public List<ExcelDto> generarExcelDirectivo() {
 
-        EvaluadorResponseDto evaluador = prioridadRepository.findUsuarioById(authService.getIdUserSession());
-        Votante votanteJefe = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        // Lookup robusto: buscar primero por numeroDocumento, fallback por id_usuario
+        Votante votanteJefe = null;
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById((long) authService.getIdUserSession());
+        if (usuarioOpt.isPresent()) {
+            votanteJefe = equipoRepository.getVotanteByNumeroDocumento(usuarioOpt.get().getNumeroDocumento());
+        }
+        if (votanteJefe == null) {
+            votanteJefe = equipoRepository.getVotanteByIdUsuario(authService.getIdUserSession());
+        }
+        if (votanteJefe == null) {
+            log.warn("No se encontró votante para id_usuario={}", authService.getIdUserSession());
+            return new ArrayList<>();
+        }
 
-        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefe(authService.getIdUserSession());
+        EvaluadorResponseDto evaluador = prioridadRepository.findUsuarioById(authService.getIdUserSession());
+
+        List<Equipo> trabajadoresPorJefe = equipoRepository.getListTrabajadoresByIdUsuarioJefeOrEvaluador(votanteJefe.getIdVotante());
 
         List<ExcelDto> listExcelDto = new ArrayList<>();
         for (Equipo e : trabajadoresPorJefe) {
             log.info("[{}-{}]", e.getIntegrante().getIdUsuario(), e.getIntegrante().getNombres());
             ExcelDto modelExcelDto = new ExcelDto();
-            modelExcelDto.setEvaluadorNombreCompleto(evaluador.getApellidos() + " " + evaluador.getNombres());
-            modelExcelDto.setEvaluadorPuesto(evaluador.getPuesto());
-            UnidadOrganizativa unidadEvaluador = prioridadRepository.getUnidadByCod(evaluador.getUnidad());
-            modelExcelDto.setEvaluadorCodUnidad(unidadEvaluador.getDescripcion());
-            modelExcelDto.setEvaluadorNumeroDocumento(evaluador.getNumeroDocumento());
-            modelExcelDto.setEvaluadorSegmento(obtenerSegmento(evaluador.getNumeroDocumento(), votanteJefe.getIdSegmento()));
+            if (evaluador != null) {
+                modelExcelDto.setEvaluadorNombreCompleto(evaluador.getApellidos() + " " + evaluador.getNombres());
+                modelExcelDto.setEvaluadorPuesto(evaluador.getPuesto());
+                UnidadOrganizativa unidadEvaluador = evaluador.getUnidad() != null ? prioridadRepository.getUnidadByCod(evaluador.getUnidad()) : null;
+                modelExcelDto.setEvaluadorCodUnidad(unidadEvaluador != null ? unidadEvaluador.getDescripcion() : null);
+                modelExcelDto.setEvaluadorNumeroDocumento(evaluador.getNumeroDocumento());
+                modelExcelDto.setEvaluadorSegmento(obtenerSegmento(evaluador.getNumeroDocumento(), votanteJefe.getIdSegmento()));
+            }
             EvaluadorResponseDto evaluado = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
             modelExcelDto.setEvaluadoNombreCompleto(e.getIntegrante().getApellidos() + " " + e.getIntegrante().getNombres());
-            modelExcelDto.setEvaluadoPuesto(evaluado.getPuesto());
-            UnidadOrganizativa unidadEvaluado = prioridadRepository.getUnidadByCod(evaluado.getUnidad());
-            modelExcelDto.setEvaluadoCodUnidad(unidadEvaluado.getDescripcion());
+            if (evaluado != null) {
+                modelExcelDto.setEvaluadoPuesto(evaluado.getPuesto());
+                UnidadOrganizativa unidadEvaluado = evaluado.getUnidad() != null ? prioridadRepository.getUnidadByCod(evaluado.getUnidad()) : null;
+                modelExcelDto.setEvaluadoCodUnidad(unidadEvaluado != null ? unidadEvaluado.getDescripcion() : null);
+            }
             modelExcelDto.setEvaluadoNumeroDocumento(e.getIntegrante().getNumeroDocumento());
             modelExcelDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
 
