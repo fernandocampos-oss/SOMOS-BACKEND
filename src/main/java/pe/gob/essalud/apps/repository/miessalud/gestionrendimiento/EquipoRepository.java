@@ -94,8 +94,8 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     @Query("SELECT e FROM Equipo e WHERE e.jefe.idVotante = :idJefe AND e.esActivo = TRUE ORDER BY e.idEquipo DESC")
     List<Equipo> findTrabajadoresByEvaluador(@Param("idJefe") Integer idJefe);
 
-    // Verificar si un trabajador ya tiene evaluador asignado
-    @Query("SELECT e FROM Equipo e WHERE e.integrante.idVotante = :idIntegrante AND e.esActivo = TRUE")
+    // Obtener el primer evaluador asignado a un trabajador (ordenado por id_equipo ASC para consistencia)
+    @Query(value = "SELECT * FROM equipo WHERE id_integrante = :idIntegrante AND es_activo = TRUE ORDER BY id_equipo ASC LIMIT 1", nativeQuery = true)
     Equipo findEvaluadorByTrabajador(@Param("idIntegrante") Integer idIntegrante);
 
     // Verificar si ya existe asignación evaluador-trabajador

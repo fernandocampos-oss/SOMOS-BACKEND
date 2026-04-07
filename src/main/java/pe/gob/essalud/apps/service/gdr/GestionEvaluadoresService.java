@@ -409,14 +409,11 @@ public class GestionEvaluadoresService {
                 return resultado;
             }
             
-            // Verificar si ya tiene evaluador asignado
-            Equipo equipoExistente = equipoRepository.findEvaluadorByTrabajador(idVotante);
-            if (equipoExistente != null) {
+            // Verificar si ya está asignado a ESTE evaluador específicamente
+            Equipo asignacionExistente = equipoRepository.findAsignacion(idEvaluador, idVotante);
+            if (asignacionExistente != null) {
                 resultado.put("puedeAsignar", false);
-                resultado.put("mensaje", "Este trabajador ya tiene un evaluador asignado: " + 
-                        equipoExistente.getJefe().getNumeroDocumento() + " - " +
-                        equipoExistente.getJefe().getNombres() + " " + equipoExistente.getJefe().getApellidos());
-                resultado.put("evaluadorActual", equipoExistente.getJefe().getNumeroDocumento());
+                resultado.put("mensaje", "Este trabajador ya está asignado a este evaluador");
                 return resultado;
             }
         }
@@ -460,11 +457,11 @@ public class GestionEvaluadoresService {
                 return resultado;
             }
             
-            // Verificar si ya tiene evaluador
-            Equipo equipoExistente = equipoRepository.findEvaluadorByTrabajador(trabajador.getIdVotante());
-            if (equipoExistente != null) {
+            // Verificar si ya está asignado a ESTE evaluador específicamente (evita duplicados exactos)
+            Equipo asignacionExistente = equipoRepository.findAsignacion(idEvaluador, trabajador.getIdVotante());
+            if (asignacionExistente != null) {
                 resultado.put("exito", false);
-                resultado.put("mensaje", "Este trabajador ya tiene un evaluador asignado");
+                resultado.put("mensaje", "Este trabajador ya está asignado a este evaluador");
                 return resultado;
             }
         } else {
@@ -661,10 +658,10 @@ public class GestionEvaluadoresService {
                 
                 if (trabajadorOpt.isPresent()) {
                     trabajador = trabajadorOpt.get();
-                    
-                    // Verificar si ya tiene evaluador
-                    Equipo equipoExistente = equipoRepository.findEvaluadorByTrabajador(trabajador.getIdVotante());
-                    if (equipoExistente != null) {
+
+                    // Solo bloquear si ya existe este par exacto evaluador+trabajador
+                    Equipo asignacionExistente = equipoRepository.findAsignacion(evaluador.getIdVotante(), trabajador.getIdVotante());
+                    if (asignacionExistente != null) {
                         yaAsignados++;
                         procesados++;
                         continue;
