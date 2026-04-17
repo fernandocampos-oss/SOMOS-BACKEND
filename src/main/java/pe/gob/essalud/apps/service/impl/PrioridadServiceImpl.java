@@ -164,7 +164,8 @@ public class PrioridadServiceImpl implements PrioridadService {
             modelMainDto.setTrabajadorApellido(e.getIntegrante().getApellidos());
             // Obtener segmento del trabajador desde tabla segmento_gdr
             modelMainDto.setEvaluadoSegmento(obtenerSegmento(e.getIntegrante().getNumeroDocumento(), e.getIntegrante().getIdSegmento()));
-            EvaluadorResponseDto usuario = prioridadRepository.findUsuarioById(e.getIntegrante().getIdUsuario());
+            Integer idUsuarioIntegrante = e.getIntegrante().getIdUsuario();
+            EvaluadorResponseDto usuario = idUsuarioIntegrante != null ? prioridadRepository.findUsuarioById(idUsuarioIntegrante) : null;
             modelMainDto.setEmail(usuario != null ? usuario.getEmail() : null);
             int porcentajeTotal = 0;
 
@@ -175,12 +176,12 @@ public class PrioridadServiceImpl implements PrioridadService {
                 MainPrioridadDto modelPrioridadDto = new MainPrioridadDto();
                 modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
                 if(p.getDescripcion() == null) {
-                	modelPrioridadDto.setPrioridadNombre(p.getActividad().getDescripcion());
+                	modelPrioridadDto.setPrioridadNombre(p.getActividad() != null ? p.getActividad().getDescripcion() : null);
                 }else{
                 	modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
                 }
                 
-                modelPrioridadDto.setIdActividad(p.getActividad().getIdActividad());
+                modelPrioridadDto.setIdActividad(p.getActividad() != null ? p.getActividad().getIdActividad() : null);
                 modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
 
                 List<Indicador> indicadoresPorTrabajadorYPrioridad = indicadorRepository.getListIndicadoresByUsuarioAndPrioridad(e.getIntegrante().getIdVotante(), p.getIdPrioridad());
@@ -191,8 +192,8 @@ public class PrioridadServiceImpl implements PrioridadService {
                     MainIndicadorDto modelIndicadorDto = new MainIndicadorDto();
                     modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                     modelIndicadorDto.setNombreIndicador(i.getDescripcion());
-                    modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
-                    modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
+                    modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta() != null ? i.getTipoValorMeta().getCodigo() : null);
+                    modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta() != null ? i.getTipoValorMeta().getIdTipoValorMeta() : null);
                     modelIndicadorDto.setValorMeta(i.getValorMeta());
                     modelIndicadorDto.setPeso(i.getPeso());
                     /* Agregado de 2 columnas - Inicio */

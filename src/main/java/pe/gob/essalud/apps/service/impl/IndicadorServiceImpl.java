@@ -294,7 +294,7 @@ public class IndicadorServiceImpl implements IndicadorService {
             PendienteDto modelPrioridadDto = new PendienteDto();
             modelPrioridadDto.setIdPrioridad(p.getIdPrioridad());
             modelPrioridadDto.setPrioridadNombre(p.getDescripcion());
-            modelPrioridadDto.setIdActividad(p.getActividad().getIdActividad());
+            modelPrioridadDto.setIdActividad(p.getActividad() != null ? p.getActividad().getIdActividad() : null);
             modelPrioridadDto.setFechaAsignacionPrioridad(p.getFechaAsignacion());
             int porcentajeTotal = 0;
 
@@ -306,8 +306,8 @@ public class IndicadorServiceImpl implements IndicadorService {
                 PendienteIndicadorDto modelIndicadorDto = new PendienteIndicadorDto();
                 modelIndicadorDto.setIdIndicador(i.getIdIndicador());
                 modelIndicadorDto.setNombreIndicador(i.getDescripcion());
-                modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta().getIdTipoValorMeta());
-                modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta().getCodigo());
+                modelIndicadorDto.setIdTipoValorMeta(i.getTipoValorMeta() != null ? i.getTipoValorMeta().getIdTipoValorMeta() : null);
+                modelIndicadorDto.setCodTipoValorMeta(i.getTipoValorMeta() != null ? i.getTipoValorMeta().getCodigo() : null);
                 modelIndicadorDto.setValorMeta(i.getValorMeta());
                 modelIndicadorDto.setPeso(i.getPeso());
                 int numero = 0;
