@@ -138,7 +138,7 @@ public class GestionEvaluadoresService {
      */
     public EvaluadorListResponseDto buscarPorDni(String dni) {
         // Primero buscar en usuario
-        Usuario usuario = usuarioRepository.findDocumento(dni);
+        Usuario usuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dni, "02").orElse(null);
         
         if (usuario == null) {
             return null;
@@ -168,7 +168,7 @@ public class GestionEvaluadoresService {
     @Transactional("transactionManager1")
     public EvaluadorListResponseDto agregarEvaluador(String dni) {
         // Buscar usuario
-        Usuario usuario = usuarioRepository.findDocumento(dni);
+        Usuario usuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dni, "02").orElse(null);
         if (usuario == null) {
             throw new RuntimeException("No se encontró trabajador con DNI: " + dni);
         }
@@ -241,7 +241,7 @@ public class GestionEvaluadoresService {
             }
             
             // Buscar en usuario
-            Usuario usuario = usuarioRepository.findDocumento(dni);
+            Usuario usuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dni, "02").orElse(null);
             if (usuario == null) {
                 errores.add(new ErrorCargaDto(fila, dni, "DNI no encontrado en el sistema"));
                 continue;
@@ -291,7 +291,7 @@ public class GestionEvaluadoresService {
             String dni = dnis.get(i).trim();
             
             try {
-                Usuario usuario = usuarioRepository.findDocumento(dni);
+                Usuario usuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dni, "02").orElse(null);
                 if (usuario == null) {
                     errores.add(new ErrorCargaDto(fila, dni, "DNI no encontrado"));
                     continue;
@@ -385,7 +385,7 @@ public class GestionEvaluadoresService {
         Map<String, Object> resultado = new HashMap<>();
         
         // Buscar en usuario
-        Usuario usuario = usuarioRepository.findDocumento(dni);
+        Usuario usuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dni, "02").orElse(null);
         if (usuario == null) {
             resultado.put("encontrado", false);
             resultado.put("mensaje", "DNI no encontrado en el sistema");
@@ -436,7 +436,7 @@ public class GestionEvaluadoresService {
                 .orElseThrow(() -> new RuntimeException("Evaluador no encontrado"));
         
         // Buscar usuario trabajador
-        Usuario usuario = usuarioRepository.findDocumento(dniTrabajador);
+        Usuario usuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dniTrabajador, "02").orElse(null);
         if (usuario == null) {
             resultado.put("exito", false);
             resultado.put("mensaje", "Trabajador no encontrado");
@@ -582,7 +582,7 @@ public class GestionEvaluadoresService {
             item.put("nombreEvaluador", (evaluador.getNombres() + " " + evaluador.getApellidos()).trim());
             
             // Buscar trabajador en usuario
-            Usuario usuarioTrabajador = usuarioRepository.findDocumento(dniTrabajador);
+            Usuario usuarioTrabajador = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dniTrabajador, "02").orElse(null);
             if (usuarioTrabajador == null) {
                 item.put("mensaje", "DNI trabajador no encontrado en el sistema");
                 errores.add(item);
@@ -668,7 +668,7 @@ public class GestionEvaluadoresService {
                     }
                 } else {
                     // Crear votante
-                    Usuario usuario = usuarioRepository.findDocumento(dniTrabajador);
+                    Usuario usuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(dniTrabajador, "02").orElse(null);
                     if (usuario == null) {
                         errores++;
                         continue;

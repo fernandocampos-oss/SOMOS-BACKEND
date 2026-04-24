@@ -37,6 +37,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.numeroDocumento = ?1")
     Usuario findDocumento(String numeroDocumento);
 
+    Optional<Usuario> findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(String numeroDocumento, String idEstadoUsuario);
+
     List<Usuario> findByIdRolIn(List roles);
 
     @Query("SELECT u FROM Usuario u WHERE u.esActivo=true AND u.idEstadoUsuario = '02' AND u.nombres LIKE %:nombres% ORDER BY u.nombres ASC")

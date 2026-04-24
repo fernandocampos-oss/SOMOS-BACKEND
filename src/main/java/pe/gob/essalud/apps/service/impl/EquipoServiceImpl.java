@@ -187,7 +187,7 @@ public class EquipoServiceImpl implements EquipoService {
                 if (votanteEncontrado.isPresent()) {
 //                    log.info("votanteEncontrado [{}]", votanteEncontrado.get().getNumeroDocumento());
                 }else{
-                    Usuario findUsuario = usuarioRepository.findDocumento(c.getNumeroDocumento());
+                    Usuario findUsuario = usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(c.getNumeroDocumento(), "02").orElse(null);
 //                    log.info("findUsuario [{}]", findUsuario);
 
                     if (findUsuario != null) {
@@ -221,7 +221,7 @@ public class EquipoServiceImpl implements EquipoService {
 
     @Override
     public Usuario findUsuarioSctrByNumeroDocumento(String numDoc) {
-        return usuarioRepository.findDocumento(numDoc);
+        return usuarioRepository.findFirstByNumeroDocumentoAndIdEstadoUsuarioOrderByIdUsuarioDesc(numDoc, "02").orElse(null);
     }
 
     @Override
