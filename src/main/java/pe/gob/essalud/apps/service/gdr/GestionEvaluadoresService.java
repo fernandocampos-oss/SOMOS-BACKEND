@@ -403,11 +403,11 @@ public class GestionEvaluadoresService {
             idVotante = votanteOpt.get().getIdVotante();
             
             // Verificar si es el mismo evaluador
-            if (idVotante.equals(idEvaluador)) {
-                resultado.put("puedeAsignar", false);
-                resultado.put("mensaje", "Un evaluador no puede ser trabajador de sí mismo");
-                return resultado;
-            }
+//            if (idVotante.equals(idEvaluador)) {
+//                resultado.put("puedeAsignar", false);
+//                resultado.put("mensaje", "Un evaluador no puede ser trabajador de sí mismo");
+//                return resultado;
+//            }
             
             // Verificar si ya está asignado a ESTE evaluador específicamente
             Equipo asignacionExistente = equipoRepository.findAsignacion(idEvaluador, idVotante);
@@ -451,11 +451,11 @@ public class GestionEvaluadoresService {
             trabajador = votanteOpt.get();
             
             // Verificar que no sea el mismo
-            if (trabajador.getIdVotante().equals(idEvaluador)) {
-                resultado.put("exito", false);
-                resultado.put("mensaje", "Un evaluador no puede ser trabajador de sí mismo");
-                return resultado;
-            }
+//            if (trabajador.getIdVotante().equals(idEvaluador)) {
+//                resultado.put("exito", false);
+//                resultado.put("mensaje", "Un evaluador no puede ser trabajador de sí mismo");
+//                return resultado;
+//            }
             
             // Verificar si ya está asignado a ESTE evaluador específicamente (evita duplicados exactos)
             Equipo asignacionExistente = equipoRepository.findAsignacion(idEvaluador, trabajador.getIdVotante());
@@ -564,11 +564,11 @@ public class GestionEvaluadoresService {
             }
             
             // Verificar que no sean iguales
-            if (dniEvaluador.equals(dniTrabajador)) {
-                item.put("mensaje", "El evaluador no puede ser su propio trabajador");
-                errores.add(item);
-                continue;
-            }
+//            if (dniEvaluador.equals(dniTrabajador)) {
+//                item.put("mensaje", "El evaluador no puede ser su propio trabajador");
+//                errores.add(item);
+//                continue;
+//            }
             
             // Buscar evaluador (debe existir en votante con segmento 3)
             Optional<Votante> evaluadorOpt = votanteRepository.findByIdSegmentoAndNumeroDocumento(SEGMENTO_EVALUADOR, dniEvaluador);
