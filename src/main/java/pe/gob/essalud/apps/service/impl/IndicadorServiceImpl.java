@@ -497,14 +497,29 @@ public class IndicadorServiceImpl implements IndicadorService {
     }
 
     @Override
+    @Transactional
     public void modificarIndicador(int id, Indicador request) {
         Indicador indicador = indicadorRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("El indicador no se encuentra"));
 
         indicador.setDescripcion(request.getDescripcion());
-        indicador.setTipoValorMeta(request.getTipoValorMeta());
+
+        // Resolver tipoValorMeta desde el repositorio para evitar errores de entidad
+        // transitoria/desconectada de Hibernate al llamar save() en sesiones separadas.
+        if (request.getTipoValorMeta() != null && request.getTipoValorMeta().getIdTipoValorMeta() != null) {
+            tipoValorMetaRepository.findById(request.getTipoValorMeta().getIdTipoValorMeta())
+                    .ifPresent(indicador::setTipoValorMeta);
+        }
+
         indicador.setValorMeta(request.getValorMeta());
         indicador.setPeso(request.getPeso());
+
+        // Actualizar campos de prioridad descriptiva si vienen en la solicitud
+        if (request.getFlDesPrioridad() != null) {
+            indicador.setFlDesPrioridad(request.getFlDesPrioridad());
+            indicador.setDesPrioridad(request.getDesPrioridad());
+        }
+
         indicador.setUsuarioModificacion(authService.getIdUserSession());
         indicadorRepository.save(indicador);
     }
