@@ -155,6 +155,22 @@ public class ReunionEstablecimientoMetasService {
         
         ReunionEstablecimientoMetas guardada = repository.save(reunion);
         log.info("Reunión confirmada exitosamente: {}", idReunion);
+
+        // Propagar confirmación a otros evaluadores del mismo evaluado+periodo
+        // (un evaluado puede tener más de un evaluador asignado)
+        List<ReunionEstablecimientoMetas> hermanas = repository
+                .findByIdVotanteEvaluadoAndPeriodo(guardada.getIdVotanteEvaluado(), guardada.getPeriodo());
+        for (ReunionEstablecimientoMetas hermana : hermanas) {
+            if (!hermana.getIdReunion().equals(guardada.getIdReunion()) && !Boolean.TRUE.equals(hermana.getConfirmado())) {
+                hermana.setConfirmado(true);
+                hermana.setAsistio(guardada.getAsistio());
+                hermana.setFechaReunion(guardada.getFechaReunion());
+                hermana.setFechaConfirmacion(guardada.getFechaConfirmacion());
+                repository.save(hermana);
+                log.info("Confirmación propagada a reunión hermana ID={}", hermana.getIdReunion());
+            }
+        }
+
         return guardada;
     }
 
