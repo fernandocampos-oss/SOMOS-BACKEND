@@ -29,7 +29,7 @@ public class ReunionEstablecimientoMetasService {
                 idVotanteEvaluado, idVotanteEvaluador, periodo);
         
         Optional<ReunionEstablecimientoMetas> existente = repository
-                .findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(
+                .findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(
                         idVotanteEvaluado, idVotanteEvaluador, periodo);
         
         if (existente.isPresent()) {
@@ -83,7 +83,7 @@ public class ReunionEstablecimientoMetasService {
      * Buscar reunión específica
      */
     public Optional<ReunionEstablecimientoMetas> buscar(Long idVotanteEvaluado, Long idVotanteEvaluador, String periodo) {
-        return repository.findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(
+        return repository.findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(
                 idVotanteEvaluado, idVotanteEvaluador, periodo);
     }
 
@@ -207,7 +207,7 @@ public class ReunionEstablecimientoMetasService {
      * Verificar si ya está confirmado
      */
     public boolean estaConfirmado(Long idVotanteEvaluado, Long idVotanteEvaluador, String periodo) {
-        return repository.findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(
+        return repository.findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(
                 idVotanteEvaluado, idVotanteEvaluador, periodo)
                 .map(ReunionEstablecimientoMetas::getConfirmado)
                 .orElse(false);

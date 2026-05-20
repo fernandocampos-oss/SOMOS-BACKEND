@@ -16,9 +16,11 @@ import java.util.Optional;
 public interface ReunionEstablecimientoMetasRepository extends JpaRepository<ReunionEstablecimientoMetas, Long> {
 
     /**
-     * Buscar reunión por evaluado, evaluador y periodo
+     * Buscar reunión por evaluado, evaluador y periodo.
+     * Usa findFirst + OrderByFechaModificacionDesc para evitar NonUniqueResultException
+     * en caso de registros duplicados, devolviendo siempre el más recientemente modificado.
      */
-    Optional<ReunionEstablecimientoMetas> findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(
+    Optional<ReunionEstablecimientoMetas> findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(
             Long idVotanteEvaluado, Long idVotanteEvaluador, String periodo);
 
     /**

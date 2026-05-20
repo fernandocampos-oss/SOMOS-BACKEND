@@ -103,7 +103,7 @@ public class PrioridadServiceImpl implements PrioridadService {
             log.info("llenarDatosReunionExcelDto: evaluado={}, evaluador={}, periodo={}", idVotanteEvaluado, idVotanteEvaluador, periodo);
             
             Optional<ReunionEstablecimientoMetas> reunionOpt = reunionMetasRepository
-                .findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(idVotanteEvaluado, idVotanteEvaluador, periodo);
+                .findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(idVotanteEvaluado, idVotanteEvaluador, periodo);
             
             log.info("llenarDatosReunionExcelDto: reunionOpt.isPresent={}", reunionOpt.isPresent());
             

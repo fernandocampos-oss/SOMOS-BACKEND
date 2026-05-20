@@ -76,7 +76,7 @@ public class IndicadorServiceImpl implements IndicadorService {
             log.info("llenarDatosReunion: evaluado={}, evaluador={}, periodo={}", idVotanteEvaluado, idVotanteEvaluador, periodo);
             
             Optional<ReunionEstablecimientoMetas> reunionOpt = reunionMetasRepository
-                .findByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodo(idVotanteEvaluado, idVotanteEvaluador, periodo);
+                .findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(idVotanteEvaluado, idVotanteEvaluador, periodo);
             
             log.info("llenarDatosReunion: reunionOpt.isPresent={}", reunionOpt.isPresent());
             
