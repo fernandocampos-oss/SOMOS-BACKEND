@@ -112,7 +112,8 @@ public class ReunionEstablecimientoMetasService {
                 .orElseThrow(() -> new RuntimeException("Reunión no encontrada: " + idReunion));
         
         if (reunion.getConfirmado()) {
-            throw new RuntimeException("No se puede modificar una reunión ya confirmada");
+            // Ya está confirmada (p.ej. heredada del coordinador): no-op, devolver tal cual
+            return reunion;
         }
         
         // Validar valor de asistio
