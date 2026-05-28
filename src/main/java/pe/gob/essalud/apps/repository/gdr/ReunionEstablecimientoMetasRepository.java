@@ -40,13 +40,12 @@ public interface ReunionEstablecimientoMetasRepository extends JpaRepository<Reu
             @Param("idEvaluado") Long idVotanteEvaluado, @Param("periodo") String periodo);
 
     /**
-     * Buscar la primera reunión confirmada de un evaluado en un periodo (cualquier evaluador)
+     * Buscar la primera reunión confirmada de un evaluado en un periodo (cualquier evaluador).
+     * Usa convención findFirst + ORDER para evitar NonUniqueResultException cuando existen
+     * múltiples registros confirmados para el mismo evaluado/periodo.
      */
-    @Query("SELECT r FROM ReunionEstablecimientoMetas r " +
-           "WHERE r.idVotanteEvaluado = :idEvaluado AND r.periodo = :periodo AND r.confirmado = true " +
-           "ORDER BY r.idReunion ASC")
-    Optional<ReunionEstablecimientoMetas> findFirstConfirmadaByEvaluadoAndPeriodo(
-            @Param("idEvaluado") Long idVotanteEvaluado, @Param("periodo") String periodo);
+    Optional<ReunionEstablecimientoMetas> findFirstByIdVotanteEvaluadoAndPeriodoAndConfirmadoIsTrueOrderByIdReunionAsc(
+            Long idVotanteEvaluado, String periodo);
 
     /**
      * Verificar si existe una reunión para la combinación

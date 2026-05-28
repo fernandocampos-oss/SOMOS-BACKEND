@@ -39,7 +39,7 @@ public class ReunionEstablecimientoMetasService {
             // (caso: segundo evaluador asignado antes del fix, o registro creado vacío)
             if (!Boolean.TRUE.equals(reunion.getConfirmado())) {
                 Optional<ReunionEstablecimientoMetas> confirmadaExistente =
-                        repository.findFirstConfirmadaByEvaluadoAndPeriodo(idVotanteEvaluado, periodo);
+                        repository.findFirstByIdVotanteEvaluadoAndPeriodoAndConfirmadoIsTrueOrderByIdReunionAsc(idVotanteEvaluado, periodo);
                 if (confirmadaExistente.isPresent()) {
                     ReunionEstablecimientoMetas fuente = confirmadaExistente.get();
                     reunion.setConfirmado(true);
@@ -58,7 +58,7 @@ public class ReunionEstablecimientoMetasService {
         ReunionEstablecimientoMetas nueva = new ReunionEstablecimientoMetas(
                 idVotanteEvaluado, idVotanteEvaluador, periodo);
         Optional<ReunionEstablecimientoMetas> confirmadaExistente =
-                repository.findFirstConfirmadaByEvaluadoAndPeriodo(idVotanteEvaluado, periodo);
+                repository.findFirstByIdVotanteEvaluadoAndPeriodoAndConfirmadoIsTrueOrderByIdReunionAsc(idVotanteEvaluado, periodo);
         if (confirmadaExistente.isPresent()) {
             ReunionEstablecimientoMetas fuente = confirmadaExistente.get();
             nueva.setConfirmado(true);
