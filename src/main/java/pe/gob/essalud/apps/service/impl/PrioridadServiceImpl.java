@@ -101,10 +101,18 @@ public class PrioridadServiceImpl implements PrioridadService {
         try {
             String periodo = String.valueOf(DateUtil.getYearCurrent());
             log.info("llenarDatosReunionExcelDto: evaluado={}, evaluador={}, periodo={}", idVotanteEvaluado, idVotanteEvaluador, periodo);
-            
+
+            // Buscar primero por el par (evaluado, evaluador)
             Optional<ReunionEstablecimientoMetas> reunionOpt = reunionMetasRepository
                 .findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(idVotanteEvaluado, idVotanteEvaluador, periodo);
-            
+
+            // Fallback: si no hay registro para este evaluador, buscar cualquier reunión confirmada del evaluado
+            if (!reunionOpt.isPresent()) {
+                log.info("llenarDatosReunionExcelDto: no encontrada por (evaluado,evaluador), intentando fallback por evaluado+confirmado");
+                reunionOpt = reunionMetasRepository
+                    .findFirstByIdVotanteEvaluadoAndPeriodoAndConfirmadoIsTrueOrderByIdReunionAsc(idVotanteEvaluado, periodo);
+            }
+
             log.info("llenarDatosReunionExcelDto: reunionOpt.isPresent={}", reunionOpt.isPresent());
             
             if (reunionOpt.isPresent()) {

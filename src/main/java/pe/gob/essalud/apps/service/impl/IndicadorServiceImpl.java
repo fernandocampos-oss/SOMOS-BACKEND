@@ -74,10 +74,18 @@ public class IndicadorServiceImpl implements IndicadorService {
         try {
             String periodo = String.valueOf(DateUtil.getYearCurrent());
             log.info("llenarDatosReunion: evaluado={}, evaluador={}, periodo={}", idVotanteEvaluado, idVotanteEvaluador, periodo);
-            
+
+            // Buscar primero por el par (evaluado, evaluador)
             Optional<ReunionEstablecimientoMetas> reunionOpt = reunionMetasRepository
                 .findFirstByIdVotanteEvaluadoAndIdVotanteEvaluadorAndPeriodoOrderByFechaModificacionDesc(idVotanteEvaluado, idVotanteEvaluador, periodo);
-            
+
+            // Fallback: si no hay registro para este evaluador, buscar cualquier reunión confirmada del evaluado
+            if (!reunionOpt.isPresent()) {
+                log.info("llenarDatosReunion: no encontrada por (evaluado,evaluador), intentando fallback por evaluado+confirmado");
+                reunionOpt = reunionMetasRepository
+                    .findFirstByIdVotanteEvaluadoAndPeriodoAndConfirmadoIsTrueOrderByIdReunionAsc(idVotanteEvaluado, periodo);
+            }
+
             log.info("llenarDatosReunion: reunionOpt.isPresent={}", reunionOpt.isPresent());
             
             if (reunionOpt.isPresent()) {
@@ -425,19 +433,24 @@ public class IndicadorServiceImpl implements IndicadorService {
         Votante votanteTrabajador = equipoRepository.getVotanteByIdVotante(idVotante);
         EvaluadorResponseDto trabajadorUsuario = prioridadRepository.findUsuarioById(votanteTrabajador.getIdUsuario());
         mainDto.setEvaluadoNombreCompleto(votanteTrabajador.getApellidos() + " " + votanteTrabajador.getNombres());
-        mainDto.setEvaluadoPuesto(trabajadorUsuario.getPuesto());
-        UnidadOrganizativa unidadtrabajador = prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad());
-        mainDto.setEvaluadoCodUnidad(unidadtrabajador.getDescripcion());
+        mainDto.setEvaluadoPuesto(trabajadorUsuario != null ? trabajadorUsuario.getPuesto() : "-");
+        UnidadOrganizativa unidadtrabajador = (trabajadorUsuario != null && trabajadorUsuario.getUnidad() != null)
+                ? prioridadRepository.getUnidadByCod(trabajadorUsuario.getUnidad()) : null;
+        mainDto.setEvaluadoCodUnidad(unidadtrabajador != null ? unidadtrabajador.getDescripcion() : "-");
         mainDto.setEvaluadoNumeroDocumento(votanteTrabajador.getNumeroDocumento());
         mainDto.setEvaluadoSegmento(obtenerSegmento(votanteTrabajador.getNumeroDocumento(), votanteTrabajador.getIdSegmento()));
         Equipo JefeEquipo = equipoRepository.getJefeByIdIntegrante(votanteTrabajador.getIdVotante());
-        EvaluadorResponseDto jefe = prioridadRepository.findUsuarioById(JefeEquipo.getJefe().getIdUsuario());
-        UnidadOrganizativa unidadJefe = prioridadRepository.getUnidadByCod(jefe.getUnidad());
-        mainDto.setEvaluadorCodUnidad(unidadJefe.getDescripcion());
-        mainDto.setEvaluadorNombreCompleto(JefeEquipo.getJefe().getApellidos() + " " + JefeEquipo.getJefe().getNombres());
-        mainDto.setEvaluadorPuesto(jefe.getPuesto());
-        mainDto.setEvaluadorSegmento(obtenerSegmento(JefeEquipo.getJefe().getNumeroDocumento(), JefeEquipo.getJefe().getIdSegmento()));
-        mainDto.setEvaluadorNumeroDocumento(jefe.getNumeroDocumento());
+        EvaluadorResponseDto jefe = (JefeEquipo != null && JefeEquipo.getJefe() != null)
+                ? prioridadRepository.findUsuarioById(JefeEquipo.getJefe().getIdUsuario()) : null;
+        UnidadOrganizativa unidadJefe = (jefe != null && jefe.getUnidad() != null)
+                ? prioridadRepository.getUnidadByCod(jefe.getUnidad()) : null;
+        mainDto.setEvaluadorCodUnidad(unidadJefe != null ? unidadJefe.getDescripcion() : "-");
+        mainDto.setEvaluadorNombreCompleto(JefeEquipo != null && JefeEquipo.getJefe() != null
+                ? JefeEquipo.getJefe().getApellidos() + " " + JefeEquipo.getJefe().getNombres() : "-");
+        mainDto.setEvaluadorPuesto(jefe != null ? jefe.getPuesto() : "-");
+        mainDto.setEvaluadorSegmento(JefeEquipo != null && JefeEquipo.getJefe() != null
+                ? obtenerSegmento(JefeEquipo.getJefe().getNumeroDocumento(), JefeEquipo.getJefe().getIdSegmento()) : "-");
+        mainDto.setEvaluadorNumeroDocumento(jefe != null ? jefe.getNumeroDocumento() : "-");
 
         List<Prioridad> prioridades = prioridadRepository.getListIdPrioridadesByTrabajador(DateUtil.getYearCurrent(), votanteTrabajador.getIdVotante());
 
