@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import pe.gob.essalud.apps.common.constants.gestionrendimiento.EstadoEvidenciaConstant;
 import pe.gob.essalud.apps.common.util.DateUtil;
-import pe.gob.essalud.apps.common.util.UploadUtil;
+import pe.gob.essalud.apps.service.gdr.StorageService;
 import pe.gob.essalud.apps.dto.gestionrendimiento.request.*;
 import pe.gob.essalud.apps.dto.gestionrendimiento.response.EvidenciaResponseDto;
 import pe.gob.essalud.apps.dto.usuario.request.UsuarioCambiarClaveRequestDto;
@@ -34,20 +34,13 @@ import pe.gob.essalud.apps.service.gdr.ComentarioEstadoService;
 @Slf4j
 public class EvidenciaServiceImpl implements EvidenciaService {
 
-    private static final String RUTA_IMAGENES_GESTION_RENDIMIENTO = "/imagenes/gestion-rendimiento/";
-    private static final String RUTA_PDF_GESTION_RENDIMIENTO = "/pdf/gestion-rendimiento/";
-    private static final String FORMATO_IMAGEN_EVIDENCIA = ".png";
-    private static final String FORMATO_PDF_EVIDENCIA = ".pdf";
-
     private final EvidenciaRepository evidenciaRepository;
     private final EvidenciaTipoService evidenciaTipoService;
     private final ComentarioEstadoService comentarioEstadoService;
     private final AuthService authService;
     private final IndicadorRepository indicadorRepository;
     private final SentidoIndicadorService sentidoIndicadorService;
-
-    @Value("${upload-path}")
-    private String uploadPath;
+    private final StorageService storageService;
 
     @Transactional
     @Override
@@ -188,15 +181,28 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     @Transactional
     @Override
     public long crearSustentoEvidencia(EvidenciaSustentoRequestDto request) {
-        if (request.getExtension().equals("pdf")) {
-            String rutaFile = uploadPath + RUTA_PDF_GESTION_RENDIMIENTO + request.getIdEvidencia() + FORMATO_PDF_EVIDENCIA;
-            rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
-            evidenciaRepository.crearEvidencia(request.getSustentoDescripcion(), rutaFile, request.getExtension(), LocalDateTime.now(ZoneId.of("America/Lima")), request.getCalificacion(), request.getIdEvidencia());
-        } else {
-            String rutaFile = uploadPath + RUTA_IMAGENES_GESTION_RENDIMIENTO + request.getIdEvidencia() + FORMATO_IMAGEN_EVIDENCIA;
-            rutaFile = UploadUtil.saveFileBase64(rutaFile, request.getFileBase64());
-            evidenciaRepository.crearEvidencia(request.getSustentoDescripcion(), rutaFile, "png", LocalDateTime.now(ZoneId.of("America/Lima")), request.getCalificacion(), request.getIdEvidencia());
+        if (request.getFileBase64() == null || request.getFileBase64().isBlank()) {
+            throw new ValidationException("El archivo es requerido");
         }
+
+        byte[] fileBytes;
+        try {
+            fileBytes = java.util.Base64.getDecoder().decode(request.getFileBase64());
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("El archivo enviado no es válido");
+        }
+
+        String extension = request.getExtension() != null ? request.getExtension() : "pdf";
+        String newFilename = storageService.upload(fileBytes, extension, request.getIdEvidencia());
+
+        evidenciaRepository.crearEvidencia(
+            request.getSustentoDescripcion(),
+            newFilename,
+            extension,
+            LocalDateTime.now(ZoneId.of("America/Lima")),
+            request.getCalificacion(),
+            request.getIdEvidencia()
+        );
         return request.getIdEvidencia();
     }
 
@@ -206,14 +212,32 @@ public class EvidenciaServiceImpl implements EvidenciaService {
 
         EvidenciaResponseDto dto = new EvidenciaResponseDto();
         if (tarea.isPresent()) {
-            String baseImagen = UploadUtil.getFileBase64(tarea.get().getSustentoRutaFile());
+            String rutaFile = tarea.get().getSustentoRutaFile();
 
             dto.setEvidenciaDescripcion(tarea.get().getSustentoDescripcion());
             dto.setEvidenciaFechaRegistro(tarea.get().getSustentoFechaRegistro());
-            dto.setFileBase64(baseImagen);
             dto.setExtension(tarea.get().getSustentoExtensionFile());
             dto.setCalificacion(tarea.get().getCalificacion());
             dto.setComentario(tarea.get().getComentario());
+
+            if (rutaFile == null || rutaFile.isBlank()) {
+                // Sin sustento registrado
+                dto.setFileBase64("");
+            } else if (rutaFile.startsWith("/")) {
+                // Archivo antiguo (ruta local del servidor anterior) — ya no accesible
+                log.warn("[EvidenciaServiceImpl] Archivo antiguo detectado para evidencia {}: {}", idEvidencia, rutaFile);
+                dto.setFileBase64("");
+                dto.setEsArchivoAntiguo(true);
+            } else {
+                // Archivo en el file server externo
+                try {
+                    String base64 = storageService.download(rutaFile);
+                    dto.setFileBase64(base64);
+                } catch (Exception e) {
+                    log.error("[EvidenciaServiceImpl] Error al descargar archivo del file server para evidencia {}: {}", idEvidencia, e.getMessage());
+                    dto.setFileBase64("");
+                }
+            }
         }
         return dto;
     }

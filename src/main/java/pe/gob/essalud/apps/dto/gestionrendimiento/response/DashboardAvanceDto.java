@@ -9,6 +9,7 @@ public class DashboardAvanceDto {
     private String codigo;
     private String nombre;
     private String tipo; // PERSONA, UNIDAD, ORGANO
+    private String codUnidad; // usado internamente para agrupar
     
     // Métricas de avance
     private Integer totalTrabajadores;

@@ -12,4 +12,6 @@ public class EvidenciaResponseDto {
     private String extension;
     private String comentario;
     private Integer calificacion;
+    // true cuando el archivo fue subido con el sistema anterior (ruta local) y ya no está disponible
+    private boolean esArchivoAntiguo;
 }

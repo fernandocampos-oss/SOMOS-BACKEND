@@ -19,6 +19,10 @@ import pe.gob.essalud.apps.model.miessalud.gestionrendimiento.Evidencia;
 import pe.gob.essalud.apps.service.EvidenciaService;
 import pe.gob.essalud.apps.service.gdr.SentidoIndicadorService;
 import pe.gob.essalud.apps.service.gdr.EvidenciaTipoService;
+import pe.gob.essalud.apps.service.gdr.StorageService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -30,6 +34,7 @@ public class EvidenciaController {
     private final EvidenciaService evidenciaService;
     private final SentidoIndicadorService sentidoIndicadorService;
     private final EvidenciaTipoService evidenciaTipoService;
+    private final StorageService storageService;
 
     @PostMapping("/registrar/exist-indicador")
     public void registrarEvidenciaExistIndicador(@Valid @RequestBody IndicadorExistRequestDto dto) {
@@ -103,6 +108,16 @@ public class EvidenciaController {
     @DeleteMapping("/eliminar/sustento/{id}")
     public void eliminarSustento(@PathVariable int id) {
         evidenciaService.eliminarSustento(id);
+    }
+
+    @GetMapping("/storage/health")
+    public ResponseEntity<Map<String, String>> storageHealth() {
+        boolean disponible = storageService.healthCheck();
+        Map<String, String> result = new HashMap<>();
+        result.put("status", disponible ? "ok" : "error");
+        result.put("fileServer", disponible ? "conectado" : "no disponible");
+        HttpStatus httpStatus = disponible ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
+        return new ResponseEntity<>(result, httpStatus);
     }
 }
 

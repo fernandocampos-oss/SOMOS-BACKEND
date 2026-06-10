@@ -52,10 +52,8 @@ public class DashboardAvanceService {
 
     @Transactional(readOnly = true)
     public List<DashboardAvanceDto> obtenerDashboard(DashboardAvanceRequestDto request) {
-        log.info("Generando dashboard de avance - tipo: {}, año: {}, redes: {}", 
-                 request.getTipoAgrupacion(), request.getAnio(), request.getListCodRed());
+        log.info("Generando dashboard - tipo: {}, anio: {}", request.getTipoAgrupacion(), request.getAnio());
 
-        // Validar y establecer defaults
         if (request.getAnio() == null || request.getAnio().isEmpty()) {
             request.setAnio(String.valueOf(java.time.Year.now().getValue()));
         }
@@ -63,24 +61,44 @@ public class DashboardAvanceService {
             request.setTipoAgrupacion("PERSONA");
         }
 
-        // Obtener todos los votantes con indicadores según filtros
         List<Object[]> datos = obtenerDatosBase(request);
-        
         if (datos == null || datos.isEmpty()) {
             log.info("No se encontraron datos para los filtros especificados");
             return new ArrayList<>();
         }
-        
+
+        int anio = Integer.parseInt(request.getAnio());
+
+        // ── Extraer ids de votantes ─────────────────────────────────────────
+        List<Integer> idsVotantes = datos.stream()
+                .map(row -> ((Number) row[0]).intValue())
+                .distinct()
+                .collect(Collectors.toList());
+
+        // ── Query batch 1: todos los indicadores de todos los votantes ──────
+        Map<Integer, List<Indicador>> indicadoresPorVotante = obtenerIndicadoresBatch(idsVotantes, anio);
+
+        // ── Query batch 2: todas las evidencias de todos esos indicadores ───
+        List<Integer> idsIndicadores = indicadoresPorVotante.values().stream()
+                .flatMap(List::stream)
+                .map(Indicador::getIdIndicador)
+                .collect(Collectors.toList());
+        Map<Integer, List<Evidencia>> evidenciasPorIndicador = obtenerEvidenciasBatch(idsIndicadores);
+
+        // ── Query batch 3: fases planeación (reunion) para todos los votantes
+        Map<Integer, Integer> fasePlaneacionPorVotante = obtenerFasePlaneacionBatch(idsVotantes, String.valueOf(anio));
+
+        // ── Calcular métricas por persona ────────────────────────────────────
+        List<DashboardAvanceDto> personasDtos = calcularMetricasPorPersona(
+                datos, indicadoresPorVotante, evidenciasPorIndicador, fasePlaneacionPorVotante, anio);
+
+        log.info("Dashboard generado: {} personas procesadas", personasDtos.size());
+
         String tipo = request.getTipoAgrupacion().toUpperCase();
         switch (tipo) {
-            case "PERSONA":
-                return agruparPorPersona(datos, Integer.parseInt(request.getAnio()));
-            case "UNIDAD":
-                return agruparPorUnidad(datos, Integer.parseInt(request.getAnio()));
-            case "ORGANO":
-                return agruparPorOrgano(datos, Integer.parseInt(request.getAnio()));
-            default:
-                return agruparPorPersona(datos, Integer.parseInt(request.getAnio()));
+            case "UNIDAD":  return agruparPorUnidad(personasDtos);
+            case "ORGANO":  return agruparPorOrgano(personasDtos);
+            default:        return personasDtos;
         }
     }
 
@@ -122,14 +140,96 @@ public class DashboardAvanceService {
         }
     }
 
-    private List<DashboardAvanceDto> agruparPorPersona(List<Object[]> datos, int anio) {
+    // ── Batch queries ────────────────────────────────────────────────────────
+
+    private Map<Integer, List<Indicador>> obtenerIndicadoresBatch(List<Integer> idsVotantes, int anio) {
+        if (idsVotantes.isEmpty()) return new HashMap<>();
+        try {
+            String sql = "SELECT * FROM indicador WHERE id_votante IN (:ids) AND anio = :anio AND estado = true";
+            Query query = entityManager.createNativeQuery(sql, Indicador.class);
+            query.setParameter("ids", idsVotantes);
+            query.setParameter("anio", anio);
+            List<Indicador> todos = query.getResultList();
+            return todos.stream().collect(Collectors.groupingBy(i -> i.getVotante().getIdVotante()));
+        } catch (Exception e) {
+            log.error("Error en obtenerIndicadoresBatch: {}", e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
+    private Map<Integer, List<Evidencia>> obtenerEvidenciasBatch(List<Integer> idsIndicadores) {
+        if (idsIndicadores.isEmpty()) return new HashMap<>();
+        try {
+            // Procesar en lotes de 1000 para evitar límite de IN clause
+            Map<Integer, List<Evidencia>> resultado = new HashMap<>();
+            int batchSize = 1000;
+            for (int i = 0; i < idsIndicadores.size(); i += batchSize) {
+                List<Integer> lote = idsIndicadores.subList(i, Math.min(i + batchSize, idsIndicadores.size()));
+                String sql = "SELECT * FROM evidencia WHERE id_indicador IN (:ids) AND estado = true ORDER BY id_evidencia ASC";
+                Query query = entityManager.createNativeQuery(sql, Evidencia.class);
+                query.setParameter("ids", lote);
+                List<Evidencia> evidencias = query.getResultList();
+                evidencias.forEach(ev -> resultado
+                        .computeIfAbsent(ev.getIndicador().getIdIndicador(), k -> new ArrayList<>())
+                        .add(ev));
+            }
+            return resultado;
+        } catch (Exception e) {
+            log.error("Error en obtenerEvidenciasBatch: {}", e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
+    private Map<Integer, Integer> obtenerFasePlaneacionBatch(List<Integer> idsVotantes, String periodo) {
+        if (idsVotantes.isEmpty()) return new HashMap<>();
+        try {
+            String sql = "SELECT id_votante_evaluado, confirmado FROM reunion_establecimiento_metas " +
+                         "WHERE id_votante_evaluado IN (:ids) AND periodo = :periodo";
+            Query query = gdrEntityManager.createNativeQuery(sql);
+            query.setParameter("ids", idsVotantes.stream().map(Long::valueOf).collect(Collectors.toList()));
+            query.setParameter("periodo", periodo);
+            List<Object[]> rows = query.getResultList();
+            Map<Integer, Integer> resultado = new HashMap<>();
+            for (Object[] row : rows) {
+                Integer idVotante = ((Number) row[0]).intValue();
+                boolean confirmado = row[1] instanceof Boolean ? (Boolean) row[1] : ((Number) row[1]).intValue() == 1;
+                resultado.put(idVotante, confirmado ? 1 : 0);
+            }
+            return resultado;
+        } catch (Exception e) {
+            log.warn("Error en obtenerFasePlaneacionBatch: {}", e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
+    // ── Cálculo de métricas (usa datos ya cargados en memoria) ──────────────
+
+    private List<DashboardAvanceDto> calcularMetricasPorPersona(
+            List<Object[]> datos,
+            Map<Integer, List<Indicador>> indicadoresPorVotante,
+            Map<Integer, List<Evidencia>> evidenciasPorIndicador,
+            Map<Integer, Integer> fasePlaneacionPorVotante,
+            int anio) {
+
         List<DashboardAvanceDto> resultado = new ArrayList<>();
+
+        // Batch: resultados finales
+        List<Integer> idsVotantes = datos.stream()
+                .map(row -> ((Number) row[0]).intValue()).collect(Collectors.toList());
+        Map<Integer, ResultadosFinales> resultadosFinalMap = new HashMap<>();
+        try {
+            resultadosFinalesRepository.findByIdVotanteInAndAnio(
+                    idsVotantes.stream().map(Long::valueOf).collect(Collectors.toList()), anio)
+                    .forEach(rf -> resultadosFinalMap.put(rf.getIdVotante().intValue(), rf));
+        } catch (Exception e) {
+            log.warn("Error cargando resultados finales batch: {}", e.getMessage());
+        }
 
         for (Object[] row : datos) {
             try {
                 Integer idVotante = ((Number) row[0]).intValue();
                 String numeroDocumento = row[1] != null ? (String) row[1] : "";
-                String nombres = row[2] != null ? (String) row[2] : "";
+                String nombres  = row[2] != null ? (String) row[2] : "";
                 String apellidos = row[3] != null ? (String) row[3] : "";
                 String codUnidad = row[5] != null ? (String) row[5] : "";
 
@@ -138,263 +238,152 @@ public class DashboardAvanceService {
                 dto.setNombre((apellidos + " " + nombres).trim());
                 dto.setTipo("PERSONA");
                 dto.setTotalTrabajadores(1);
+                dto.setCodUnidad(codUnidad);
 
-                // Obtener indicadores del votante
-                List<Indicador> indicadores = obtenerIndicadoresPorVotante(idVotante, anio);
-                int numIndicadores = indicadores != null ? indicadores.size() : 0;
-                dto.setTotalIndicadores(numIndicadores);
-                log.info("Votante {} ({}): {} indicadores encontrados", numeroDocumento, idVotante, numIndicadores);
-                
-                // Contadores de evidencias
-                int totalEvidenciasCiclo = 0;      // Evidencias que no son SUSTENTO FINAL
-                int evidenciasCicloSubidas = 0;   // Evidencias de ciclo con archivo subido
-                int totalEvidenciasFinales = 0;   // Evidencias SUSTENTO FINAL
-                int evidenciasFinalesSubidas = 0; // Evidencias finales con archivo subido
-                int totalEvidencias = 0;
-                int evidenciasSubidas = 0;
+                List<Indicador> indicadores = indicadoresPorVotante.getOrDefault(idVotante, new ArrayList<>());
+                dto.setTotalIndicadores(indicadores.size());
+
+                int totalEvidenciasCiclo = 0, evidenciasCicloSubidas = 0;
+                int totalEvidenciasFinales = 0, evidenciasFinalesSubidas = 0;
+                int totalEvidencias = 0, evidenciasSubidas = 0;
                 int indicadoresCompletados = 0;
+                boolean faseSeguimientoOk = !indicadores.isEmpty();
 
-                if (indicadores != null) {
-                    for (Indicador ind : indicadores) {
-                        List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(ind.getIdIndicador());
-                        if (evidencias == null) evidencias = new ArrayList<>();
-                        
-                        log.info("  Indicador {}: {} evidencias", ind.getIdIndicador(), evidencias.size());
-                        
-                        int evidenciasIndicadorSubidas = 0;
-                        int totalEvidenciasIndicador = evidencias.size();
-                        
-                        for (Evidencia ev : evidencias) {
-                            totalEvidencias++;
-                            String rutaFile = ev.getSustentoRutaFile();
-                            boolean tieneArchivo = rutaFile != null && !rutaFile.trim().isEmpty();
-                            
-                            log.info("    Evidencia {}: desc='{}', sustentoRutaFile='{}', tieneArchivo={}", 
-                                    ev.getIdEvidencia(), ev.getDescripcion(), rutaFile, tieneArchivo);
-                            
-                            if (tieneArchivo) {
-                                evidenciasSubidas++;
-                                evidenciasIndicadorSubidas++;
+                for (Indicador ind : indicadores) {
+                    List<Evidencia> evidencias = evidenciasPorIndicador.getOrDefault(ind.getIdIndicador(), new ArrayList<>());
+                    int subidas = 0;
+
+                    for (Evidencia ev : evidencias) {
+                        totalEvidencias++;
+                        boolean tieneArchivo = ev.getSustentoRutaFile() != null && !ev.getSustentoRutaFile().isBlank();
+                        if (tieneArchivo) { evidenciasSubidas++; subidas++; }
+
+                        String desc = ev.getDescripcion() != null ? ev.getDescripcion().toUpperCase().trim() : "";
+                        if ("SUSTENTO FINAL".equals(desc)) {
+                            totalEvidenciasFinales++;
+                            if (tieneArchivo) evidenciasFinalesSubidas++;
+                        } else {
+                            totalEvidenciasCiclo++;
+                            if (tieneArchivo) evidenciasCicloSubidas++;
+                            // Fase seguimiento: solo evidencias iniciales deben tener comentario
+                            if (faseSeguimientoOk) {
+                                String comentario = ev.getComentario();
+                                if (comentario == null || comentario.isBlank()) faseSeguimientoOk = false;
                             }
-                            
-                            // Clasificar: SUSTENTO FINAL = evidencia final, resto = evidencias de ciclo
-                            String desc = ev.getDescripcion() != null ? ev.getDescripcion().toUpperCase().trim() : "";
-                            if ("SUSTENTO FINAL".equals(desc)) {
-                                totalEvidenciasFinales++;
-                                if (tieneArchivo) {
-                                    evidenciasFinalesSubidas++;
-                                }
-                            } else {
-                                totalEvidenciasCiclo++;
-                                if (tieneArchivo) {
-                                    evidenciasCicloSubidas++;
-                                }
-                            }
-                        }
-                        
-                        // Indicador completado si todas sus evidencias tienen archivo
-                        if (totalEvidenciasIndicador > 0 && evidenciasIndicadorSubidas == totalEvidenciasIndicador) {
-                            indicadoresCompletados++;
                         }
                     }
+
+                    if (!evidencias.isEmpty() && subidas == evidencias.size()) indicadoresCompletados++;
                 }
-                
-                log.info("Votante {}: totalEvid={}, subidas={}, cicloParcial={}/{}, finalesParcial={}/{}", 
-                         numeroDocumento, totalEvidencias, evidenciasSubidas,
-                         evidenciasCicloSubidas, totalEvidenciasCiclo,
-                         evidenciasFinalesSubidas, totalEvidenciasFinales);
 
                 dto.setIndicadoresCompletados(indicadoresCompletados);
-                // Para la UI: 
-                // Evid. Iniciales = TOTAL de evidencias que no son SUSTENTO FINAL
-                // Evid. Seguimiento = 0 (no aplica en el modelo actual)  
-                // Evid. Finales = TOTAL de evidencias SUSTENTO FINAL
-                // Evid. Subidas = total de evidencias con archivo cargado
                 dto.setEvidenciasIniciales(totalEvidenciasCiclo);
                 dto.setEvidenciasSeguimiento(0);
                 dto.setEvidenciasFinales(totalEvidenciasFinales);
                 dto.setTotalEvidencias(totalEvidencias);
                 dto.setEvidenciasSubidas(evidenciasSubidas);
-                
-                // Calcular porcentaje de avance
-                double porcentaje = totalEvidencias > 0 
-                        ? (evidenciasSubidas * 100.0) / totalEvidencias 
-                        : 0.0;
-                dto.setPorcentajeAvance(roundDouble(porcentaje));
+                dto.setPorcentajeAvance(totalEvidencias > 0
+                        ? roundDouble((evidenciasSubidas * 100.0) / totalEvidencias) : 0.0);
 
-                // Verificar resultado final
-                try {
-                    Optional<ResultadosFinales> resultadoFinal = resultadosFinalesRepository
-                            .findByIdVotanteAndAnio(Long.valueOf(idVotante), anio);
-                    if (resultadoFinal.isPresent()) {
-                        dto.setConCalificacion(1);
-                        dto.setSinCalificacion(0);
-                        if ("SI".equalsIgnoreCase(resultadoFinal.get().getRendimientoDistinguido())) {
-                            dto.setDistinguidos(1);
-                        } else {
-                            dto.setDistinguidos(0);
-                        }
-                    } else {
-                        dto.setConCalificacion(0);
-                        dto.setSinCalificacion(1);
-                        dto.setDistinguidos(0);
-                    }
-                } catch (Exception ex) {
-                    log.warn("Error al obtener resultado final para votante {}: {}", idVotante, ex.getMessage());
+                // Resultado final
+                ResultadosFinales rf = resultadosFinalMap.get(idVotante);
+                if (rf != null) {
+                    dto.setConCalificacion(1);
+                    dto.setSinCalificacion(0);
+                    dto.setDistinguidos("SI".equalsIgnoreCase(rf.getRendimientoDistinguido()) ? 1 : 0);
+                } else {
                     dto.setConCalificacion(0);
                     dto.setSinCalificacion(1);
                     dto.setDistinguidos(0);
                 }
 
-                // === CALCULAR FASES GDR ===
-                // Fase 1: Planeación (formato registrado)
-                int fasePlaneacion = verificarFasePlaneacion(idVotante, anio);
-                dto.setFasePlaneacion(fasePlaneacion);
-                
-                // Fase 2: Seguimiento (todas las evidencias con comentario no vacío)
-                int faseSeguimiento = verificarFaseSeguimiento(indicadores);
-                dto.setFaseSeguimiento(faseSeguimiento);
-                
-                // Fase 3: Evaluación (todos los indicadores con valor alcanzado > 0)
-                int faseEvaluacion = verificarFaseEvaluacion(indicadores);
-                dto.setFaseEvaluacion(faseEvaluacion);
-                
-                log.info("Votante {} - Fases: Planeacion={}, Seguimiento={}, Evaluacion={}", 
-                         numeroDocumento, fasePlaneacion, faseSeguimiento, faseEvaluacion);
+                // Fases
+                dto.setFasePlaneacion(fasePlaneacionPorVotante.getOrDefault(idVotante, 0));
+                dto.setFaseSeguimiento(faseSeguimientoOk ? 1 : 0);
+                dto.setFaseEvaluacion(verificarFaseEvaluacion(indicadores));
 
                 resultado.add(dto);
             } catch (Exception e) {
                 log.error("Error procesando votante: {}", e.getMessage());
             }
         }
-
         return resultado;
     }
 
-    private List<DashboardAvanceDto> agruparPorUnidad(List<Object[]> datos, int anio) {
-        // Agrupar por código de unidad
-        Map<String, List<Object[]>> porUnidad = datos.stream()
-                .filter(row -> row[5] != null)
-                .collect(Collectors.groupingBy(row -> (String) row[5]));
+    private List<DashboardAvanceDto> agruparPorUnidad(List<DashboardAvanceDto> personas) {
+        Map<String, List<DashboardAvanceDto>> porUnidad = personas.stream()
+                .filter(p -> p.getCodUnidad() != null && !p.getCodUnidad().isEmpty())
+                .collect(Collectors.groupingBy(DashboardAvanceDto::getCodUnidad));
 
         List<DashboardAvanceDto> resultado = new ArrayList<>();
-
-        for (Map.Entry<String, List<Object[]>> entry : porUnidad.entrySet()) {
+        for (Map.Entry<String, List<DashboardAvanceDto>> entry : porUnidad.entrySet()) {
             String codUnidad = entry.getKey();
-            List<Object[]> votantesUnidad = entry.getValue();
+            List<DashboardAvanceDto> lista = entry.getValue();
 
-            // Obtener datos agregados por persona para esta unidad
-            List<DashboardAvanceDto> personasUnidad = agruparPorPersona(votantesUnidad, anio);
-            
             DashboardAvanceDto dto = new DashboardAvanceDto();
             dto.setCodigo(codUnidad);
-            
-            // Obtener nombre de la unidad
             UnidadOrganizativa unidad = unidadOrganizativaRepository.findFirstByCodUnidad(codUnidad);
             dto.setNombre(unidad != null ? unidad.getDescripcion() : codUnidad);
+            dto.setCodUnidad(codUnidad);
             dto.setTipo("UNIDAD");
-
-            // Sumar métricas
-            dto.setTotalTrabajadores(personasUnidad.size());
-            dto.setTotalIndicadores(personasUnidad.stream().mapToInt(DashboardAvanceDto::getTotalIndicadores).sum());
-            dto.setIndicadoresCompletados(personasUnidad.stream().mapToInt(DashboardAvanceDto::getIndicadoresCompletados).sum());
-            dto.setEvidenciasIniciales(personasUnidad.stream().mapToInt(DashboardAvanceDto::getEvidenciasIniciales).sum());
-            dto.setEvidenciasSeguimiento(personasUnidad.stream().mapToInt(DashboardAvanceDto::getEvidenciasSeguimiento).sum());
-            dto.setEvidenciasFinales(personasUnidad.stream().mapToInt(DashboardAvanceDto::getEvidenciasFinales).sum());
-            dto.setTotalEvidencias(personasUnidad.stream().mapToInt(DashboardAvanceDto::getTotalEvidencias).sum());
-            dto.setEvidenciasSubidas(personasUnidad.stream().mapToInt(DashboardAvanceDto::getEvidenciasSubidas).sum());
-            dto.setConCalificacion(personasUnidad.stream().mapToInt(DashboardAvanceDto::getConCalificacion).sum());
-            dto.setSinCalificacion(personasUnidad.stream().mapToInt(DashboardAvanceDto::getSinCalificacion).sum());
-            dto.setDistinguidos(personasUnidad.stream().mapToInt(DashboardAvanceDto::getDistinguidos).sum());
-            
-            // Sumar conteos de fases
-            dto.setFasePlaneacion(personasUnidad.stream().mapToInt(DashboardAvanceDto::getFasePlaneacion).sum());
-            dto.setFaseSeguimiento(personasUnidad.stream().mapToInt(DashboardAvanceDto::getFaseSeguimiento).sum());
-            dto.setFaseEvaluacion(personasUnidad.stream().mapToInt(DashboardAvanceDto::getFaseEvaluacion).sum());
-
-            // Calcular porcentaje promedio
-            int totalEv = dto.getTotalEvidencias();
-            int subidas = dto.getEvidenciasSubidas();
-            double porcentaje = totalEv > 0 ? (subidas * 100.0) / totalEv : 0.0;
-            dto.setPorcentajeAvance(roundDouble(porcentaje));
-
-            dto.setDesglose(personasUnidad);
-
+            sumarMetricas(dto, lista);
+            dto.setDesglose(lista);
             resultado.add(dto);
         }
-
         return resultado;
     }
 
-    private List<DashboardAvanceDto> agruparPorOrgano(List<Object[]> datos, int anio) {
-        // Primero, identificar los órganos (unidades padre)
-        Map<String, String> unidadAPadre = new HashMap<>();
+    private List<DashboardAvanceDto> agruparPorOrgano(List<DashboardAvanceDto> personas) {
         List<UnidadOrganizativa> todasUnidades = unidadOrganizativaRepository.findAll();
-        
+        Map<String, String> unidadAPadre = new HashMap<>();
         for (UnidadOrganizativa u : todasUnidades) {
-            if (u.getCodPadre() != null && !u.getCodPadre().isEmpty()) {
-                unidadAPadre.put(u.getCodUnidad(), u.getCodPadre());
-            } else {
-                // Es un órgano (nivel superior)
-                unidadAPadre.put(u.getCodUnidad(), u.getCodUnidad());
-            }
+            unidadAPadre.put(u.getCodUnidad(),
+                    (u.getCodPadre() != null && !u.getCodPadre().isEmpty()) ? u.getCodPadre() : u.getCodUnidad());
         }
 
-        // Agrupar datos por órgano
-        Map<String, List<Object[]>> porOrgano = datos.stream()
-                .filter(row -> row[5] != null)
-                .collect(Collectors.groupingBy(row -> {
-                    String codUnidad = (String) row[5];
-                    return unidadAPadre.getOrDefault(codUnidad, codUnidad);
-                }));
+        Map<String, List<DashboardAvanceDto>> porOrgano = personas.stream()
+                .filter(p -> p.getCodUnidad() != null && !p.getCodUnidad().isEmpty())
+                .collect(Collectors.groupingBy(p ->
+                        unidadAPadre.getOrDefault(p.getCodUnidad(), p.getCodUnidad())));
 
         List<DashboardAvanceDto> resultado = new ArrayList<>();
-
-        for (Map.Entry<String, List<Object[]>> entry : porOrgano.entrySet()) {
+        for (Map.Entry<String, List<DashboardAvanceDto>> entry : porOrgano.entrySet()) {
             String codOrgano = entry.getKey();
-            List<Object[]> votantesOrgano = entry.getValue();
+            List<DashboardAvanceDto> lista = entry.getValue();
 
-            // Obtener datos agregados por unidad para este órgano
-            List<DashboardAvanceDto> unidadesOrgano = agruparPorUnidad(votantesOrgano, anio);
+            // Agrupar personas por unidad dentro del órgano
+            List<DashboardAvanceDto> unidades = agruparPorUnidad(lista);
 
             DashboardAvanceDto dto = new DashboardAvanceDto();
             dto.setCodigo(codOrgano);
-
-            // Obtener nombre del órgano
             UnidadOrganizativa organo = unidadOrganizativaRepository.findFirstByCodUnidad(codOrgano);
             dto.setNombre(organo != null ? organo.getDescripcion() : codOrgano);
             dto.setTipo("ORGANO");
-
-            // Sumar métricas de todas las unidades
-            dto.setTotalTrabajadores(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getTotalTrabajadores).sum());
-            dto.setTotalIndicadores(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getTotalIndicadores).sum());
-            dto.setIndicadoresCompletados(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getIndicadoresCompletados).sum());
-            dto.setEvidenciasIniciales(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getEvidenciasIniciales).sum());
-            dto.setEvidenciasSeguimiento(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getEvidenciasSeguimiento).sum());
-            dto.setEvidenciasFinales(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getEvidenciasFinales).sum());
-            dto.setTotalEvidencias(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getTotalEvidencias).sum());
-            dto.setEvidenciasSubidas(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getEvidenciasSubidas).sum());
-            dto.setConCalificacion(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getConCalificacion).sum());
-            dto.setSinCalificacion(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getSinCalificacion).sum());
-            dto.setDistinguidos(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getDistinguidos).sum());
-            
-            // Sumar conteos de fases
-            dto.setFasePlaneacion(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getFasePlaneacion).sum());
-            dto.setFaseSeguimiento(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getFaseSeguimiento).sum());
-            dto.setFaseEvaluacion(unidadesOrgano.stream().mapToInt(DashboardAvanceDto::getFaseEvaluacion).sum());
-
-            // Calcular porcentaje
-            int totalEv = dto.getTotalEvidencias();
-            int subidas = dto.getEvidenciasSubidas();
-            double porcentaje = totalEv > 0 ? (subidas * 100.0) / totalEv : 0.0;
-            dto.setPorcentajeAvance(roundDouble(porcentaje));
-
-            dto.setDesglose(unidadesOrgano);
-
+            sumarMetricas(dto, lista); // suma sobre personas, no sobre unidades intermedias
+            dto.setDesglose(unidades);
             resultado.add(dto);
         }
-
         return resultado;
+    }
+
+    private void sumarMetricas(DashboardAvanceDto dest, List<DashboardAvanceDto> fuente) {
+        dest.setTotalTrabajadores(fuente.stream().mapToInt(DashboardAvanceDto::getTotalTrabajadores).sum());
+        dest.setTotalIndicadores(fuente.stream().mapToInt(DashboardAvanceDto::getTotalIndicadores).sum());
+        dest.setIndicadoresCompletados(fuente.stream().mapToInt(DashboardAvanceDto::getIndicadoresCompletados).sum());
+        dest.setEvidenciasIniciales(fuente.stream().mapToInt(DashboardAvanceDto::getEvidenciasIniciales).sum());
+        dest.setEvidenciasSeguimiento(0);
+        dest.setEvidenciasFinales(fuente.stream().mapToInt(DashboardAvanceDto::getEvidenciasFinales).sum());
+        int total = fuente.stream().mapToInt(DashboardAvanceDto::getTotalEvidencias).sum();
+        int subidas = fuente.stream().mapToInt(DashboardAvanceDto::getEvidenciasSubidas).sum();
+        dest.setTotalEvidencias(total);
+        dest.setEvidenciasSubidas(subidas);
+        dest.setPorcentajeAvance(total > 0 ? roundDouble((subidas * 100.0) / total) : 0.0);
+        dest.setConCalificacion(fuente.stream().mapToInt(DashboardAvanceDto::getConCalificacion).sum());
+        dest.setSinCalificacion(fuente.stream().mapToInt(DashboardAvanceDto::getSinCalificacion).sum());
+        dest.setDistinguidos(fuente.stream().mapToInt(DashboardAvanceDto::getDistinguidos).sum());
+        dest.setFasePlaneacion(fuente.stream().mapToInt(DashboardAvanceDto::getFasePlaneacion).sum());
+        dest.setFaseSeguimiento(fuente.stream().mapToInt(DashboardAvanceDto::getFaseSeguimiento).sum());
+        dest.setFaseEvaluacion(fuente.stream().mapToInt(DashboardAvanceDto::getFaseEvaluacion).sum());
     }
 
     private List<Indicador> obtenerIndicadoresPorVotante(int idVotante, int anio) {
@@ -415,103 +404,29 @@ public class DashboardAvanceService {
     }
     
     /**
-     * Fase 1: Planeación - Verificar si el formato está registrado
-     * (reunion_establecimiento_metas.confirmado = true)
-     */
-    private int verificarFasePlaneacion(int idVotante, int anio) {
-        try {
-            String periodo = String.valueOf(anio);
-            String sql = "SELECT confirmado FROM reunion_establecimiento_metas " +
-                         "WHERE id_votante_evaluado = :idVotante AND periodo = :periodo";
-            Query query = gdrEntityManager.createNativeQuery(sql);
-            query.setParameter("idVotante", (long) idVotante);
-            query.setParameter("periodo", periodo);
-            
-            List<?> results = query.getResultList();
-            if (results != null && !results.isEmpty()) {
-                Object result = results.get(0);
-                if (result instanceof Boolean) {
-                    return Boolean.TRUE.equals(result) ? 1 : 0;
-                } else if (result instanceof Number) {
-                    return ((Number) result).intValue() == 1 ? 1 : 0;
-                }
-            }
-            return 0;
-        } catch (Exception e) {
-            log.warn("Error verificando fase planeación para votante {}: {}", idVotante, e.getMessage());
-            return 0;
-        }
-    }
-    
-    /**
-     * Fase 2: Seguimiento - Verificar que TODAS las evidencias tengan comentario no vacío
-     * (comentario debe ser: logrado, proceso, no_presento, si_presenta, no_presenta)
-     */
-    private int verificarFaseSeguimiento(List<Indicador> indicadores) {
-        try {
-            if (indicadores == null || indicadores.isEmpty()) {
-                return 0;
-            }
-            
-            for (Indicador ind : indicadores) {
-                List<Evidencia> evidencias = evidenciaRepository.listEvidenciaByIdIndicador(ind.getIdIndicador());
-                if (evidencias == null || evidencias.isEmpty()) {
-                    return 0; // Sin evidencias = no completó seguimiento
-                }
-                
-                for (Evidencia ev : evidencias) {
-                    String comentario = ev.getComentario();
-                    // Si alguna evidencia NO tiene comentario válido, fase no completada
-                    if (comentario == null || comentario.trim().isEmpty()) {
-                        return 0;
-                    }
-                }
-            }
-            // Todas las evidencias tienen comentario
-            return 1;
-        } catch (Exception e) {
-            log.warn("Error verificando fase seguimiento: {}", e.getMessage());
-            return 0;
-        }
-    }
-    
-    /**
-     * Fase 3: Evaluación - Verificar que TODOS los indicadores tengan valor alcanzado > 0
-     * (buscar en tabla valor_alcanzado_prioridad por id_prioridad)
+     * Fase 3: Evaluación — todos los indicadores con valor alcanzado > 0
      */
     private int verificarFaseEvaluacion(List<Indicador> indicadores) {
         try {
-            if (indicadores == null || indicadores.isEmpty()) {
-                return 0;
-            }
-            
-            // Obtener todos los ids de prioridad de los indicadores
+            if (indicadores == null || indicadores.isEmpty()) return 0;
+
             List<Long> idsPrioridad = indicadores.stream()
                     .filter(ind -> ind.getPrioridad() != null)
                     .map(ind -> Long.valueOf(ind.getPrioridad().getIdPrioridad()))
                     .distinct()
                     .collect(Collectors.toList());
-            
-            if (idsPrioridad.isEmpty()) {
-                return 0;
-            }
-            
-            // Buscar valores alcanzados
+
+            if (idsPrioridad.isEmpty()) return 0;
+
             List<ValorAlcanzadoPrioridad> valores = valorAlcanzadoPrioridadRepository.findByIdPrioridadIn(idsPrioridad);
-            
-            // Verificar que TODOS los indicadores tengan valor alcanzado > 0
             Set<Long> prioridadesConValor = valores.stream()
                     .filter(v -> v.getValorAlcanzado() != null && v.getValorAlcanzado().compareTo(BigDecimal.ZERO) > 0)
                     .map(ValorAlcanzadoPrioridad::getIdPrioridad)
                     .collect(Collectors.toSet());
-            
-            // Todos los IDs de prioridad deben tener valor
-            for (Long idPrioridad : idsPrioridad) {
-                if (!prioridadesConValor.contains(idPrioridad)) {
-                    return 0;
-                }
+
+            for (Long id : idsPrioridad) {
+                if (!prioridadesConValor.contains(id)) return 0;
             }
-            
             return 1;
         } catch (Exception e) {
             log.warn("Error verificando fase evaluación: {}", e.getMessage());
