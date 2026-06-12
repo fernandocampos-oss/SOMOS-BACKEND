@@ -26,13 +26,13 @@ public class StorageService {
 
     private final RestTemplate storageRestTemplate;
 
-    @Value("${storage.url}")
+    @Value("${storage.url:}")
     private String storageUrl;
 
-    @Value("${storage.api-key}")
+    @Value("${storage.api-key:}")
     private String storageApiKey;
 
-    @Value("${storage.app-name}")
+    @Value("${storage.app-name:}")
     private String storageAppName;
 
     public StorageService(@Qualifier("storageRestTemplate") RestTemplate storageRestTemplate) {
